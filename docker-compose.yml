@@ -11,6 +11,9 @@ services:
       - "mongodb"
       - "memcached"
     restart: always
+    environment:
+      - GO_PORT=:5050
+      - ROOT_PATH=/app
     volumes:
       - ./:/app
     networks:
