@@ -1,0 +1,57 @@
+version: "3.9"
+services:
+  backend:
+    container_name: go-rust-drop-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "32520:5050"
+    depends_on:
+      - "mongodb"
+      - "memcached"
+    restart: always
+    volumes:
+      - ./:/app
+    networks:
+      - go-rust-drop-network
+
+  mongodb:
+    container_name: go-rust-drop-mdb
+    image: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=rust-drop
+      - MONGO_INITDB_ROOT_PASSWORD=<H;wFO&:L:ym;9
+    ports:
+      - "32521:27017"
+    restart: on-failure
+    volumes:
+      - ./storage/db/mdb:/data/db
+    networks:
+      - go-rust-drop-network
+
+  db:
+    image: mysql
+    container_name: go-rust-drop-mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: rust_drop
+      MYSQL_ROOT_PASSWORD: "6i6Eo0v812;:**'w"
+    ports:
+      - '32522:3306'
+    volumes:
+      - ./storage/db/mysql:/var/lib/mysql
+    networks:
+      - go-rust-drop-network
+
+  memcached:
+    container_name: go-rust-drop-mcd
+    image: memcached
+    ports:
+      - "32523:11211"
+    networks:
+      - go-rust-drop-network
+        
+networks:
+  go-rust-drop-network:
+    external: true
