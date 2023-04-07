@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"github.com/doug-martin/goqu/v9"
 	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/dababase/mongodb"
 	"go-rust-drop/internal/api/dababase/mysql"
@@ -19,13 +20,22 @@ func (us UserService) CreateSteamUser(userInfo models.UserSteamInfo) (string, er
 		return "", errors.Wrap(err, "Error getting MySQL connection")
 	}
 
-	query := "INSERT INTO users (uuid, avatar_url, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)"
-	//generate uuid
-	uui := "123"
-	createdAt := time.Now()
-	updatedAt := time.Now()
+	ds := goqu.Insert("users").Rows(
+		goqu.Record{
+			"uuid":       "123",
+			"avatar_url": userInfo.AvatarURL,
+			"name":       userInfo.Name,
+			"created_at": time.Now(),
+			"updated_at": time.Now(),
+		},
+	)
 
-	result, err := db.Exec(query, uui, userInfo.AvatarURL, userInfo.Name, createdAt, updatedAt)
+	sql, _, err := ds.ToSQL()
+	if err != nil {
+		return "", errors.Wrap(err, "Error building SQL query")
+	}
+
+	result, err := db.Exec(sql)
 	if err != nil {
 		return "", errors.Wrap(err, "Error inserting user into MySQL")
 	}

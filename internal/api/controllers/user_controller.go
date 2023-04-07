@@ -13,6 +13,8 @@ type UserController struct {
 }
 
 func (u UserController) UserInfo(c *gin.Context) {
+	var err error
+
 	userID, err := getUserIDFromContext(c)
 	if err != nil {
 		utils.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
@@ -20,6 +22,10 @@ func (u UserController) UserInfo(c *gin.Context) {
 	}
 
 	userWithBalance, err := services.UserService{}.GetUserInfo(userID)
+	if err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, "Error getting user information", err)
+		return
+	}
 
 	userResources := resources.UserResources{
 		UserBalance: userWithBalance.UserBalance,
