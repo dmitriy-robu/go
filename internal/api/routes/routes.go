@@ -21,7 +21,7 @@ func RouteHandle(router *gin.Engine) {
 	dashboardGroup := router.Group("/api/v1")
 	steamMiddleware := middlewares.SteamMiddleware{}
 
-	dashboardGroup.Use(steamMiddleware.VerifyToken())
+	dashboardGroup.Use(steamMiddleware.VerifyToken)
 	{
 		auth.Routes(dashboardGroup)
 	}
