@@ -26,20 +26,18 @@ func (ws WSController) Ws(w http.ResponseWriter, r *http.Request) {
 		}
 	}(c, websocket.StatusNormalClosure, "")
 
-	incoming := make(chan string)
-	outgoing := make(chan string)
+	messages := make(chan string)
 
 	ctx, cancel := context.WithCancel(r.Context())
 	defer cancel()
 
-	go services.WSService{}.ReadMessages(ctx, c, incoming)
-	go services.WSService{}.WriteMessages(ctx, c, outgoing)
+	go services.WSService{}.HandleMessages(ctx, c, messages)
 
 	for {
 		select {
-		case msg := <-incoming:
+		case msg := <-messages:
 			log.Println("Received message:", msg)
-			outgoing <- fmt.Sprintf("You said: %s", msg)
+			messages <- fmt.Sprintf("You said: %s", msg)
 		case <-time.After(time.Minute):
 			log.Println("Closing connection due to inactivity")
 			return

@@ -2,7 +2,7 @@ package services
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"
 )
@@ -10,25 +10,21 @@ import (
 type WSService struct {
 }
 
-func (wss WSService) ReadMessages(ctx context.Context, c *websocket.Conn, incoming chan string) {
+func (wss WSService) HandleMessages(ctx context.Context, c *websocket.Conn, messages chan string) {
 	for {
 		var message string
 		err := wsjson.Read(ctx, c, &message)
 		if err != nil {
-			fmt.Println("Failed to read ws message:", err)
+			log.Println("Failed to read ws message:", err)
 			break
 		}
 
-		incoming <- message
-	}
-}
+		messages <- message
 
-func (wss WSService) WriteMessages(ctx context.Context, c *websocket.Conn, outgoing chan string) {
-	for {
-		msg := <-outgoing
-		err := wsjson.Write(ctx, c, msg)
+		response := <-messages
+		err = wsjson.Write(ctx, c, response)
 		if err != nil {
-			fmt.Println("Failed to write ws message:", err)
+			log.Println("Failed to write ws message:", err)
 			break
 		}
 	}
