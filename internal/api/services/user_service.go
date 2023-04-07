@@ -6,6 +6,7 @@ import (
 	"go-rust-drop/internal/api/dababase/mongodb"
 	"go-rust-drop/internal/api/dababase/mysql"
 	"go-rust-drop/internal/api/models"
+	"go-rust-drop/internal/api/repository"
 	"strconv"
 	"time"
 )
@@ -54,4 +55,15 @@ func (us UserService) InsertUserAuthSteam(userID string, steamID string) error {
 	}
 
 	return nil
+}
+
+func (us UserService) GetUserInfo(userID uint64) (models.UserWithBalance, error) {
+	db, err := mysql.GetMySQLConnection()
+
+	userWithBalance, err := repository.UserRepository{}.FindUserByIDWithBalance(db, userID)
+	if err != nil {
+		return models.UserWithBalance{}, errors.Wrap(err, "An error occurred while retrieving user information")
+	}
+
+	return userWithBalance, nil
 }

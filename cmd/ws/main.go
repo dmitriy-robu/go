@@ -2,17 +2,26 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"go-rust-drop/internal/ws"
+	"github.com/joho/godotenv"
+	"go-rust-drop/internal/ws/controller"
 	"log"
+	"os"
 )
 
 func main() {
+	var err error
+
+	if err = godotenv.Load(".env"); err != nil {
+		log.Fatalln(err)
+		return
+	}
+
 	router := gin.Default()
 	router.GET("/ws", func(c *gin.Context) {
-		ws.Handler(c.Writer, c.Request)
+		controller.WSController{}.Ws(c.Writer, c.Request)
 	})
 
-	err := router.Run(":8080")
+	err = router.Run(os.Getenv("WS_PORT"))
 	if err != nil {
 		log.Fatalln(err)
 		return
