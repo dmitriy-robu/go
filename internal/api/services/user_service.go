@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"github.com/doug-martin/goqu/v9"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/dababase/mongodb"
 	"go-rust-drop/internal/api/dababase/mysql"
@@ -12,17 +13,25 @@ import (
 	"time"
 )
 
-type UserService struct{}
+type UserService struct {
+}
 
 func (us UserService) CreateSteamUser(userInfo models.UserSteamInfo) (string, error) {
+	var err error
+
 	db, err := mysql.GetMySQLConnection()
 	if err != nil {
 		return "", errors.Wrap(err, "Error getting MySQL connection")
 	}
 
+	newUUID, err := uuid.NewRandom()
+	if err != nil {
+		return "", errors.Wrap(err, "Error generating UUID")
+	}
+
 	ds := goqu.Insert("users").Rows(
 		goqu.Record{
-			"uuid":       "123",
+			"uuid":       newUUID.String(),
 			"avatar_url": userInfo.AvatarURL,
 			"name":       userInfo.Name,
 			"created_at": time.Now(),
@@ -49,6 +58,8 @@ func (us UserService) CreateSteamUser(userInfo models.UserSteamInfo) (string, er
 }
 
 func (us UserService) InsertUserAuthSteam(userID string, steamID string) error {
+	var err error
+
 	userAuthSteam := models.UserAuthSteam{
 		UserID:  userID,
 		SteamID: steamID,
@@ -68,6 +79,8 @@ func (us UserService) InsertUserAuthSteam(userID string, steamID string) error {
 }
 
 func (us UserService) GetUserInfo(userID uint64) (models.UserWithBalance, error) {
+	var err error
+
 	db, err := mysql.GetMySQLConnection()
 
 	userWithBalance, err := repository.UserRepository{}.FindUserByIDWithBalance(db, userID)

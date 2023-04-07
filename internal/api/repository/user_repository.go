@@ -6,9 +6,12 @@ import (
 	"go-rust-drop/internal/api/models"
 )
 
-type UserRepository struct{}
+type UserRepository struct {
+}
 
 func (u UserRepository) FindUserByIDWithBalance(db *sql.DB, userID uint64) (models.UserWithBalance, error) {
+	var err error
+
 	ds := goqu.From("users").Select(
 		"users.id as user_id",
 		"users.uuid",
@@ -54,6 +57,8 @@ func (u UserRepository) FindUserByIDWithBalance(db *sql.DB, userID uint64) (mode
 }
 
 func (u UserRepository) FindUserByID(db *sql.DB, userID uint64) (models.User, error) {
+	var err error
+
 	ds := goqu.From("users").Select(
 		"id",
 		"uuid",
@@ -106,6 +111,8 @@ func (u UserRepository) FindUserByID(db *sql.DB, userID uint64) (models.User, er
 }
 
 func (u UserRepository) GetUserBalance(db *sql.DB, userID uint64) (models.UserBalance, error) {
+	var err error
+
 	ds := goqu.From("user_balances").Select(
 		"id",
 		"user_id",
