@@ -25,5 +25,5 @@ MYSQL_PASSWORD="6i6Eo0v812"
 - `make docker` or `make` - build and up project stack
 
 ## Documentation for creating newest data in project
-- [Creating migrations for MySQL](https://github.com/popcornrus/go-rust-drop/issues/1)
-- [Creating Enum](https://github.com/popcornrus/go-rust-drop/issues/2)
+- [Migrations](https://github.com/popcornrus/go-rust-drop/issues/1)
+- [Enum](https://github.com/popcornrus/go-rust-drop/issues/2)
