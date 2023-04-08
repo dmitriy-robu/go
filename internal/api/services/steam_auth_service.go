@@ -76,13 +76,19 @@ func (sam SteamAuthService) Callback(c *gin.Context) error {
 		return errors.Wrap(err, "Error saving user info to MySQL")
 	}
 
-	token, _, err := sam.steamRepository.GenerateAllTokens(*userInfo.SteamID, user.UUID)
+	token, err := sam.steamRepository.GenerateAllTokens(*userInfo.SteamID, user.UUID)
 	if err != nil {
 		return errors.Wrap(err, "Error generating JWT token")
 
 	}
 
-	err = sam.userService.CreateUserAuthSteam(*user.ID, *userInfo.SteamID)
+	authUserSteam := models.UserAuthSteam{
+		SteamID: userInfo.SteamID,
+		UserID:  user.ID,
+		Token:   &token,
+	}
+
+	err = sam.userService.CreateUserAuthSteam(authUserSteam)
 	if err != nil {
 		return errors.Wrap(err, "Error saving user to database")
 	}

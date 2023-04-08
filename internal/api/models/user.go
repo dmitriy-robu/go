@@ -32,12 +32,6 @@ type UserSteamInfo struct {
 	Name      *string
 }
 
-type UserAuthSteam struct {
-	ID      primitive.ObjectID `bson:"_id,omitempty"`
-	UserID  *uint64            `bson:"user_id"`
-	SteamID *string            `bson:"steam_id"`
-}
-
 type UserSteamProfile struct {
 	SteamID   *string `json:"steamid"`
 	AvatarURL *string `json:"avatar"`
@@ -47,4 +41,14 @@ type UserSteamProfile struct {
 type UserWithBalance struct {
 	User        User
 	UserBalance UserBalance
+}
+
+type UserAuthSteam struct {
+	ID           primitive.ObjectID `bson:"_id,omitempty"`
+	UserID       *uint64            `bson:"user_id"`
+	SteamID      *string            `bson:"steam_id"`
+	Token        *string            `bson:"token"`
+	RefreshToken *string            `bson:"refresh_token"`
+	CreatedAt    time.Time          `bson:"created_at"`
+	UpdatedAt    time.Time          `bson:"updated_at"`
 }

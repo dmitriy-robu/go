@@ -5,7 +5,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/database/mongodb"
-	"go-rust-drop/internal/api/database/mysql"
 	"go-rust-drop/internal/api/models"
 	"go-rust-drop/internal/api/repositories"
 	"gorm.io/gorm"
@@ -13,50 +12,64 @@ import (
 )
 
 type UserService struct {
-	userRepo repositories.UserRepository
-	db       *gorm.DB
+	userRepo  repositories.UserRepository
+	db        *gorm.DB
+	userModel models.User
 }
 
 func (us UserService) CreateSteamUser(userInfo models.UserSteamInfo) (models.User, error) {
-	db, err := mysql.GetGormConnection()
+	var err error
+
+	if *userInfo.SteamID == "" {
+		return us.userModel, errors.New("SteamID is empty")
+	}
+
+	userAuth, err := us.userRepo.FindUserAuthBySteamID(*userInfo.SteamID)
 	if err != nil {
-		return models.User{}, errors.Wrap(err, "Error getting MySQL connection")
+		if err != gorm.ErrRecordNotFound {
+			return us.userModel, errors.Wrap(err, "Error finding user by SteamID")
+		}
+	}
+
+	if userAuth.UserID != nil {
+		user, err := us.userRepo.UpdateUser(*userAuth.UserID)
+		if err != nil {
+			return us.userModel, errors.Wrap(err, "Error finding user by ID")
+		}
+
+		return user, nil
 	}
 
 	newUUID, err := uuid.NewRandom()
 	if err != nil {
-		return models.User{}, errors.Wrap(err, "Error generating UUID")
+		return us.userModel, errors.Wrap(err, "Error generating UUID")
 	}
 
 	user := models.User{
 		UUID:      newUUID.String(),
 		AvatarURL: userInfo.AvatarURL,
 		Name:      userInfo.Name,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
 	}
 
-	if err := db.Create(&user).Error; err != nil {
-		return models.User{}, errors.Wrap(err, "Error inserting user into MySQL")
+	if err = us.userRepo.CreateUser(user); err != nil {
+		return us.userModel, errors.Wrap(err, "Error creating user")
 	}
 
 	return user, nil
 }
 
-func (us UserService) CreateUserAuthSteam(userID uint64, steamID string) error {
+func (us UserService) CreateUserAuthSteam(userAuthSteam models.UserAuthSteam) error {
 	var err error
 
-	userAuthSteam := models.UserAuthSteam{
-		UserID:  &userID,
-		SteamID: &steamID,
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
 
 	collection, err := mongodb.GetCollectionByName("user_auth_steam")
 	if err != nil {
 		return errors.Wrap(err, "Error getting MongoDB collection")
 	}
 
-	_, err = collection.InsertOne(context.Background(), userAuthSteam)
+	_, err = collection.InsertOne(ctx, userAuthSteam)
 	if err != nil {
 		return errors.Wrap(err, "Error inserting UserAuthSteam into MongoDB")
 	}
