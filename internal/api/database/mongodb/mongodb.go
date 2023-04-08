@@ -36,8 +36,6 @@ func GetMongoDBConnection() (*Client, error) {
 			mongodbConfig.AuthDatabase,
 		)
 
-		fmt.Println(uri)
-
 		var err error
 		client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
 		if err != nil {
