@@ -8,7 +8,6 @@ import (
 
 // User полная таблица в mysql
 type User struct {
-	gorm.Model
 	ID              *uint64 `gorm:"primaryKey"`
 	UUID            string  `gorm:"unique"`
 	Name            *string
@@ -24,6 +23,7 @@ type User struct {
 	DeletedAt       *time.Time
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
+	gorm.Model
 }
 
 type UserSteamInfo struct {

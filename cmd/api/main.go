@@ -7,6 +7,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/steam"
+	"go-rust-drop/internal/api/database/migrations"
 	"go-rust-drop/internal/api/routes"
 	"log"
 	"os"
@@ -19,13 +20,7 @@ func main() {
 		log.Fatalln(err)
 		return
 	}
-	/*
-		if err = godotenv.Load(os.Getenv("ROOT_PATH") + "/.env"); err != nil {
-			log.Fatalln(err)
-			return
-		}
 
-	*/
 	r := gin.Default()
 
 	goth.UseProviders(
@@ -37,6 +32,8 @@ func main() {
 	r.Use(sessions.Sessions("mysession", store))
 
 	routes.RouteHandle(r)
+
+	go migrations.Migrations{}.MigrateAll()
 
 	if err = r.Run(":" + os.Getenv("GO_PORT")); err != nil {
 		log.Fatalln(err)
