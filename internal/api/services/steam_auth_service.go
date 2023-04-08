@@ -17,13 +17,15 @@ import (
 	"time"
 )
 
+type SteamAuthManager struct {
+	userService UserService
+}
+
 type PlayerSummariesResponse struct {
 	Response struct {
 		Players []models.UserSteamProfile `json:"players"`
 	} `json:"response"`
 }
-
-type SteamAuthManager struct{}
 
 func (sam SteamAuthManager) Login(c *gin.Context) (string, error) {
 	provider, err := goth.GetProvider("steam")
@@ -37,7 +39,7 @@ func (sam SteamAuthManager) Login(c *gin.Context) (string, error) {
 	}
 
 	sess := sessions.Default(c)
-	sess.Set("goth_session", session.Marshal())
+	sess.Set(os.Getenv("GOTH_SESSION"), session.Marshal())
 	if err := sess.Save(); err != nil {
 		return "", errors.Wrap(err, "Error saving session")
 
@@ -61,6 +63,7 @@ func (sam SteamAuthManager) Callback(c *gin.Context) error {
 	if err != nil {
 		return errors.Wrap(err, "Error parsing claimed ID")
 	}
+
 	steamID := path.Base(claimedID.Path)
 
 	userInfo, err := sam.fetchSteamUserInfo(steamID)
@@ -68,18 +71,18 @@ func (sam SteamAuthManager) Callback(c *gin.Context) error {
 		return errors.Wrap(err, "Error fetching user info from Steam API")
 	}
 
-	userID, err := UserService{}.CreateSteamUser(userInfo)
-	if err != nil {
-		return errors.Wrap(err, "Error saving user info to MySQL")
-	}
-
-	token, err := sam.generateJWTToken(userID)
+	token, err := sam.generateJWTToken(userInfo.SteamID)
 	if err != nil {
 		return errors.Wrap(err, "Error generating JWT token")
 
 	}
 
-	err = UserService{}.InsertUserAuthSteam(userID, userInfo.SteamID)
+	userID, err := sam.userService.CreateSteamUser(userInfo)
+	if err != nil {
+		return errors.Wrap(err, "Error saving user info to MySQL")
+	}
+
+	err = sam.userService.InsertUserAuthSteam(userID, *userInfo.SteamID)
 	if err != nil {
 		return errors.Wrap(err, "Error saving user to database")
 	}
@@ -154,15 +157,15 @@ func (sam SteamAuthManager) getSteamUserProfile(steamID string) (models.UserStea
 	return playerSummariesResponse.Response.Players[0], nil
 }
 
-func (sam SteamAuthManager) generateJWTToken(userID string) (string, error) {
+func (sam SteamAuthManager) generateJWTToken(steamUserID *string) (string, error) {
 	secretKey := os.Getenv("JWT_SECRET")
 	if secretKey == "" {
 		return "", fmt.Errorf("jwt secret key is not set")
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userID": userID,
-		"exp":    time.Now().Add(24 * time.Hour).Unix(),
+		"steamUserID": steamUserID,
+		"exp":         time.Now().Add(24 * time.Hour).Unix(),
 	})
 
 	signedToken, err := token.SignedString([]byte(secretKey))

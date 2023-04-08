@@ -2,13 +2,15 @@ package models
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"gorm.io/gorm"
 	"time"
 )
 
 // User полная таблица в mysql
 type User struct {
-	ID              *uint64
-	UUID            *string
+	gorm.Model
+	ID              *uint64 `gorm:"primaryKey"`
+	UUID            string  `gorm:"unique"`
 	Name            *string
 	AvatarURL       *string
 	Email           *string
@@ -25,9 +27,9 @@ type User struct {
 }
 
 type UserSteamInfo struct {
-	SteamID   string
-	AvatarURL string
-	Name      string
+	SteamID   *string
+	AvatarURL *string
+	Name      *string
 }
 
 type UserAuthSteam struct {
@@ -37,9 +39,9 @@ type UserAuthSteam struct {
 }
 
 type UserSteamProfile struct {
-	SteamID   string `json:"steamid"`
-	AvatarURL string `json:"avatar"`
-	Name      string `json:"personaname"`
+	SteamID   *string `json:"steamid"`
+	AvatarURL *string `json:"avatar"`
+	Name      *string `json:"personaname"`
 }
 
 type UserWithBalance struct {

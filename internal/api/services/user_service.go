@@ -2,24 +2,24 @@ package services
 
 import (
 	"context"
-	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/dababase/mongodb"
 	"go-rust-drop/internal/api/dababase/mysql"
 	"go-rust-drop/internal/api/models"
-	"go-rust-drop/internal/api/repository"
+	"go-rust-drop/internal/api/repositories"
+	"gorm.io/gorm"
 	"strconv"
 	"time"
 )
 
 type UserService struct {
+	userRepo repositories.UserRepository
+	db       *gorm.DB
 }
 
 func (us UserService) CreateSteamUser(userInfo models.UserSteamInfo) (string, error) {
-	var err error
-
-	db, err := mysql.GetMySQLConnection()
+	db, err := mysql.GetGormConnection()
 	if err != nil {
 		return "", errors.Wrap(err, "Error getting MySQL connection")
 	}
@@ -29,32 +29,19 @@ func (us UserService) CreateSteamUser(userInfo models.UserSteamInfo) (string, er
 		return "", errors.Wrap(err, "Error generating UUID")
 	}
 
-	ds := goqu.Insert("users").Rows(
-		goqu.Record{
-			"uuid":       newUUID.String(),
-			"avatar_url": userInfo.AvatarURL,
-			"name":       userInfo.Name,
-			"created_at": time.Now(),
-			"updated_at": time.Now(),
-		},
-	)
-
-	sql, _, err := ds.ToSQL()
-	if err != nil {
-		return "", errors.Wrap(err, "Error building SQL query")
+	user := models.User{
+		UUID:      newUUID.String(),
+		AvatarURL: userInfo.AvatarURL,
+		Name:      userInfo.Name,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
-	result, err := db.Exec(sql)
-	if err != nil {
+	if err := db.Create(&user).Error; err != nil {
 		return "", errors.Wrap(err, "Error inserting user into MySQL")
 	}
 
-	userID, err := result.LastInsertId()
-	if err != nil {
-		return "", errors.Wrap(err, "Error getting last insert ID from MySQL")
-	}
-
-	return strconv.FormatInt(userID, 10), nil
+	return strconv.FormatUint(*user.ID, 10), nil
 }
 
 func (us UserService) InsertUserAuthSteam(userID string, steamID string) error {
@@ -81,9 +68,7 @@ func (us UserService) InsertUserAuthSteam(userID string, steamID string) error {
 func (us UserService) GetUserInfo(userID uint64) (models.UserWithBalance, error) {
 	var err error
 
-	db, err := mysql.GetMySQLConnection()
-
-	userWithBalance, err := repository.UserRepository{}.FindUserByIDWithBalance(db, userID)
+	userWithBalance, err := us.userRepo.FindUserByIDWithBalance(userID)
 	if err != nil {
 		return models.UserWithBalance{}, errors.Wrap(err, "An error occurred while retrieving user information")
 	}

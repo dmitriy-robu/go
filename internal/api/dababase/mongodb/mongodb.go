@@ -16,12 +16,12 @@ var (
 	mongoConnection *mongo.Client
 )
 
-type MongoDBClient struct {
+type Client struct {
 	Client   *mongo.Client
 	Database string
 }
 
-func GetMongoDBConnection() (*MongoDBClient, error) {
+func GetMongoDBConnection() (*Client, error) {
 	mongodbConfig := config.LoadConfig().MongoDB
 
 	onceDBMongoDB.Do(func() {
@@ -48,7 +48,7 @@ func GetMongoDBConnection() (*MongoDBClient, error) {
 		return nil, errors.New("Failed to connect to MongoDB")
 	}
 
-	mongoDBClient := &MongoDBClient{
+	mongoDBClient := &Client{
 		Client:   mongoConnection,
 		Database: mongodbConfig.DBName,
 	}
@@ -65,6 +65,6 @@ func GetCollectionByName(collectionName string) (*mongo.Collection, error) {
 	return mongoDBClient.GetCollection(collectionName), nil
 }
 
-func (m *MongoDBClient) GetCollection(collectionName string) *mongo.Collection {
+func (m *Client) GetCollection(collectionName string) *mongo.Collection {
 	return m.Client.Database(m.Database).Collection(collectionName)
 }

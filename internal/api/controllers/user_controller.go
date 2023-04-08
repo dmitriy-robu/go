@@ -6,10 +6,13 @@ import (
 	"go-rust-drop/internal/api/resources"
 	"go-rust-drop/internal/api/services"
 	"go-rust-drop/internal/api/utils"
+	"gorm.io/gorm"
 	"net/http"
 )
 
 type UserController struct {
+	userService services.UserService
+	db          *gorm.DB
 }
 
 func (u UserController) UserInfo(c *gin.Context) {
@@ -21,7 +24,7 @@ func (u UserController) UserInfo(c *gin.Context) {
 		return
 	}
 
-	userWithBalance, err := services.UserService{}.GetUserInfo(userID)
+	userWithBalance, err := u.userService.GetUserInfo(userID)
 	if err != nil {
 		utils.HandleError(c, http.StatusInternalServerError, "Error getting user information", err)
 		return

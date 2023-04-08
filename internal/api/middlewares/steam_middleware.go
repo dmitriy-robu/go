@@ -27,7 +27,7 @@ func (s SteamMiddleware) VerifyToken(c *gin.Context) {
 		return
 	}
 
-	c.Set("userId", claims.UserId)
+	c.Set("steamUserID", claims.SteamUserId)
 
 	c.Next()
 }
