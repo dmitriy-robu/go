@@ -34,6 +34,7 @@ func GetGormConnection() (*gorm.DB, error) {
 			configMySQl.Port,
 			configMySQl.DBName,
 		)
+
 		gormConnection, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 		if err != nil {
 			gormConnection = nil

@@ -15,7 +15,6 @@ type MongoDBConfig struct {
 
 func SetMongoDBConfig() MongoDBConfig {
 	return MongoDBConfig{
-		Url:           os.Getenv("MONGODB_URL"),
 		User:          os.Getenv("MONGODB_USER"),
 		Password:      os.Getenv("MONGODB_PASSWORD"),
 		Host:          os.Getenv("MONGODB_HOST"),

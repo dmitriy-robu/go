@@ -12,7 +12,7 @@ services:
       - "memcached"
     restart: always
     environment:
-      - GO_PORT=:5050
+      - GO_PORT=5050
       - ROOT_PATH=/app
     volumes:
       - ./:/app
@@ -23,23 +23,25 @@ services:
     container_name: go-rust-drop-mdb
     image: mongo
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=rust-drop
+      - MONGO_INITDB_ROOT_USERNAME=rust_drop
       - MONGO_INITDB_ROOT_PASSWORD=<H;wFO&:L:ym;9
     ports:
       - "32521:27017"
-    restart: on-failure
+    restart: unless-stopped
     volumes:
+      - ./docker/mongodb/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
       - ./storage/db/mdb:/data/db
     networks:
       - go-rust-drop-network
 
   db:
-    image: mysql
+    image: mysql:latest
     container_name: go-rust-drop-mysql
-    restart: always
+    restart: unless-stopped
+    tty: true
     environment:
       MYSQL_DATABASE: rust_drop
-      MYSQL_ROOT_PASSWORD: "6i6Eo0v812;:**'w"
+      MYSQL_ROOT_PASSWORD: 6i6Eo0v812
     ports:
       - '32522:3306'
     volumes:

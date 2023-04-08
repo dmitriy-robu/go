@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"go-rust-drop/config/db"
+	"net/url"
 	"sync"
 
 	"github.com/pkg/errors"
@@ -27,13 +28,15 @@ func GetMongoDBConnection() (*Client, error) {
 	onceDBMongoDB.Do(func() {
 		uri := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s?authMechanism=%s&authSource=%s",
 			mongodbConfig.User,
-			mongodbConfig.Password,
-			mongodbConfig.Url,
+			url.QueryEscape(mongodbConfig.Password),
+			mongodbConfig.Host,
 			mongodbConfig.Port,
 			mongodbConfig.DBName,
 			mongodbConfig.AuthMechanism,
 			mongodbConfig.AuthDatabase,
 		)
+
+		fmt.Println(uri)
 
 		var err error
 		client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
