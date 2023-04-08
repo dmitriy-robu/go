@@ -65,10 +65,10 @@ func (us UserService) InsertUserAuthSteam(userID string, steamID string) error {
 	return nil
 }
 
-func (us UserService) GetUserInfo(userID uint64) (models.UserWithBalance, error) {
+func (us UserService) GetUserInfo(steamUserID string) (models.UserWithBalance, error) {
 	var err error
 
-	userWithBalance, err := us.userRepo.FindUserByIDWithBalance(userID)
+	userWithBalance, err := us.userRepo.FindUserByIDWithBalance(steamUserID)
 	if err != nil {
 		return models.UserWithBalance{}, errors.Wrap(err, "An error occurred while retrieving user information")
 	}

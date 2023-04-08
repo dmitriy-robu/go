@@ -44,16 +44,11 @@ func (u UserController) UserInfo(c *gin.Context) {
 	c.Data(http.StatusOK, "application/json", jsonData)
 }
 
-func getUserIDFromContext(c *gin.Context) (uint64, error) {
-	userIDValue, ok := c.Get("userID")
+func getUserIDFromContext(c *gin.Context) (string, error) {
+	steamUserIDValue, ok := c.MustGet("steamUserID").(string)
 	if !ok {
-		return 0, fmt.Errorf("user ID not found in context")
+		return "", fmt.Errorf("user ID not found in context")
 	}
 
-	userID, ok := userIDValue.(uint64)
-	if !ok {
-		return 0, fmt.Errorf("user ID has wrong type")
-	}
-
-	return userID, nil
+	return steamUserIDValue, nil
 }
