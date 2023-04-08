@@ -9,7 +9,6 @@ import (
 	"go-rust-drop/internal/api/models"
 	"go-rust-drop/internal/api/repositories"
 	"gorm.io/gorm"
-	"strconv"
 	"time"
 )
 
@@ -18,15 +17,15 @@ type UserService struct {
 	db       *gorm.DB
 }
 
-func (us UserService) CreateSteamUser(userInfo models.UserSteamInfo) (string, error) {
+func (us UserService) CreateSteamUser(userInfo models.UserSteamInfo) (models.User, error) {
 	db, err := mysql.GetGormConnection()
 	if err != nil {
-		return "", errors.Wrap(err, "Error getting MySQL connection")
+		return models.User{}, errors.Wrap(err, "Error getting MySQL connection")
 	}
 
 	newUUID, err := uuid.NewRandom()
 	if err != nil {
-		return "", errors.Wrap(err, "Error generating UUID")
+		return models.User{}, errors.Wrap(err, "Error generating UUID")
 	}
 
 	user := models.User{
@@ -38,18 +37,18 @@ func (us UserService) CreateSteamUser(userInfo models.UserSteamInfo) (string, er
 	}
 
 	if err := db.Create(&user).Error; err != nil {
-		return "", errors.Wrap(err, "Error inserting user into MySQL")
+		return models.User{}, errors.Wrap(err, "Error inserting user into MySQL")
 	}
 
-	return strconv.FormatUint(*user.ID, 10), nil
+	return user, nil
 }
 
-func (us UserService) InsertUserAuthSteam(userID string, steamID string) error {
+func (us UserService) CreateUserAuthSteam(userID uint64, steamID string) error {
 	var err error
 
 	userAuthSteam := models.UserAuthSteam{
-		UserID:  userID,
-		SteamID: steamID,
+		UserID:  &userID,
+		SteamID: &steamID,
 	}
 
 	collection, err := mongodb.GetCollectionByName("user_auth_steam")

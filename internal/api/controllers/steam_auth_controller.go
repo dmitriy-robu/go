@@ -8,11 +8,11 @@ import (
 )
 
 type SteamAuthController struct {
-	steamAuthManager services.SteamAuthManager
+	steamAuthService services.SteamAuthService
 }
 
 func (s SteamAuthController) Login(c *gin.Context) {
-	authURL, err := s.steamAuthManager.Login(c)
+	authURL, err := s.steamAuthService.Login(c)
 	if err != nil {
 		utils.HandleError(c, http.StatusInternalServerError, "Error logging in", err)
 		return
@@ -22,7 +22,7 @@ func (s SteamAuthController) Login(c *gin.Context) {
 }
 
 func (s SteamAuthController) Callback(c *gin.Context) {
-	err := s.steamAuthManager.Callback(c)
+	err := s.steamAuthService.Callback(c)
 	if err != nil {
 		utils.HandleError(c, http.StatusInternalServerError, "Error logging in", err)
 		return

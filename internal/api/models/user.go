@@ -34,8 +34,8 @@ type UserSteamInfo struct {
 
 type UserAuthSteam struct {
 	ID      primitive.ObjectID `bson:"_id,omitempty"`
-	UserID  string             `bson:"user_id"`
-	SteamID string             `bson:"steam_id"`
+	UserID  *uint64            `bson:"user_id"`
+	SteamID *string            `bson:"steam_id"`
 }
 
 type UserSteamProfile struct {

@@ -1,8 +1,6 @@
 package repositories
 
 import (
-	"database/sql"
-	"github.com/doug-martin/goqu/v9"
 	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/models"
 	"gorm.io/gorm"
@@ -42,28 +40,15 @@ func (ur UserRepository) FindUserByID(userID uint64) (models.User, error) {
 	return user, nil
 }
 
-func (ur UserRepository) GetUserBalance(db *sql.DB, userID uint64) (models.UserBalance, error) {
+func (ur UserRepository) GetUserBalance(userID uint64) (models.UserBalance, error) {
 	var err error
-
-	ds := goqu.From(models.TableUserBalance).Select(
-		"id",
-		"user_id",
-		"balance",
-	).Where(
-		goqu.Ex{"user_id": userID},
-	)
-
-	query, _, err := ds.ToSQL()
-	if err != nil {
-		return models.UserBalance{}, err
-	}
-
-	row := db.QueryRow(query, userID)
-
 	var userBalance models.UserBalance
-	err = row.Scan(&userBalance.ID, &userBalance.UserID, &userBalance.Balance)
-	if err != nil {
-		return models.UserBalance{}, err
+
+	if err = MysqlDB.Where("id = ?", userID).First(&userBalance).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return userBalance, err
+		}
+		return userBalance, err
 	}
 
 	return userBalance, nil

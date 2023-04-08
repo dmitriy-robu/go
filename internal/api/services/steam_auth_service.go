@@ -5,20 +5,20 @@ import (
 	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/markbates/goth"
 	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/models"
+	"go-rust-drop/internal/api/repositories"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
-	"time"
 )
 
-type SteamAuthManager struct {
-	userService UserService
+type SteamAuthService struct {
+	userService     UserService
+	steamRepository repositories.SteamRepository
 }
 
 type PlayerSummariesResponse struct {
@@ -27,7 +27,7 @@ type PlayerSummariesResponse struct {
 	} `json:"response"`
 }
 
-func (sam SteamAuthManager) Login(c *gin.Context) (string, error) {
+func (sam SteamAuthService) Login(c *gin.Context) (string, error) {
 	provider, err := goth.GetProvider("steam")
 	if err != nil {
 		return "", errors.Wrap(err, "Error getting steam provider")
@@ -53,7 +53,7 @@ func (sam SteamAuthManager) Login(c *gin.Context) (string, error) {
 	return authURL, nil
 }
 
-func (sam SteamAuthManager) Callback(c *gin.Context) error {
+func (sam SteamAuthService) Callback(c *gin.Context) error {
 	_, err := goth.GetProvider("steam")
 	if err != nil {
 		return errors.Wrap(err, "Error getting steam provider")
@@ -71,18 +71,18 @@ func (sam SteamAuthManager) Callback(c *gin.Context) error {
 		return errors.Wrap(err, "Error fetching user info from Steam API")
 	}
 
-	token, err := sam.generateJWTToken(userInfo.SteamID)
+	user, err := sam.userService.CreateSteamUser(userInfo)
+	if err != nil {
+		return errors.Wrap(err, "Error saving user info to MySQL")
+	}
+
+	token, _, err := sam.steamRepository.GenerateAllTokens(*userInfo.SteamID, user.UUID)
 	if err != nil {
 		return errors.Wrap(err, "Error generating JWT token")
 
 	}
 
-	userID, err := sam.userService.CreateSteamUser(userInfo)
-	if err != nil {
-		return errors.Wrap(err, "Error saving user info to MySQL")
-	}
-
-	err = sam.userService.InsertUserAuthSteam(userID, *userInfo.SteamID)
+	err = sam.userService.CreateUserAuthSteam(*user.ID, *userInfo.SteamID)
 	if err != nil {
 		return errors.Wrap(err, "Error saving user to database")
 	}
@@ -100,7 +100,7 @@ func (sam SteamAuthManager) Callback(c *gin.Context) error {
 	return nil
 }
 
-func (sam SteamAuthManager) fetchSteamUserInfo(steamID string) (models.UserSteamInfo, error) {
+func (sam SteamAuthService) fetchSteamUserInfo(steamID string) (models.UserSteamInfo, error) {
 	userProfile, err := sam.getSteamUserProfile(steamID)
 	if err != nil {
 		return models.UserSteamInfo{}, errors.Wrap(err, "Error fetching user profile from Steam API")
@@ -115,7 +115,7 @@ func (sam SteamAuthManager) fetchSteamUserInfo(steamID string) (models.UserSteam
 	return userInfo, nil
 }
 
-func (sam SteamAuthManager) getSteamUserProfile(steamID string) (models.UserSteamProfile, error) {
+func (sam SteamAuthService) getSteamUserProfile(steamID string) (models.UserSteamProfile, error) {
 	var steamApiKey = os.Getenv("STEAM_API_KEY")
 	if steamApiKey == "" {
 		return models.UserSteamProfile{}, fmt.Errorf("steam api key is not set")
@@ -155,23 +155,4 @@ func (sam SteamAuthManager) getSteamUserProfile(steamID string) (models.UserStea
 	}
 
 	return playerSummariesResponse.Response.Players[0], nil
-}
-
-func (sam SteamAuthManager) generateJWTToken(steamUserID *string) (string, error) {
-	secretKey := os.Getenv("JWT_SECRET")
-	if secretKey == "" {
-		return "", fmt.Errorf("jwt secret key is not set")
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"steamUserID": steamUserID,
-		"exp":         time.Now().Add(24 * time.Hour).Unix(),
-	})
-
-	signedToken, err := token.SignedString([]byte(secretKey))
-	if err != nil {
-		return "", fmt.Errorf("error signing jwt token: %v", err)
-	}
-
-	return signedToken, nil
 }
