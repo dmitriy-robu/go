@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/pkg/errors"
-	"go-rust-drop/internal/api/dababase/mysql"
+	"go-rust-drop/internal/api/database/mysql"
 	"go-rust-drop/internal/api/models"
 	"gorm.io/gorm"
 )

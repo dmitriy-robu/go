@@ -1,9 +1,11 @@
 package mysql
 
 import (
-	"database/sql"
 	"fmt"
 	"go-rust-drop/config/db"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 	"log"
 	"sync"
 
@@ -12,15 +14,15 @@ import (
 )
 
 var (
-	onceDBMySQL     sync.Once
-	mysqlConnection *sql.DB
+	onceGorm       sync.Once
+	gormConnection *gorm.DB
 )
 
-func GetMySQLConnection() (*sql.DB, error) {
+func GetGormConnection() (*gorm.DB, error) {
 	configMySQl := db.SetMysqlConfig()
 
-	onceDBMySQL.Do(func() {
-		dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
+	onceGorm.Do(func() {
+		dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 			configMySQl.User,
 			configMySQl.Password,
 			configMySQl.Host,
@@ -29,16 +31,16 @@ func GetMySQLConnection() (*sql.DB, error) {
 		)
 
 		var err error
-		mysqlConnection, err = sql.Open("mysql", dsn)
+		gormConnection, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 		if err != nil {
-			mysqlConnection = nil
-			log.Fatalf("Error opening MySQL connection: %v", err)
+			gormConnection = nil
+			log.Fatalf("Error opening GORM connection: %v", err)
 		}
 	})
 
-	if mysqlConnection == nil {
-		return nil, errors.New("Failed to initialize MySQL connection")
+	if gormConnection == nil {
+		return nil, errors.New("Failed to initialize GORM connection")
 	}
 
-	return mysqlConnection, nil
+	return gormConnection, nil
 }

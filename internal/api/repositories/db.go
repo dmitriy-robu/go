@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"go-rust-drop/internal/api/dababase/mysql"
+	"go-rust-drop/internal/api/database/mysql"
 	"gorm.io/gorm"
 	"log"
 )
