@@ -3,7 +3,7 @@ package mongodb
 import (
 	"context"
 	"fmt"
-	"go-rust-drop/config"
+	"go-rust-drop/config/db"
 	"sync"
 
 	"github.com/pkg/errors"
@@ -22,7 +22,7 @@ type Client struct {
 }
 
 func GetMongoDBConnection() (*Client, error) {
-	mongodbConfig := config.LoadConfig().MongoDB
+	mongodbConfig := db.SetMongoDBConfig()
 
 	onceDBMongoDB.Do(func() {
 		uri := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s?authMechanism=%s&authSource=%s",
