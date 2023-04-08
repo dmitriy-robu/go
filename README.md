@@ -1,6 +1,6 @@
 # Rust drop project on Go
 
-### To set up .env file with connections to db's:
+## To set up .env file with connections to db's:
 ##### MongoDB Connection
 ```
 MONGODB_HOST=go-rust-drop-mdb
@@ -20,9 +20,9 @@ MYSQL_USER=root
 MYSQL_PASSWORD="6i6Eo0v812;:**'w"
 ```
 
-### Makefile commands
+## Makefile commands
 - `make build` - using by air plugin of live reload
 - `make docker` or `make` - build and up project stack
 
-### Documentation for creating newest data in project
-* [Creating migrations for MySQL](https://github.com/popcornrus/go-rust-drop/issues/1)
+## Documentation for creating newest data in project
+- [Creating migrations for MySQL](https://github.com/popcornrus/go-rust-drop/issues/1)
