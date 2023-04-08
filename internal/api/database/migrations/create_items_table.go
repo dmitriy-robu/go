@@ -5,9 +5,9 @@ import (
 	"log"
 )
 
-func CreateUsersTable() {
+func CreateItemsTable() {
 	var (
-		table models.User
+		table models.Item
 	)
 
 	if !MySQL.Migrator().HasTable(table) {
