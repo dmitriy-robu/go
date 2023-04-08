@@ -26,3 +26,4 @@ MYSQL_PASSWORD="6i6Eo0v812"
 
 ## Documentation for creating newest data in project
 - [Creating migrations for MySQL](https://github.com/popcornrus/go-rust-drop/issues/1)
+- [Creating Enum](https://github.com/popcornrus/go-rust-drop/issues/2)
