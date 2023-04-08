@@ -23,3 +23,6 @@ MYSQL_PASSWORD="6i6Eo0v812;:**'w"
 ### Makefile commands
 - `make build` - using by air plugin of live reload
 - `make docker` or `make` - build and up project stack
+
+### Documentation for creating newest data in project
+* [Creating migrations for MySQL](https://github.com/popcornrus/go-rust-drop/issues/1)
