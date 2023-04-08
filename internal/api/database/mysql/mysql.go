@@ -3,7 +3,7 @@ package mysql
 import (
 	"database/sql"
 	"fmt"
-	"go-rust-drop/config"
+	"go-rust-drop/config/db"
 	"log"
 	"sync"
 
@@ -17,7 +17,7 @@ var (
 )
 
 func GetMySQLConnection() (*sql.DB, error) {
-	configMySQl := config.LoadConfig().MySQL
+	configMySQl := db.SetMysqlConfig()
 
 	onceDBMySQL.Do(func() {
 		dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",

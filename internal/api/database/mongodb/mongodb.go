@@ -3,7 +3,7 @@ package mongodb
 import (
 	"context"
 	"fmt"
-	"go-rust-drop/config"
+	"go-rust-drop/config/db"
 	"sync"
 
 	"github.com/pkg/errors"
@@ -16,13 +16,13 @@ var (
 	mongoConnection *mongo.Client
 )
 
-type MongoDBClient struct {
+type Client struct {
 	Client   *mongo.Client
 	Database string
 }
 
-func GetMongoDBConnection() (*MongoDBClient, error) {
-	mongodbConfig := config.LoadConfig().MongoDB
+func GetMongoDBConnection() (*Client, error) {
+	mongodbConfig := db.SetMongoDBConfig()
 
 	onceDBMongoDB.Do(func() {
 		uri := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s?authMechanism=%s&authSource=%s",
@@ -48,7 +48,7 @@ func GetMongoDBConnection() (*MongoDBClient, error) {
 		return nil, errors.New("Failed to connect to MongoDB")
 	}
 
-	mongoDBClient := &MongoDBClient{
+	mongoDBClient := &Client{
 		Client:   mongoConnection,
 		Database: mongodbConfig.DBName,
 	}
@@ -65,6 +65,6 @@ func GetCollectionByName(collectionName string) (*mongo.Collection, error) {
 	return mongoDBClient.GetCollection(collectionName), nil
 }
 
-func (m *MongoDBClient) GetCollection(collectionName string) *mongo.Collection {
+func (m *Client) GetCollection(collectionName string) *mongo.Collection {
 	return m.Client.Database(m.Database).Collection(collectionName)
 }
