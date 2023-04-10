@@ -56,6 +56,7 @@ func (sr SteamRepository) GenerateAllTokens(steamUserId, uuid string) (string, e
 
 func (sr SteamRepository) updateAllTokens(signedToken, signedRefreshToken, uid string) error {
 	var updateObj primitive.D
+	var err error
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

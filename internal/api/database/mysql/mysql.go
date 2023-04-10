@@ -27,7 +27,7 @@ func GetGormConnection() (*gorm.DB, error) {
 	configMySQl := db.SetMysqlConfig()
 
 	onceGorm.Do(func() {
-		dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
+		dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
 			configMySQl.User,
 			configMySQl.Password,
 			configMySQl.Host,

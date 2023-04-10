@@ -54,7 +54,9 @@ func (sam SteamAuthService) Login(c *gin.Context) (string, error) {
 }
 
 func (sam SteamAuthService) Callback(c *gin.Context) error {
-	_, err := goth.GetProvider("steam")
+	var err error
+
+	_, err = goth.GetProvider("steam")
 	if err != nil {
 		return errors.Wrap(err, "Error getting steam provider")
 	}
@@ -71,37 +73,19 @@ func (sam SteamAuthService) Callback(c *gin.Context) error {
 		return errors.Wrap(err, "Error fetching user info from Steam API")
 	}
 
-	user, err := sam.userService.CreateSteamUser(userInfo)
+	user, err := sam.userService.CreateOrUpdateSteamUser(userInfo)
 	if err != nil {
-		return errors.Wrap(err, "Error saving user info to MySQL")
+		return errors.Wrap(err, "Error saving user info to database")
 	}
 
-	token, err := sam.steamRepository.GenerateAllTokens(*userInfo.SteamID, user.UUID)
-	if err != nil {
-		return errors.Wrap(err, "Error generating JWT token")
+	session := sessions.Default(c)
+	session.Set("user_uuid", user.UUID)
 
+	if err = session.Save(); err != nil {
+		return errors.Wrap(err, "Error saving session")
 	}
 
-	authUserSteam := models.UserAuthSteam{
-		SteamID: userInfo.SteamID,
-		UserID:  user.ID,
-		Token:   &token,
-	}
-
-	err = sam.userService.CreateUserAuthSteam(authUserSteam)
-	if err != nil {
-		return errors.Wrap(err, "Error saving user to database")
-	}
-
-	cookie := &http.Cookie{
-		Name:     "access_token",
-		Value:    token,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteStrictMode,
-	}
-	http.SetCookie(c.Writer, cookie)
+	c.Redirect(http.StatusTemporaryRedirect, "/")
 
 	return nil
 }

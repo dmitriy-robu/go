@@ -11,8 +11,9 @@ import (
 )
 
 type UserController struct {
-	userService services.UserService
-	db          *gorm.DB
+	userService  services.UserService
+	db           *gorm.DB
+	errorHandler utils.Errors
 }
 
 func (u UserController) UserInfo(c *gin.Context) {
@@ -20,13 +21,13 @@ func (u UserController) UserInfo(c *gin.Context) {
 
 	userID, err := getUserIDFromContext(c)
 	if err != nil {
-		utils.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
+		u.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
 		return
 	}
 
 	userWithBalance, err := u.userService.GetUserInfo(userID)
 	if err != nil {
-		utils.HandleError(c, http.StatusInternalServerError, "Error getting user information", err)
+		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error getting user information", err)
 		return
 	}
 
@@ -37,7 +38,7 @@ func (u UserController) UserInfo(c *gin.Context) {
 
 	jsonData, err := userResources.UserInfo()
 	if err != nil {
-		utils.HandleError(c, http.StatusInternalServerError, "Error converting user information to JSON", err)
+		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error converting user information to JSON", err)
 		return
 	}
 

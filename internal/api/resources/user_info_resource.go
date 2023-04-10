@@ -12,7 +12,7 @@ type UserResources struct {
 
 func (u UserResources) UserInfo() ([]byte, error) {
 	var resource struct {
-		ID            *uint64 `json:"id"`
+		ID            *int    `json:"id"`
 		UUID          string  `json:"uuid"`
 		Name          *string `json:"name"`
 		AvatarURL     *string `json:"avatar_url"`
