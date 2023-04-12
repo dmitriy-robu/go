@@ -79,10 +79,10 @@ func (ur UserRepository) CreateUser(user models.User) (models.User, error) {
 	return user, nil
 }
 
-func (ur UserRepository) UpdateUser(userID *int, user models.User) (models.User, error) {
+func (ur UserRepository) UpdateUser(UserUUID string, user models.User) (models.User, error) {
 	var err error
 
-	if err = MysqlDB.Where("id = ?", userID).First(&user).Error; err != nil {
+	if err = MysqlDB.Where("uuid = ?", UserUUID).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return user, err
 		}
@@ -148,7 +148,7 @@ func (ur UserRepository) UpdateUserAuth(userAuthSteam models.UserAuthSteam) erro
 		return errors.Wrap(err, "Error getting MongoDB collection")
 	}
 
-	_, err = collection.ReplaceOne(ctx, bson.M{"steam_id": userAuthSteam.SteamID}, userAuthSteam)
+	_, err = collection.ReplaceOne(ctx, bson.M{"steam_id": userAuthSteam.SteamUserID}, userAuthSteam)
 	if err != nil {
 		return errors.Wrap(err, "Error updating UserAuthSteam in MongoDB")
 	}

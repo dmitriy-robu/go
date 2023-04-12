@@ -6,14 +6,13 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth"
+	"github.com/markbates/goth/gothic"
 	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/models"
 	"go-rust-drop/internal/api/repositories"
 	"io"
 	"net/http"
-	"net/url"
 	"os"
-	"path"
 )
 
 type SteamAuthService struct {
@@ -28,21 +27,24 @@ type PlayerSummariesResponse struct {
 }
 
 func (sam SteamAuthService) Login(c *gin.Context) (string, error) {
+	if os.Getenv("SESSION_SECRET") == "" {
+		return "", errors.New("SESSION_SECRET env variable is not set")
+	}
+
 	provider, err := goth.GetProvider("steam")
 	if err != nil {
 		return "", errors.Wrap(err, "Error getting steam provider")
 	}
 
-	session, err := provider.BeginAuth("")
+	session, err := provider.BeginAuth("oauth_verifier")
 	if err != nil {
 		return "", errors.Wrap(err, "Error starting steam auth")
 	}
 
 	sess := sessions.Default(c)
-	sess.Set(os.Getenv("GOTH_SESSION"), session.Marshal())
+	sess.Set(os.Getenv("SESSION_SECRET"), session.Marshal())
 	if err := sess.Save(); err != nil {
 		return "", errors.Wrap(err, "Error saving session")
-
 	}
 
 	authURL, err := session.GetAuthURL()
@@ -55,37 +57,68 @@ func (sam SteamAuthService) Login(c *gin.Context) (string, error) {
 
 func (sam SteamAuthService) Callback(c *gin.Context) error {
 	var err error
+	providerName := "steam"
 
-	_, err = goth.GetProvider("steam")
+	provider, err := goth.GetProvider(providerName)
 	if err != nil {
 		return errors.Wrap(err, "Error getting steam provider")
 	}
 
-	claimedID, err := url.Parse(c.Request.URL.Query().Get("openid.claimed_id"))
+	req := c.Request
+
+	value, err := gothic.GetFromSession(providerName, req)
 	if err != nil {
-		return errors.Wrap(err, "Error parsing claimed ID")
+		return errors.Wrap(err, "Error getting session")
+	}
+	// релизазуй
+	// defer Logout(res, req)
+
+	session, err := provider.UnmarshalSession(value)
+	if err != nil {
+		return errors.Wrap(err, "Error unmarshalling session")
 	}
 
-	steamID := path.Base(claimedID.Path)
-
-	userInfo, err := sam.fetchSteamUserInfo(steamID)
+	_, err = session.Authorize(provider, c.Request.URL.Query())
 	if err != nil {
-		return errors.Wrap(err, "Error fetching user info from Steam API")
+		return errors.Wrap(err, "Error authorizing session")
 	}
 
-	user, err := sam.userService.CreateOrUpdateSteamUser(userInfo)
+	userFetch, err := provider.FetchUser(session)
+	if err != nil {
+		return errors.Wrap(err, "Error fetching user")
+	}
+
+	userSteamInfo := models.UserSteamInfo{
+		Name:              &userFetch.Name,
+		SteamUserID:       &userFetch.UserID,
+		AvatarURL:         &userFetch.AvatarURL,
+		AccessToken:       &userFetch.AccessToken,
+		AccessTokenSecret: &userFetch.AccessTokenSecret,
+		RefreshToken:      &userFetch.RefreshToken,
+		ExpiresAt:         &userFetch.ExpiresAt,
+	}
+
+	_, err = sam.userService.CreateOrUpdateSteamUser(userSteamInfo)
 	if err != nil {
 		return errors.Wrap(err, "Error saving user info to database")
 	}
 
-	session := sessions.Default(c)
-	session.Set("user_uuid", user.UUID)
-
-	if err = session.Save(); err != nil {
-		return errors.Wrap(err, "Error saving session")
+	if err = sam.storeUserInSession(userFetch, c); err != nil {
+		return errors.Wrap(err, "Error storing user in session")
 	}
 
 	c.Redirect(http.StatusTemporaryRedirect, "/")
+
+	return nil
+}
+
+func (sam SteamAuthService) storeUserInSession(user goth.User, c *gin.Context) error {
+	session := sessions.Default(c)
+	session.Set("user", user)
+	err := session.Save()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -97,9 +130,9 @@ func (sam SteamAuthService) fetchSteamUserInfo(steamID string) (models.UserSteam
 	}
 
 	userInfo := models.UserSteamInfo{
-		SteamID:   userProfile.SteamID,
-		AvatarURL: userProfile.AvatarURL,
-		Name:      userProfile.Name,
+		SteamUserID: userProfile.SteamID,
+		AvatarURL:   userProfile.AvatarURL,
+		Name:        userProfile.Name,
 	}
 
 	return userInfo, nil

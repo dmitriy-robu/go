@@ -3,13 +3,16 @@ package mongodb
 import (
 	"context"
 	"fmt"
-	"go-rust-drop/config/db"
-	"net/url"
-	"sync"
-
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/mongo/mongodriver"
 	"github.com/pkg/errors"
+	"go-rust-drop/config/db"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"net/url"
+	"os"
+	"sync"
+	"time"
 )
 
 var (
@@ -68,4 +71,25 @@ func GetCollectionByName(collectionName string) (*mongo.Collection, error) {
 
 func (m *Client) GetCollection(collectionName string) *mongo.Collection {
 	return m.Client.Database(m.Database).Collection(collectionName)
+}
+
+func InitMongoSessionStore() (store sessions.Store, err error) {
+	secretKey := os.Getenv("SESSION_SECRET")
+	if secretKey == "" {
+		return nil, errors.New("key is not set")
+	}
+
+	collectionName := "sessions"
+
+	_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	collection, err := GetCollectionByName(collectionName)
+	if err != nil {
+		return nil, err
+	}
+
+	store = mongodriver.NewStore(collection, 3600, true, []byte(secretKey))
+
+	return store, nil
 }

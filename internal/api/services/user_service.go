@@ -15,64 +15,64 @@ type UserService struct {
 }
 
 func (us UserService) CreateOrUpdateSteamUser(userInfo models.UserSteamInfo) (models.User, error) {
-	var err error
-	var userAuthSteam models.UserAuthSteam
-	var user models.User
-
-	if *userInfo.SteamID == "" {
+	if *userInfo.SteamUserID == "" {
 		return us.userModel, errors.New("SteamID is empty")
 	}
 
-	userAuth, err := us.userRepo.FindUserAuthBySteamID(*userInfo.SteamID)
+	now := time.Now()
+
+	user := models.User{
+		AvatarURL: userInfo.AvatarURL,
+		Name:      userInfo.Name,
+		UpdatedAt: now,
+	}
+
+	userAuth, err := us.userRepo.FindUserAuthBySteamID(*userInfo.SteamUserID)
+
+	if err != nil && err != mongo.ErrNoDocuments {
+		return us.userModel, errors.Wrap(err, "Error finding user by SteamID")
+	}
+
+	userAuthSteam := models.UserAuthSteam{
+		SteamUserID:       userInfo.SteamUserID,
+		AccessToken:       userInfo.AccessToken,
+		AccessTokenSecret: userInfo.AccessTokenSecret,
+		RefreshToken:      userInfo.RefreshToken,
+		ExpiresAt:         userInfo.ExpiresAt,
+		UpdatedAt:         now,
+	}
 
 	if err == nil {
-		userUpdate := models.User{
-			AvatarURL: userInfo.AvatarURL,
-			Name:      userInfo.Name,
-			UpdatedAt: time.Now(),
-		}
-
-		user, err = us.userRepo.UpdateUser(userAuth.UserID, userUpdate)
+		user, err = us.userRepo.UpdateUser(userAuth.UserUUID, user)
 		if err != nil {
 			return us.userModel, errors.Wrap(err, "Error updating user")
 		}
 
-		userAuthSteam = models.UserAuthSteam{
-			SteamID:   userInfo.SteamID,
-			UserID:    user.ID,
-			UpdatedAt: time.Now(),
-		}
+		userAuthSteam.UserUUID = user.UUID
 
 		if err = us.userRepo.UpdateUserAuth(userAuthSteam); err != nil {
 			return us.userModel, errors.Wrap(err, "Error updating user auth")
 		}
+	} else {
+		newUUID, err := uuid.NewRandom()
+		if err != nil {
+			return us.userModel, errors.Wrap(err, "Error generating UUID")
+		}
 
-		return user, nil
-	} else if err != mongo.ErrNoDocuments {
-		return us.userModel, errors.Wrap(err, "Error finding user by SteamID")
-	}
+		user.UUID = newUUID.String()
+		user.CreatedAt = now
 
-	newUUID, err := uuid.NewRandom()
-	if err != nil {
-		return us.userModel, errors.Wrap(err, "Error generating UUID")
-	}
+		user, err = us.userRepo.CreateUser(user)
+		if err != nil {
+			return user, errors.Wrap(err, "Error creating user")
+		}
 
-	user = models.User{
-		UUID:      newUUID.String(),
-		AvatarURL: userInfo.AvatarURL,
-		Name:      userInfo.Name,
-	}
+		userAuthSteam.UserUUID = user.UUID
+		userAuthSteam.CreatedAt = now
 
-	user, err = us.userRepo.CreateUser(user)
-	if err != nil {
-		return user, errors.Wrap(err, "Error creating user")
-	}
-
-	if err = us.userRepo.CreateUserAuth(models.UserAuthSteam{
-		SteamID: userInfo.SteamID,
-		UserID:  user.ID,
-	}); err != nil {
-		return user, errors.Wrap(err, "Error creating user auth")
+		if err = us.userRepo.CreateUserAuth(userAuthSteam); err != nil {
+			return user, errors.Wrap(err, "Error creating user auth")
+		}
 	}
 
 	return user, nil

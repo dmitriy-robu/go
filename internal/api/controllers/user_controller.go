@@ -46,7 +46,7 @@ func (u UserController) UserInfo(c *gin.Context) {
 }
 
 func getUserIDFromContext(c *gin.Context) (string, error) {
-	steamUserIDValue, ok := c.MustGet("steamUserID").(string)
+	steamUserIDValue, ok := c.MustGet("user_uuid").(string)
 	if !ok {
 		return "", fmt.Errorf("user ID not found in context")
 	}
