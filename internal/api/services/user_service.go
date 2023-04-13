@@ -15,7 +15,7 @@ type UserService struct {
 	userModel models.User
 }
 
-func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) error {
+func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) (string, error) {
 	now := time.Now()
 
 	user := models.User{
@@ -27,7 +27,7 @@ func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) error {
 	userAuth, err := us.userRepo.FindUserAuthBySteamID(userGoth.UserID)
 
 	if err != nil && err != mongo.ErrNoDocuments {
-		return errors.Wrap(err, "Error finding user by SteamID")
+		return "", errors.Wrap(err, "Error finding user by SteamID")
 	}
 
 	userAuthSteam := models.UserAuthSteam{
@@ -38,18 +38,18 @@ func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) error {
 	if err == nil {
 		user, err = us.userRepo.UpdateUser(userAuth.UserUUID, user)
 		if err != nil {
-			return errors.Wrap(err, "Error updating user")
+			return "", errors.Wrap(err, "Error updating user")
 		}
 
 		userAuthSteam.UserUUID = user.UUID
 
 		if err = us.userRepo.UpdateUserAuth(userAuthSteam); err != nil {
-			return errors.Wrap(err, "Error updating user auth")
+			return "", errors.Wrap(err, "Error updating user auth")
 		}
 	} else {
 		newUUID, err := uuid.NewRandom()
 		if err != nil {
-			return errors.Wrap(err, "Error generating UUID")
+			return "", errors.Wrap(err, "Error generating UUID")
 		}
 
 		user.UUID = newUUID.String()
@@ -57,18 +57,18 @@ func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) error {
 
 		user, err = us.userRepo.CreateUser(user)
 		if err != nil {
-			return errors.Wrap(err, "Error creating user")
+			return "", errors.Wrap(err, "Error creating user")
 		}
 
 		userAuthSteam.UserUUID = user.UUID
 		userAuthSteam.CreatedAt = now
 
 		if err = us.userRepo.CreateUserAuth(userAuthSteam); err != nil {
-			return errors.Wrap(err, "Error creating user auth")
+			return "", errors.Wrap(err, "Error creating user auth")
 		}
 	}
 
-	return nil
+	return user.UUID, nil
 }
 
 func (us UserService) GetUserInfo(steamUserID string) (models.UserWithBalance, error) {

@@ -7,12 +7,3 @@ type SignedDetails struct {
 	Uuid        string
 	jwt.RegisteredClaims
 }
-
-type Session struct {
-	ID        string
-	UserID    string
-	Email     string
-	Name      string
-	AvatarURL string
-	Provider  string
-}

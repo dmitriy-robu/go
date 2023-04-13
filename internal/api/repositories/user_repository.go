@@ -12,20 +12,15 @@ import (
 )
 
 type UserRepository struct {
-	userWithBalance models.UserWithBalance
 }
 
 func (ur UserRepository) FindUserByIDWithBalance(steamUserID string) (models.UserWithBalance, error) {
 	var err error
+	var userWithBalance models.UserWithBalance
 
-	err = MysqlDB.Preload("UserBalance").First(&ur.userWithBalance, steamUserID).Error
+	err = MysqlDB.Preload("UserWithBalance").First(&userWithBalance, steamUserID).Error
 	if err != nil {
 		return models.UserWithBalance{}, errors.Wrap(err, "Error finding user with balance")
-	}
-
-	userWithBalance := models.UserWithBalance{
-		User:        ur.userWithBalance.User,
-		UserBalance: ur.userWithBalance.UserBalance,
 	}
 
 	return userWithBalance, nil

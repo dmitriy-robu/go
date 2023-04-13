@@ -6,13 +6,11 @@ import (
 	"go-rust-drop/internal/api/resources"
 	"go-rust-drop/internal/api/services"
 	"go-rust-drop/internal/api/utils"
-	"gorm.io/gorm"
 	"net/http"
 )
 
 type UserController struct {
 	userService  services.UserService
-	db           *gorm.DB
 	errorHandler utils.Errors
 }
 
@@ -46,9 +44,9 @@ func (u UserController) UserInfo(c *gin.Context) {
 }
 
 func getUserIDFromContext(c *gin.Context) (string, error) {
-	steamUserIDValue, ok := c.MustGet("user_uuid").(string)
+	steamUserIDValue, ok := c.MustGet("userUuid").(string)
 	if !ok {
-		return "", fmt.Errorf("user ID not found in context")
+		return "", fmt.Errorf("user not found in context")
 	}
 
 	return steamUserIDValue, nil

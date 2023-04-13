@@ -11,13 +11,13 @@ type SteamMiddleware struct {
 
 func (s SteamMiddleware) AuthRequired(c *gin.Context) {
 	session := sessions.Default(c)
-	steamID := session.Get("steamID")
+	userUuid := session.Get("userUuid")
 
-	if steamID == nil {
+	if userUuid == nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
-	c.Set("steamID", steamID)
+	c.Set("userUuid", userUuid)
 	c.Next()
 }

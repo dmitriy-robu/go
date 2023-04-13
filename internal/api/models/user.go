@@ -26,23 +26,8 @@ type User struct {
 	UpdatedAt       time.Time    `gorm:"default:current_timestamp"`
 }
 
-type UserSteamInfo struct {
-	SteamUserID       *string
-	AvatarURL         *string
-	Name              *string
-	AccessToken       *string
-	AccessTokenSecret *string
-	RefreshToken      *string
-	ExpiresAt         *time.Time
-}
-
-type UserSteamProfile struct {
-	SteamID   *string `json:"steamid"`
-	AvatarURL *string `json:"avatar"`
-	Name      *string `json:"personaname"`
-}
-
 type UserWithBalance struct {
+	gorm.Model
 	User        User
 	UserBalance UserBalance
 }
