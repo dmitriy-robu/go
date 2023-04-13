@@ -108,7 +108,7 @@ func (ur UserRepository) FindUserAuthBySteamID(steamID string) (*models.UserAuth
 		return &userAuth, errors.Wrap(err, "Error getting MongoDB collection")
 	}
 
-	if err = collection.FindOne(ctx, bson.M{"steam_id": steamID}).Decode(&userAuth); err != nil {
+	if err = collection.FindOne(ctx, bson.M{"steam_user_id": steamID}).Decode(&userAuth); err != nil {
 		if err == mongo.ErrNoDocuments {
 			return &userAuth, mongo.ErrNoDocuments
 		}

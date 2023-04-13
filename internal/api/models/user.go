@@ -48,13 +48,9 @@ type UserWithBalance struct {
 }
 
 type UserAuthSteam struct {
-	ID                primitive.ObjectID `bson:"_id,omitempty"`
-	UserUUID          string             `bson:"user_uuid"`
-	SteamUserID       *string            `bson:"steam_user_id"`
-	AccessToken       *string            `bson:"access_token"`
-	AccessTokenSecret *string            `bson:"access_token_secret"`
-	RefreshToken      *string            `bson:"refresh_token"`
-	ExpiresAt         *time.Time         `bson:"expires_at"`
-	CreatedAt         time.Time          `bson:"created_at"`
-	UpdatedAt         time.Time          `bson:"updated_at"`
+	ID          primitive.ObjectID `bson:"_id,omitempty"`
+	UserUUID    string             `bson:"user_uuid"`
+	SteamUserID *string            `bson:"steam_user_id"`
+	CreatedAt   time.Time          `bson:"created_at"`
+	UpdatedAt   time.Time          `bson:"updated_at"`
 }

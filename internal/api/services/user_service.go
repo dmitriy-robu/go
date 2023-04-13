@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/google/uuid"
+	"github.com/markbates/goth"
 	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/models"
 	"go-rust-drop/internal/api/repositories"
@@ -14,49 +15,41 @@ type UserService struct {
 	userModel models.User
 }
 
-func (us UserService) CreateOrUpdateSteamUser(userInfo models.UserSteamInfo) (models.User, error) {
-	if *userInfo.SteamUserID == "" {
-		return us.userModel, errors.New("SteamID is empty")
-	}
-
+func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) error {
 	now := time.Now()
 
 	user := models.User{
-		AvatarURL: userInfo.AvatarURL,
-		Name:      userInfo.Name,
+		AvatarURL: &userGoth.AvatarURL,
+		Name:      &userGoth.NickName,
 		UpdatedAt: now,
 	}
 
-	userAuth, err := us.userRepo.FindUserAuthBySteamID(*userInfo.SteamUserID)
+	userAuth, err := us.userRepo.FindUserAuthBySteamID(userGoth.UserID)
 
 	if err != nil && err != mongo.ErrNoDocuments {
-		return us.userModel, errors.Wrap(err, "Error finding user by SteamID")
+		return errors.Wrap(err, "Error finding user by SteamID")
 	}
 
 	userAuthSteam := models.UserAuthSteam{
-		SteamUserID:       userInfo.SteamUserID,
-		AccessToken:       userInfo.AccessToken,
-		AccessTokenSecret: userInfo.AccessTokenSecret,
-		RefreshToken:      userInfo.RefreshToken,
-		ExpiresAt:         userInfo.ExpiresAt,
-		UpdatedAt:         now,
+		SteamUserID: &userGoth.UserID,
+		UpdatedAt:   now,
 	}
 
 	if err == nil {
 		user, err = us.userRepo.UpdateUser(userAuth.UserUUID, user)
 		if err != nil {
-			return us.userModel, errors.Wrap(err, "Error updating user")
+			return errors.Wrap(err, "Error updating user")
 		}
 
 		userAuthSteam.UserUUID = user.UUID
 
 		if err = us.userRepo.UpdateUserAuth(userAuthSteam); err != nil {
-			return us.userModel, errors.Wrap(err, "Error updating user auth")
+			return errors.Wrap(err, "Error updating user auth")
 		}
 	} else {
 		newUUID, err := uuid.NewRandom()
 		if err != nil {
-			return us.userModel, errors.Wrap(err, "Error generating UUID")
+			return errors.Wrap(err, "Error generating UUID")
 		}
 
 		user.UUID = newUUID.String()
@@ -64,18 +57,18 @@ func (us UserService) CreateOrUpdateSteamUser(userInfo models.UserSteamInfo) (mo
 
 		user, err = us.userRepo.CreateUser(user)
 		if err != nil {
-			return user, errors.Wrap(err, "Error creating user")
+			return errors.Wrap(err, "Error creating user")
 		}
 
 		userAuthSteam.UserUUID = user.UUID
 		userAuthSteam.CreatedAt = now
 
 		if err = us.userRepo.CreateUserAuth(userAuthSteam); err != nil {
-			return user, errors.Wrap(err, "Error creating user auth")
+			return errors.Wrap(err, "Error creating user auth")
 		}
 	}
 
-	return user, nil
+	return nil
 }
 
 func (us UserService) GetUserInfo(steamUserID string) (models.UserWithBalance, error) {
