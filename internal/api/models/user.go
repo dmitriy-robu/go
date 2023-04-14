@@ -27,7 +27,6 @@ type User struct {
 }
 
 type UserWithBalance struct {
-	gorm.Model
 	User        User
 	UserBalance UserBalance
 }

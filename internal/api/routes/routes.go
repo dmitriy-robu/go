@@ -28,9 +28,9 @@ func RouteHandle(router *gin.Engine) {
 	public.Routes(publicGroup)
 
 	authGroup := router.Group("/api/v1")
-	steamMiddleware := middlewares.SteamMiddleware{}
+	Middleware := middlewares.Middleware{}
 
-	authGroup.Use(steamMiddleware.AuthRequired)
+	authGroup.Use(Middleware.AuthRequired)
 	{
 		auth.Routes(authGroup)
 	}

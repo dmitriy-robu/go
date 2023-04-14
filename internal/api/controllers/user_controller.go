@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go-rust-drop/internal/api/resources"
 	"go-rust-drop/internal/api/services"
@@ -17,13 +16,13 @@ type UserController struct {
 func (u UserController) UserInfo(c *gin.Context) {
 	var err error
 
-	userID, err := getUserIDFromContext(c)
+	user, err := u.userService.AuthUser(c)
 	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
 		return
 	}
 
-	userWithBalance, err := u.userService.GetUserInfo(userID)
+	userWithBalance, err := u.userService.GetUserInfo(*user.ID)
 	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error getting user information", err)
 		return
@@ -41,13 +40,4 @@ func (u UserController) UserInfo(c *gin.Context) {
 	}
 
 	c.Data(http.StatusOK, "application/json", jsonData)
-}
-
-func getUserIDFromContext(c *gin.Context) (string, error) {
-	steamUserIDValue, ok := c.MustGet("userUuid").(string)
-	if !ok {
-		return "", fmt.Errorf("user not found in context")
-	}
-
-	return steamUserIDValue, nil
 }

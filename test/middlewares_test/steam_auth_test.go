@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSteamMiddleware(t *testing.T) {
+func TestMiddleware(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	// Создайте тестовый обработчик, который будет использоваться с middleware
@@ -23,13 +23,13 @@ func TestSteamMiddleware(t *testing.T) {
 	}
 
 	// Настройте middleware и сессии
-	steamMiddleware := middlewares.SteamMiddleware{}
+	Middleware := middlewares.Middleware{}
 	store := cookie.NewStore([]byte("test-session-secret"))
 
 	// Создайте Gin Engine и зарегистрируйте middleware и обработчик
 	engine := gin.New()
 	engine.Use(sessions.Sessions("test-session", store))
-	engine.Use(steamMiddleware.VerifyToken)
+	engine.Use(Middleware.VerifyToken)
 	engine.GET("/test", testHandler)
 
 	// Создайте тестовый запрос

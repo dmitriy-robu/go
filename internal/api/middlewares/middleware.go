@@ -6,10 +6,10 @@ import (
 	"net/http"
 )
 
-type SteamMiddleware struct {
+type Middleware struct {
 }
 
-func (s SteamMiddleware) AuthRequired(c *gin.Context) {
+func (s Middleware) AuthRequired(c *gin.Context) {
 	session := sessions.Default(c)
 	userUuid := session.Get("userUuid")
 

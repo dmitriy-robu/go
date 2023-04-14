@@ -1,6 +1,8 @@
 package services
 
 import (
+	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/markbates/goth"
 	"github.com/pkg/errors"
@@ -36,7 +38,12 @@ func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) (string, error
 	}
 
 	if err == nil {
-		user, err = us.userRepo.UpdateUser(userAuth.UserUUID, user)
+		user, err = us.userRepo.GetUserByUuid(userAuth.UserUUID)
+		if err != nil {
+			return "", errors.Wrap(err, "Error getting user from database")
+		}
+
+		user, err = us.userRepo.UpdateUser(user)
 		if err != nil {
 			return "", errors.Wrap(err, "Error updating user")
 		}
@@ -71,13 +78,27 @@ func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) (string, error
 	return user.UUID, nil
 }
 
-func (us UserService) GetUserInfo(steamUserID string) (models.UserWithBalance, error) {
+func (us UserService) GetUserInfo(userId int) (models.UserWithBalance, error) {
 	var err error
 
-	userWithBalance, err := us.userRepo.FindUserByIDWithBalance(steamUserID)
+	userWithBalance, err := us.userRepo.FindUserByIDWithBalance(userId)
 	if err != nil {
 		return models.UserWithBalance{}, errors.Wrap(err, "An error occurred while retrieving user information")
 	}
 
 	return userWithBalance, nil
+}
+
+func (us UserService) AuthUser(c *gin.Context) (user models.User, err error) {
+	userUuid, ok := c.MustGet("userUuid").(string)
+	if !ok {
+		return models.User{}, fmt.Errorf("user not found in context")
+	}
+
+	user, err = us.userRepo.GetUserByUuid(userUuid)
+	if err != nil {
+		return models.User{}, errors.Wrap(err, "Error getting user from database")
+	}
+
+	return user, nil
 }
