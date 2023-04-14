@@ -22,7 +22,7 @@ func (u UserController) UserInfo(c *gin.Context) {
 		return
 	}
 
-	userWithBalance, err := u.userService.GetUserInfo(*user.ID)
+	userWithBalance, err := u.userService.GetUserInfo(user)
 	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error getting user information", err)
 		return

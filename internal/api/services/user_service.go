@@ -78,10 +78,10 @@ func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) (string, error
 	return user.UUID, nil
 }
 
-func (us UserService) GetUserInfo(userId int) (models.UserWithBalance, error) {
+func (us UserService) GetUserInfo(user models.User) (models.UserWithBalance, error) {
 	var err error
 
-	userWithBalance, err := us.userRepo.FindUserByIDWithBalance(userId)
+	userWithBalance, err := us.userRepo.FindUserByIDWithBalance(*user.ID)
 	if err != nil {
 		return models.UserWithBalance{}, errors.Wrap(err, "An error occurred while retrieving user information")
 	}
