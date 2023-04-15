@@ -13,8 +13,7 @@ import (
 )
 
 type UserService struct {
-	userRepo  repositories.UserRepository
-	userModel models.User
+	userRepo repositories.UserRepository
 }
 
 func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) (string, error) {
@@ -78,12 +77,12 @@ func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) (string, error
 	return user.UUID, nil
 }
 
-func (us UserService) GetUserInfo(user models.User) (models.UserWithBalance, error) {
+func (us UserService) GetUser(user models.User) (models.User, error) {
 	var err error
 
-	userWithBalance, err := us.userRepo.FindUserByIDWithBalance(*user.ID)
+	userWithBalance, err := us.userRepo.FindUserByID(*user.ID)
 	if err != nil {
-		return models.UserWithBalance{}, errors.Wrap(err, "An error occurred while retrieving user information")
+		return models.User{}, errors.Wrap(err, "An error occurred while retrieving user information")
 	}
 
 	return userWithBalance, nil
@@ -101,4 +100,15 @@ func (us UserService) AuthUser(c *gin.Context) (user models.User, err error) {
 	}
 
 	return user, nil
+}
+
+func (us UserService) GetUserWithBalance(user models.User) (models.User, error) {
+	var err error
+
+	userWithBalance, err := us.userRepo.GetUserByIdWithBalance(*user.ID)
+	if err != nil {
+		return models.User{}, errors.Wrap(err, "An error occurred while retrieving user information")
+	}
+
+	return userWithBalance, nil
 }

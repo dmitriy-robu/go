@@ -14,19 +14,19 @@ import (
 type UserRepository struct {
 }
 
-func (ur UserRepository) FindUserByIDWithBalance(userid int) (models.UserWithBalance, error) {
+func (ur UserRepository) FindUserByIDWithBalance(userid int) (models.UserBalance, error) {
 	var err error
-	var userWithBalance models.UserWithBalance
+	var userBalance models.UserBalance
 
-	err = MysqlDB.Preload("UserWithBalance").First(&userWithBalance, userid).Error
+	err = MysqlDB.Joins("UserBalance").First(&userBalance, "user_id = ?", userid).Error
 	if err != nil {
-		return models.UserWithBalance{}, errors.Wrap(err, "Error finding user with balance")
+		return models.UserBalance{}, errors.Wrap(err, "Error finding user with balance")
 	}
 
-	return userWithBalance, nil
+	return userBalance, nil
 }
 
-func (ur UserRepository) FindUserByID(userID uint64) (models.User, error) {
+func (ur UserRepository) FindUserByID(userID int) (models.User, error) {
 	var err error
 	var user models.User
 
@@ -92,10 +92,32 @@ func (ur UserRepository) FindUserAuthBySteamID(steamID string) (models.UserAuthS
 	return userAuth, nil
 }
 
+func (ur UserRepository) GetUserAuthByUserUUID(uuid string) (models.UserAuthSteam, error) {
+	var err error
+	var userAuth models.UserAuthSteam
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	collection, err := mongodb.GetCollectionByName("user_auth_steam")
+	if err != nil {
+		return userAuth, errors.Wrap(err, "Error getting MongoDB collection")
+	}
+
+	if err = collection.FindOne(ctx, bson.M{"user_uuid": uuid}).Decode(&userAuth); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return userAuth, mongo.ErrNoDocuments
+		}
+		return userAuth, errors.Wrap(err, "Error finding user by steamID")
+	}
+
+	return userAuth, nil
+}
+
 func (ur UserRepository) CreateUserAuth(userAuthSteam models.UserAuthSteam) error {
 	var err error
 
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	collection, err := mongodb.GetCollectionByName("user_auth_steam")
@@ -139,6 +161,17 @@ func (ur UserRepository) GetUserByUuid(uuid string) (models.User, error) {
 			return user, err
 		}
 		return user, err
+	}
+
+	return user, nil
+}
+
+func (ur UserRepository) GetUserByIdWithBalance(userId int) (models.User, error) {
+	var user models.User
+	var err error
+
+	if err = MysqlDB.Preload("UserBalance").Where("id = ?", userId).First(&user).Error; err != nil {
+		return user, errors.Wrap(err, "Error finding user with balance")
 	}
 
 	return user, nil

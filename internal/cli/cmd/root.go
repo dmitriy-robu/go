@@ -8,9 +8,9 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "your_app",
-	Short: "Your application's short description",
-	Long:  `Your application's long description`,
+	Use:   "go-rust-drop",
+	Short: "Go-Rust-Drop is a Rust Drop API written in Go",
+	Long:  `Go-Rust-Drop is a Rust Drop API written in Go`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		err := godotenv.Load(".env")
 		if err != nil {

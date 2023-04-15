@@ -13,6 +13,7 @@ func Routes(router *gin.RouterGroup) {
 
 func get(router *gin.RouterGroup) {
 	router.GET("/user/info", controllers.UserController{}.UserInfo)
+	router.GET("/user/inventory", controllers.UserController{}.UserInventory)
 }
 
 func post(router *gin.RouterGroup) {

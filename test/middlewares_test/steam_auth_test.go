@@ -29,7 +29,7 @@ func TestMiddleware(t *testing.T) {
 	// Создайте Gin Engine и зарегистрируйте middleware и обработчик
 	engine := gin.New()
 	engine.Use(sessions.Sessions("test-session", store))
-	engine.Use(Middleware.VerifyToken)
+	engine.Use(Middleware.AuthRequired)
 	engine.GET("/test", testHandler)
 
 	// Создайте тестовый запрос

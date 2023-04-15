@@ -24,17 +24,18 @@ type User struct {
 	RememberToken   *string      `gorm:"column:remember_token"`
 	CreatedAt       time.Time    `gorm:"default:current_timestamp"`
 	UpdatedAt       time.Time    `gorm:"default:current_timestamp"`
-}
-
-type UserWithBalance struct {
-	User        User
-	UserBalance UserBalance
+	UserBalance     UserBalance  `gorm:"foreignKey:UserID"`
 }
 
 type UserAuthSteam struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty"`
+	ID          primitive.ObjectID `bson:"_id"`
 	UserUUID    string             `bson:"user_uuid"`
 	SteamUserID *string            `bson:"steam_user_id"`
 	CreatedAt   time.Time          `bson:"created_at"`
 	UpdatedAt   time.Time          `bson:"updated_at"`
+}
+
+type Inventory struct {
+	Assets              []interface{}
+	TotalInventoryCount int
 }

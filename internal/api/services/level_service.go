@@ -2,9 +2,10 @@ package services
 
 import "go-rust-drop/internal/api/models"
 
-type LevelManager struct{}
+type LevelService struct {
+}
 
-func (lm LevelManager) GetLevelForByExperience(experience *int) models.Level {
+func (ls LevelService) GetLevelForByExperience(experience *int) models.Level {
 	level := &models.Level{
 		Current:       1,
 		MinExperience: 0,
