@@ -32,10 +32,12 @@ func (uis UserInventoryService) GetInventoryForUser(userUUID *string) (inventory
 }
 
 func (uis UserInventoryService) getInventory(steamID *string, settings config.SteamSettings) (*models.InventoryData, error) {
+	var err error
+
 	client := &http.Client{}
 	endpoint := fmt.Sprintf(
 		"%s/%s/%d/%d?api_key=%s",
-		"https://api.steamapis.com/steam/inventory",
+		settings.SteamAPIs.Url,
 		*steamID,
 		&settings.GameInventory.AppID,
 		settings.GameInventory.ContextID,
@@ -47,14 +49,14 @@ func (uis UserInventoryService) getInventory(steamID *string, settings config.St
 		return nil, errors.Wrap(err, "Error getting inventory")
 	}
 	defer func(Body io.ReadCloser) {
-		err := Body.Close()
+		err = Body.Close()
 		if err != nil {
 			log.Printf("Error closing response body: %v", err)
 		}
 	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, nil
+		return nil, errors.Errorf("Error getting inventory: %s", resp.Status)
 	}
 
 	var response map[string]interface{}

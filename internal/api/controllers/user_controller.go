@@ -50,7 +50,8 @@ func (u UserController) UserInventory(c *gin.Context) {
 	}
 
 	inventory, err := u.userInventoryService.GetInventoryForUser(&user.UUID)
-	if err != nil {
+	log.Printf("inventory: %+v", inventory)
+	if err != nil || inventory == nil {
 		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error getting user inventory", err)
 		return
 	}
@@ -58,7 +59,6 @@ func (u UserController) UserInventory(c *gin.Context) {
 	userResources := resources.UserResources{
 		AssetData: inventory.AssetData,
 	}
-	log.Printf("inventory: %+v", inventory)
 
 	jsonData, err := userResources.UserInventory()
 	if err != nil {

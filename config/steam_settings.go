@@ -5,6 +5,7 @@ import (
 )
 
 type SteamAPIs struct {
+	Url                string
 	APIKey             string
 	SteamAccountAPIKey string
 }
@@ -24,7 +25,8 @@ func SetSteamSettings() SteamSettings {
 	env := utils.Environment{}
 	return SteamSettings{
 		SteamAPIs: SteamAPIs{
-			APIKey:             env.GetEnvOrDefault("STEAM_API_KEY", "25EC47576042A4ED4E9EFC32308864C3"),
+			Url:                env.GetEnvOrDefault("STEAM_APIS_URL", "https://api.steamapis.com/steam/inventory"),
+			APIKey:             env.GetEnvOrDefault("STEAM_APIS_API_KEY", "k-ENKG-syMEX_NuE2i0gKnzJff4"),
 			SteamAccountAPIKey: env.GetEnvOrDefault("STEAM_ACCOUNT_API_KEY", "3_FCxv4dfoq2gdEreuJTQdIyUIM"),
 		},
 		GameInventory: GameInventory{
