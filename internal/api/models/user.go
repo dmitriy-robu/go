@@ -22,6 +22,7 @@ type User struct {
 	Active          bool         `gorm:"column:active"`
 	IsBot           bool         `gorm:"column:is_bot"`
 	RememberToken   *string      `gorm:"column:remember_token"`
+	ReferralCode    *string      `gorm:"column:referral_code" unique:"true"`
 	CreatedAt       time.Time    `gorm:"default:current_timestamp"`
 	UpdatedAt       time.Time    `gorm:"default:current_timestamp"`
 	UserBalance     UserBalance  `gorm:"foreignKey:UserID"`

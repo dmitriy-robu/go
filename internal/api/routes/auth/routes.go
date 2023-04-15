@@ -12,12 +12,12 @@ func Routes(router *gin.RouterGroup) {
 }
 
 func get(router *gin.RouterGroup) {
-	router.GET("/user/info", controllers.UserController{}.UserInfo)
-	router.GET("/user/inventory", controllers.UserController{}.UserInventory)
+	router.GET("/users/info", controllers.UserController{}.UserInfo)
+	router.GET("/users/inventory", controllers.UserController{}.UserInventory)
 }
 
 func post(router *gin.RouterGroup) {
-
+	router.POST("/referrals/store-code", controllers.ReferralController{}.StoreCode)
 }
 
 func put(router *gin.RouterGroup) {
