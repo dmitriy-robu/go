@@ -9,9 +9,9 @@ type ReferralTier struct {
 }
 
 type ReferralTransaction struct {
-	ID         uint    `gorm:"primaryKey"`
-	ReferralID uint    `gorm:"column:referral_id"`
-	Amount     float64 `gorm:"column:amount"`
+	ID         uint `gorm:"primaryKey"`
+	ReferralID uint `gorm:"column:referral_id"`
+	Amount     int  `gorm:"column:amount"`
 }
 
 type Referral struct {
