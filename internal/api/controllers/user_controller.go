@@ -31,13 +31,13 @@ func (u UserController) UserInfo(c *gin.Context) {
 		User:        &user,
 	}
 
-	jsonData, err := userResources.UserInfo()
+	userInfo, err := userResources.ToJson()
 	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error converting user information to JSON", err)
 		return
 	}
 
-	c.Data(http.StatusOK, "application/json", jsonData)
+	c.JSON(http.StatusOK, userInfo)
 }
 
 func (u UserController) UserInventory(c *gin.Context) {
@@ -60,11 +60,11 @@ func (u UserController) UserInventory(c *gin.Context) {
 		AssetData: inventory.AssetData,
 	}
 
-	jsonData, err := userResources.UserInventory()
+	userInventoryResource, err := userResources.ToJson()
 	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error converting user information to JSON", err)
 		return
 	}
 
-	c.Data(http.StatusOK, "application/json", jsonData)
+	c.JSON(http.StatusOK, userInventoryResource)
 }

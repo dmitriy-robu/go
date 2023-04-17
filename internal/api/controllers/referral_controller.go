@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go-rust-drop/internal/api/models"
 	"go-rust-drop/internal/api/request"
+	"go-rust-drop/internal/api/resources"
 	"go-rust-drop/internal/api/services"
 	"go-rust-drop/internal/api/utils"
 	"net/http"
@@ -44,9 +45,10 @@ func (rc ReferralController) StoreCode(c *gin.Context) {
 
 func (rc ReferralController) Details(c *gin.Context) {
 	var (
-		err             error
-		user            models.User
-		referralDetails map[string]interface{}
+		err                    error
+		user                   models.User
+		referralDetails        *models.ReferralDetails
+		referralDetailResource map[string]interface{}
 	)
 
 	user, err = rc.userService.AuthUser(c)
@@ -61,6 +63,15 @@ func (rc ReferralController) Details(c *gin.Context) {
 		return
 	}
 
-	//c.Data(http.StatusOK, "application/json", referralDetails)
-	c.JSON(http.StatusOK, referralDetails)
+	userResources := resources.ReferralDetailResource{
+		ReferralDetails: referralDetails,
+	}
+
+	referralDetailResource, err = userResources.ToJSON()
+	if err != nil {
+		rc.errorHandler.HandleError(c, http.StatusInternalServerError, "Error converting user information to JSON", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, referralDetailResource)
 }

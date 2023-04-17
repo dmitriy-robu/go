@@ -3,7 +3,6 @@ package repositories
 import (
 	"go-rust-drop/internal/api/models"
 	"go-rust-drop/internal/api/request"
-	"log"
 )
 
 type ReferralRepository struct {
@@ -76,7 +75,7 @@ func (rr ReferralRepository) GetReferredUsersByUserId(userID uint) ([]models.Use
 		err           error
 		referredUsers []models.User
 	)
-	log.Printf("GetReferredUsersByUserId: %v", userID)
+
 	if err = MysqlDB.Model(&models.User{ID: &userID}).Association("ReferralUsers").Find(&referredUsers); err != nil {
 		return nil, err
 	}

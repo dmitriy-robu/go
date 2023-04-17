@@ -20,3 +20,10 @@ type Referral struct {
 	ReferralUserID uint    `gorm:"column:referral_user_id"`
 	ReceivedAmount float64 `gorm:"column:received_amount"`
 }
+
+type ReferralDetails struct {
+	ReferralCode          *string
+	TotalEarnings         int
+	CurrentTierCommission float64
+	ReferredUsers         []User
+}
