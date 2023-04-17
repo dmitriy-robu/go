@@ -19,7 +19,7 @@ func (r *ReferralUserResource) ToJSON() ([]map[string]interface{}, error) {
 	for i, user := range *r.User {
 		assetMaps[i] = map[string]interface{}{
 			"name":               user.Name,
-			"total_earned":       r.moneyConvert.FromCentsToVault(r.getSum(user.ID)), // Здесь нужно заменить на сумму реферальных транзакций пользователя
+			"total_earned":       r.moneyConvert.FromCentsToVault(r.getSum(user.ID)),
 			"earning_commission": r.getCommission(&user.ReferralTierLevel),
 			"current_tier":       user.ReferralTierLevel,
 			"created_at":         user.CreatedAt,
