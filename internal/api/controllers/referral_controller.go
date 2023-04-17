@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
+	"go-rust-drop/internal/api/models"
 	"go-rust-drop/internal/api/request"
 	"go-rust-drop/internal/api/services"
 	"go-rust-drop/internal/api/utils"
@@ -15,15 +16,17 @@ type ReferralController struct {
 }
 
 func (rc ReferralController) StoreCode(c *gin.Context) {
-	var err error
+	var (
+		err   error
+		user  models.User
+		store request.StoreUserReferralCode
+	)
 
-	user, err := rc.userService.AuthUser(c)
+	user, err = rc.userService.AuthUser(c)
 	if err != nil {
 		rc.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
 		return
 	}
-
-	var store request.StoreUserReferralCode
 
 	if err = c.ShouldBindJSON(&store); err != nil {
 		rc.errorHandler.HandleError(c, http.StatusBadRequest, "Error binding JSON", err)
@@ -40,19 +43,24 @@ func (rc ReferralController) StoreCode(c *gin.Context) {
 }
 
 func (rc ReferralController) Details(c *gin.Context) {
-	var err error
+	var (
+		err             error
+		user            models.User
+		referralDetails map[string]interface{}
+	)
 
-	user, err := rc.userService.AuthUser(c)
+	user, err = rc.userService.AuthUser(c)
 	if err != nil {
 		rc.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
 		return
 	}
 
-	referralDetails, err := rc.referralService.GetReferralDetails(user)
+	referralDetails, err = rc.referralService.GetReferralDetails(user)
 	if err != nil {
 		rc.errorHandler.HandleError(c, http.StatusInternalServerError, "Error getting referral details", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"referral_code": referralDetails})
+	//c.Data(http.StatusOK, "application/json", referralDetails)
+	c.JSON(http.StatusOK, referralDetails)
 }

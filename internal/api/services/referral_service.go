@@ -27,11 +27,13 @@ func (rs ReferralService) StoreReferralCode(user *models.User, store *request.St
 }
 
 func (rs ReferralService) GetReferralDetails(user models.User) (map[string]interface{}, error) {
-	var err error
-	var referralTiers []models.ReferralTier
-	var referral models.Referral
-	var totalEarnings int
-	var referredUsers []models.User
+	var (
+		err           error
+		referralTiers []models.ReferralTier
+		referral      models.Referral
+		totalEarnings int
+		referredUsers []models.User
+	)
 
 	referralTiers, err = rs.referralRepository.GetReferralTiers()
 	if err != nil {
