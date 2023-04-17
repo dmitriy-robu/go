@@ -29,7 +29,7 @@ type User struct {
 	UserBalance          UserBalance           `gorm:"foreignKey:UserID"`
 	ReferralTier         ReferralTier          `gorm:"foreignKey:ReferralTierLevel"`
 	ReferralTransactions []ReferralTransaction `gorm:"many2many:referral_transactions_users"`
-	ReferredUsers        []User                `gorm:"many2many:referred_users"`
+	ReferralUsers        []User                `gorm:"many2many:referrals;joinForeignKey:ReferralUserID;JoinReferences:ParentUserID"`
 }
 
 type UserAuthSteam struct {

@@ -27,4 +27,5 @@ func (m Migrations) MigrateAll() {
 	CreateItemsTable()
 	CreateReferralTiersTable()
 	CreateReferralsTable()
+	CreateReferralTransactionsTable()
 }

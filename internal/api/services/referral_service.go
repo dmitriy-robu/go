@@ -60,7 +60,7 @@ func (rs ReferralService) GetReferralDetails(user models.User) (map[string]inter
 		return nil, errors.Wrap(err, "Error getting referral transaction sum")
 	}
 
-	referredUsers, err = rs.referralRepository.GetReferredUsersByUserId(referral.ID)
+	referredUsers, err = rs.referralRepository.GetReferredUsersByUserId(referral.ReferralUserID)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting referred users by user id")
 	}

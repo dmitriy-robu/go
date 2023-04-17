@@ -3,6 +3,7 @@ package repositories
 import (
 	"go-rust-drop/internal/api/models"
 	"go-rust-drop/internal/api/request"
+	"log"
 )
 
 type ReferralRepository struct {
@@ -63,7 +64,7 @@ func (rr ReferralRepository) GetReferralTransactionSumByReferralId(referralID ui
 		sum int
 	)
 
-	if err = MysqlDB.Model(&models.ReferralTransaction{}).Where("referral_id = ?", referralID).Select("SUM(amount) as sum").Scan(&sum).Error; err != nil {
+	if err = MysqlDB.Model(&models.ReferralTransaction{}).Where("referral_id = ?", referralID).Select("SUM(amount)").Scan(&sum).Error; err != nil {
 		return 0, err
 	}
 
@@ -75,9 +76,8 @@ func (rr ReferralRepository) GetReferredUsersByUserId(userID uint) ([]models.Use
 		err           error
 		referredUsers []models.User
 	)
-
-	err = MysqlDB.Model(&models.User{ID: &userID}).Association("Referrals").Find(&referredUsers)
-	if err != nil {
+	log.Printf("GetReferredUsersByUserId: %v", userID)
+	if err = MysqlDB.Model(&models.User{ID: &userID}).Association("ReferralUsers").Find(&referredUsers); err != nil {
 		return nil, err
 	}
 
