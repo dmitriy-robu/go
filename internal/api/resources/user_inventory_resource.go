@@ -11,10 +11,13 @@ type UserInventoryResources struct {
 }
 
 func (ur *UserInventoryResources) ToJSON() ([]map[string]interface{}, error) {
-	assetMaps := make([]map[string]interface{}, len(ur.AssetData))
+	var (
+		asset  map[string]interface{}
+		assets []map[string]interface{}
+	)
 
-	for i, assetData := range ur.AssetData {
-		assetMaps[i] = map[string]interface{}{
+	for _, assetData := range ur.AssetData {
+		asset = map[string]interface{}{
 			"asset_id":  assetData.AssetID,
 			"name":      assetData.Name,
 			"amount":    1,
@@ -23,7 +26,8 @@ func (ur *UserInventoryResources) ToJSON() ([]map[string]interface{}, error) {
 			"image_url": assetData.IconURL,
 			"is_stack":  false,
 		}
+		assets = append(assets, asset)
 	}
 
-	return assetMaps, nil
+	return assets, nil
 }

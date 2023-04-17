@@ -82,6 +82,7 @@ func (rs ReferralService) getReferredUsers(userID uint, referralID uint) ([]mode
 		users         []models.User
 		referredUser  models.ReferredUser
 		referredUsers []models.ReferredUser
+		commission    float64
 	)
 
 	users, err = rs.referralRepository.GetReferredUserByUserId(userID)
@@ -90,7 +91,7 @@ func (rs ReferralService) getReferredUsers(userID uint, referralID uint) ([]mode
 	}
 
 	for _, user := range users {
-		commission, err := rs.referralRepository.GetReferralTierCommissionByReferralTierLevel(user.ReferralTierLevel)
+		commission, err = rs.referralRepository.GetReferralTierCommissionByReferralTierLevel(user.ReferralTierLevel)
 		if err != nil {
 			commission = 0.0
 		}
