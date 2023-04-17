@@ -82,3 +82,16 @@ func (rr ReferralRepository) GetReferredUsersByUserId(userID uint) ([]models.Use
 
 	return referredUsers, nil
 }
+
+func (rr ReferralRepository) GetReferralTierCommissionByReferralTierLevel(level uint) (float64, error) {
+	var (
+		err          error
+		referralTier models.ReferralTier
+	)
+
+	if err = MysqlDB.Where("level = ?", level).First(&referralTier).Error; err != nil {
+		return 0.0, err
+	}
+
+	return referralTier.BonusPercentage, nil
+}

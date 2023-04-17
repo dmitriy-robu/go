@@ -27,11 +27,10 @@ func (u UserController) UserInfo(c *gin.Context) {
 	user, err = u.userService.GetUserWithBalance(user)
 
 	userResources := resources.UserResources{
-		UserBalance: user.UserBalance,
-		User:        &user,
+		User: &user,
 	}
 
-	userInfo, err := userResources.ToJson()
+	userInfo, err := userResources.ToJSON()
 	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error converting user information to JSON", err)
 		return
@@ -56,11 +55,11 @@ func (u UserController) UserInventory(c *gin.Context) {
 		return
 	}
 
-	userResources := resources.UserResources{
+	userResources := resources.UserInventoryResources{
 		AssetData: inventory.AssetData,
 	}
 
-	userInventoryResource, err := userResources.ToJson()
+	userInventoryResource, err := userResources.ToJSON()
 	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error converting user information to JSON", err)
 		return

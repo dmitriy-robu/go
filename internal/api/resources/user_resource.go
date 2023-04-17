@@ -7,14 +7,11 @@ import (
 )
 
 type UserResources struct {
-	User        *models.User
-	UserBalance models.UserBalance
-	Inventory   models.Inventory
-	AssetData   []models.AssetData
-	util        utils.MoneyConvert
+	User *models.User
+	util utils.MoneyConvert
 }
 
-func (ur *UserResources) ToJson() (map[string]interface{}, error) {
+func (ur *UserResources) ToJSON() (map[string]interface{}, error) {
 	return map[string]interface{}{
 		"user": map[string]interface{}{
 			"id":         ur.User.ID,
