@@ -10,7 +10,7 @@ import (
 // User полная таблица в mysql
 type User struct {
 	gorm.Model
-	ID                   *uint                 `gorm:"primaryKey"`
+	ID                   uint                  `gorm:"primaryKey"`
 	UUID                 string                `gorm:"unique"`
 	Name                 *string               `gorm:"type:varchar(255)"`
 	AvatarURL            *string               `gorm:"column:avatar_url"`

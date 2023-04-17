@@ -32,7 +32,7 @@ func (rs ReferralService) GetReferralDetails(user models.User) (*models.Referral
 		referralTiers   []models.ReferralTier
 		referral        models.Referral
 		totalEarnings   int
-		referredUsers   []models.User
+		referredUsers   []models.ReferredUser
 		referralDetails *models.ReferralDetails
 	)
 
@@ -51,7 +51,7 @@ func (rs ReferralService) GetReferralDetails(user models.User) (*models.Referral
 		}
 	}
 
-	referral, err = rs.referralRepository.GetReferralByUserId(*user.ID)
+	referral, err = rs.referralRepository.GetReferralByUserId(user.ID)
 	if err != nil {
 		return referralDetails, errors.Wrap(err, "Error getting referral by user id")
 	}
@@ -61,7 +61,7 @@ func (rs ReferralService) GetReferralDetails(user models.User) (*models.Referral
 		return referralDetails, errors.Wrap(err, "Error getting referral transaction sum")
 	}
 
-	referredUsers, err = rs.referralRepository.GetReferredUsersByUserId(referral.ReferralUserID)
+	referredUsers, err = rs.getReferredUsers(referral.ReferralUserID, referral.ID)
 	if err != nil {
 		return referralDetails, errors.Wrap(err, "Error getting referred users by user id")
 	}
@@ -74,4 +74,42 @@ func (rs ReferralService) GetReferralDetails(user models.User) (*models.Referral
 	}
 
 	return referralDetails, nil
+}
+
+func (rs ReferralService) getReferredUsers(userID uint, referralID uint) ([]models.ReferredUser, error) {
+	var (
+		err           error
+		users         []models.User
+		referredUser  models.ReferredUser
+		referredUsers []models.ReferredUser
+	)
+
+	users, err = rs.referralRepository.GetReferredUserByUserId(userID)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error getting referred users by user id")
+	}
+
+	for _, user := range users {
+		commission, err := rs.referralRepository.GetReferralTierCommissionByReferralTierLevel(user.ReferralTierLevel)
+		if err != nil {
+			commission = 0.0
+		}
+
+		sum, err := rs.referralRepository.GetReferralTransactionSumByReferralId(referralID)
+		if err != nil {
+			sum = 0
+		}
+
+		referredUser = models.ReferredUser{
+			Name:              *user.Name,
+			TotalEarnings:     sum,
+			EarningCommission: commission,
+			CurrentTier:       user.ReferralTierLevel,
+			CreatedAt:         user.CreatedAt,
+		}
+
+		referredUsers = append(referredUsers, referredUser)
+	}
+
+	return referredUsers, nil
 }

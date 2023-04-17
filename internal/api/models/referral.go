@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type ReferralTier struct {
 	ID                  uint    `gorm:"primaryKey"`
 	Level               int     `gorm:"column:level"`
@@ -25,5 +27,13 @@ type ReferralDetails struct {
 	ReferralCode          *string
 	TotalEarnings         int
 	CurrentTierCommission float64
-	ReferredUsers         []User
+	ReferredUsers         []ReferredUser
+}
+
+type ReferredUser struct {
+	Name              string
+	TotalEarnings     int
+	EarningCommission float64
+	CurrentTier       uint
+	CreatedAt         time.Time
 }

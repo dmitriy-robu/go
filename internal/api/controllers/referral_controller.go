@@ -63,11 +63,11 @@ func (rc ReferralController) Details(c *gin.Context) {
 		return
 	}
 
-	userResources := resources.ReferralDetailResource{
+	referralDetailResources := resources.ReferralDetailResource{
 		ReferralDetails: referralDetails,
 	}
 
-	referralDetailResource, err = userResources.ToJSON()
+	referralDetailResource, err = referralDetailResources.ToJSON()
 	if err != nil {
 		rc.errorHandler.HandleError(c, http.StatusInternalServerError, "Error converting user information to JSON", err)
 		return

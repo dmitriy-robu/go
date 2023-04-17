@@ -11,25 +11,12 @@ type ReferralDetailResource struct {
 }
 
 func (r *ReferralDetailResource) ToJSON() (map[string]interface{}, error) {
-	var (
-		err                  error
-		referralUserResource ReferralUserResource
-		details              map[string]interface{}
-	)
-
-	referralUserResource = ReferralUserResource{
-		User: &r.ReferralDetails.ReferredUsers,
-	}
-
-	referredUsersJSON, err := referralUserResource.ToJSON()
-	if err != nil {
-		return nil, err
-	}
+	var details map[string]interface{}
 
 	details = map[string]interface{}{
 		"referral_code":  r.ReferralDetails.ReferralCode,
 		"total_earnings": r.moneyConvert.FromCentsToVault(r.ReferralDetails.TotalEarnings),
-		"referred_users": referredUsersJSON,
+		"referred_users": r.ReferralDetails.ReferredUsers,
 	}
 
 	return details, nil

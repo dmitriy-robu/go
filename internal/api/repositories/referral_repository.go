@@ -70,13 +70,13 @@ func (rr ReferralRepository) GetReferralTransactionSumByReferralId(referralID ui
 	return sum, nil
 }
 
-func (rr ReferralRepository) GetReferredUsersByUserId(userID uint) ([]models.User, error) {
+func (rr ReferralRepository) GetReferredUserByUserId(userID uint) ([]models.User, error) {
 	var (
 		err           error
 		referredUsers []models.User
 	)
 
-	if err = MysqlDB.Model(&models.User{ID: &userID}).Association("ReferralUsers").Find(&referredUsers); err != nil {
+	if err = MysqlDB.Model(&models.User{ID: userID}).Association("ReferralUsers").Find(&referredUsers); err != nil {
 		return nil, err
 	}
 

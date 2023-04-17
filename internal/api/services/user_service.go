@@ -80,7 +80,7 @@ func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) (string, error
 func (us UserService) GetUser(user models.User) (models.User, error) {
 	var err error
 
-	userWithBalance, err := us.userRepo.FindUserByID(*user.ID)
+	userWithBalance, err := us.userRepo.FindUserByID(user.ID)
 	if err != nil {
 		return models.User{}, errors.Wrap(err, "An error occurred while retrieving user information")
 	}
@@ -105,7 +105,7 @@ func (us UserService) AuthUser(c *gin.Context) (user models.User, err error) {
 func (us UserService) GetUserWithBalance(user models.User) (models.User, error) {
 	var err error
 
-	userWithBalance, err := us.userRepo.GetUserByIdWithBalance(*user.ID)
+	userWithBalance, err := us.userRepo.GetUserByIdWithBalance(user.ID)
 	if err != nil {
 		return models.User{}, errors.Wrap(err, "An error occurred while retrieving user information")
 	}

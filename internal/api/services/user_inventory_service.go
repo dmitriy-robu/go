@@ -170,7 +170,7 @@ func getDetailsForAllItems(settings config.SteamSettings) (map[string]interface{
 	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, nil
+		return nil, errors.Wrap(err, "Error getting items details")
 	}
 
 	var response map[string]interface{}
