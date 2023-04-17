@@ -10,7 +10,7 @@ import (
 // User полная таблица в mysql
 type User struct {
 	gorm.Model
-	ID                   *int                  `gorm:"primaryKey"`
+	ID                   uint                  `gorm:"primaryKey"`
 	UUID                 string                `gorm:"unique"`
 	Name                 *string               `gorm:"type:varchar(255)"`
 	AvatarURL            *string               `gorm:"column:avatar_url"`
@@ -29,7 +29,7 @@ type User struct {
 	UserBalance          UserBalance           `gorm:"foreignKey:UserID"`
 	ReferralTier         ReferralTier          `gorm:"foreignKey:ReferralTierLevel"`
 	ReferralTransactions []ReferralTransaction `gorm:"many2many:referral_transactions_users"`
-	ReferredUsers        []User                `gorm:"many2many:referred_users"`
+	ReferralUsers        []User                `gorm:"many2many:referrals;joinForeignKey:ReferralUserID;JoinReferences:ParentUserID"`
 }
 
 type UserAuthSteam struct {

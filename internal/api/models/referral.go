@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type ReferralTier struct {
 	ID                  uint    `gorm:"primaryKey"`
 	Level               int     `gorm:"column:level"`
@@ -9,9 +11,9 @@ type ReferralTier struct {
 }
 
 type ReferralTransaction struct {
-	ID         uint    `gorm:"primaryKey"`
-	ReferralID uint    `gorm:"column:referral_id"`
-	Amount     float64 `gorm:"column:amount"`
+	ID         uint `gorm:"primaryKey"`
+	ReferralID uint `gorm:"column:referral_id"`
+	Amount     int  `gorm:"column:amount"`
 }
 
 type Referral struct {
@@ -19,4 +21,19 @@ type Referral struct {
 	ParentUserID   uint    `gorm:"column:parent_user_id"`
 	ReferralUserID uint    `gorm:"column:referral_user_id"`
 	ReceivedAmount float64 `gorm:"column:received_amount"`
+}
+
+type ReferralDetails struct {
+	ReferralCode          *string
+	TotalEarnings         int
+	CurrentTierCommission float64
+	ReferredUsers         []ReferredUser
+}
+
+type ReferredUser struct {
+	Name              string
+	TotalEarnings     int
+	EarningCommission float64
+	CurrentTier       uint
+	CreatedAt         time.Time
 }

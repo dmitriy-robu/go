@@ -14,19 +14,7 @@ import (
 type UserRepository struct {
 }
 
-func (ur UserRepository) FindUserByIDWithBalance(userid int) (models.UserBalance, error) {
-	var err error
-	var userBalance models.UserBalance
-
-	err = MysqlDB.Joins("UserBalance").First(&userBalance, "user_id = ?", userid).Error
-	if err != nil {
-		return models.UserBalance{}, errors.Wrap(err, "Error finding user with balance")
-	}
-
-	return userBalance, nil
-}
-
-func (ur UserRepository) FindUserByID(userID int) (models.User, error) {
+func (ur UserRepository) FindUserByID(userID uint) (models.User, error) {
 	var err error
 	var user models.User
 
@@ -166,7 +154,7 @@ func (ur UserRepository) GetUserByUuid(uuid string) (models.User, error) {
 	return user, nil
 }
 
-func (ur UserRepository) GetUserByIdWithBalance(userId int) (models.User, error) {
+func (ur UserRepository) GetUserByIdWithBalance(userId uint) (models.User, error) {
 	var user models.User
 	var err error
 

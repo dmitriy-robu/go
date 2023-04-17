@@ -26,6 +26,12 @@ func (e Errors) HandleError(c *gin.Context, httpStatus int, errMsg string, err e
 	}
 }
 
+func (e Errors) ResourcesHandleError(errMsg string, err error) {
+	if err != nil {
+		log.Printf("%s: %s", errMsg, err.Error())
+	}
+}
+
 func (mc MoneyConvert) FromCentsToVault(value int) string {
 	if value <= 0 {
 		return "0"
