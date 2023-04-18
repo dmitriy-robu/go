@@ -16,11 +16,12 @@ type ProvablyFairService struct {
 
 func (pfs ProvablyFairService) GetProvablyFair(provablyFair models.ProvablyFair) (models.ProvablyFair, error) {
 	var (
-		err        error
-		message    string
-		hash       []byte
-		partOfHash string
-		decimal    uint64
+		err          error
+		message      string
+		hash         []byte
+		partOfHash   string
+		decimal      uint64
+		randomNumber float64
 	)
 
 	provablyFair.ServerSeed, err = generateRandomServerSeed(64)
@@ -48,14 +49,14 @@ func (pfs ProvablyFairService) GetProvablyFair(provablyFair models.ProvablyFair)
 	}
 
 	const maxHexValue float64 = 1048575
-	result := float64(decimal) / maxHexValue
-	result = provablyFair.MinChance + (provablyFair.MaxChance-provablyFair.MinChance)*result
+	randomNumber = float64(decimal) / maxHexValue
+	randomNumber = provablyFair.MinChance + (provablyFair.MaxChance-provablyFair.MinChance)*randomNumber
 
 	return models.ProvablyFair{
 		ClientSeed:   provablyFair.ClientSeed,
 		ServerSeed:   provablyFair.ServerSeed,
 		Nonce:        provablyFair.Nonce,
-		RandomNumber: result,
+		RandomNumber: randomNumber,
 		MinChance:    provablyFair.MinChance,
 		MaxChance:    provablyFair.MaxChance,
 	}, nil
