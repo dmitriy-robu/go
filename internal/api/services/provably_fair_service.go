@@ -6,7 +6,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/models"
 	"strconv"
 )
@@ -45,7 +44,7 @@ func (pfs *ProvablyFairService) GetProvablyFair(provablyFair *models.ProvablyFai
 	partOfHash = hex.EncodeToString(hash)[:5]
 	decimal, err = strconv.ParseUint(partOfHash, 16, 64)
 	if err != nil {
-		return errors.Wrap(err, "Error parsing int")
+		return err
 	}
 
 	const maxHexValue float64 = 1048575
