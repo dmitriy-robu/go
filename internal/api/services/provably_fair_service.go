@@ -23,7 +23,7 @@ func (pfs *ProvablyFairService) GetProvablyFair(provablyFair *models.ProvablyFai
 		randomNumber float64
 	)
 
-	provablyFair.ServerSeed, err = generateRandomServerSeed(64)
+	provablyFair.ServerSeed, err = generateRandomSeed(64)
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func (pfs *ProvablyFairService) GetProvablyFair(provablyFair *models.ProvablyFai
 	provablyFair.MinChance = 0.00
 
 	if provablyFair.ClientSeed == "" {
-		provablyFair.ClientSeed, err = generateRandomServerSeed(64)
+		provablyFair.ClientSeed, err = generateRandomSeed(64)
 		if err != nil {
 			return err
 		}
@@ -56,7 +56,7 @@ func (pfs *ProvablyFairService) GetProvablyFair(provablyFair *models.ProvablyFai
 	return nil
 }
 
-func generateRandomServerSeed(length int) (string, error) {
+func generateRandomSeed(length int) (string, error) {
 	randomBytes := make([]byte, length/2)
 	_, err := rand.Read(randomBytes)
 	if err != nil {
