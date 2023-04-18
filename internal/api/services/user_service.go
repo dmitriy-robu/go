@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/models"
 	"go-rust-drop/internal/api/repositories"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"time"
 )
@@ -63,6 +64,7 @@ func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) (string, error
 			return "", errors.Wrap(err, "Error creating user balance")
 		}
 
+		userAuthSteam.ID = primitive.NewObjectID()
 		userAuthSteam.UserUUID = user.UUID
 		userAuthSteam.CreatedAt = now
 
