@@ -17,21 +17,26 @@ type ProvablyFairService struct {
 func (pfs ProvablyFairService) GetProvablyFair(provablyFair models.ProvablyFair) (models.ProvablyFair, error) {
 	var (
 		err        error
-		seed       string
 		message    string
 		hash       []byte
 		partOfHash string
 		decimal    uint64
 	)
 
-	seed, err = generateRandomServerSeed(64)
+	provablyFair.ServerSeed, err = generateRandomServerSeed(64)
 	if err != nil {
 		return models.ProvablyFair{}, errors.Wrap(err, "Error generating random server seed")
 	}
 
 	provablyFair.Nonce++
 	provablyFair.MinChance = 0.00
-	provablyFair.ServerSeed = seed
+
+	if provablyFair.ClientSeed == "" {
+		provablyFair.ClientSeed, err = generateRandomServerSeed(64)
+		if err != nil {
+			return models.ProvablyFair{}, errors.Wrap(err, "Error generating random server seed")
+		}
+	}
 
 	message = fmt.Sprintf("%s-%d", provablyFair.ClientSeed, provablyFair.Nonce)
 	hash = createHmac(provablyFair.ServerSeed, message)
