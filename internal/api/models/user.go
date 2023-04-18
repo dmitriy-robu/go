@@ -2,7 +2,6 @@ package models
 
 import (
 	"database/sql"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"gorm.io/gorm"
 	"time"
 )
@@ -32,15 +31,7 @@ type User struct {
 	ReferralUsers        []User                `gorm:"many2many:referrals;joinForeignKey:ReferralUserID;JoinReferences:ParentUserID"`
 }
 
-type UserAuthSteam struct {
-	ID          primitive.ObjectID `bson:"_id"`
-	UserUUID    string             `bson:"user_uuid"`
-	SteamUserID *string            `bson:"steam_user_id"`
-	CreatedAt   time.Time          `bson:"created_at"`
-	UpdatedAt   time.Time          `bson:"updated_at"`
-}
-
-type Inventory struct {
+type UserInventory struct {
 	Assets              []interface{}
 	TotalInventoryCount int
 }
