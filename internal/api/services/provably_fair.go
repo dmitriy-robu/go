@@ -42,7 +42,7 @@ func (pfs ProvablyFairService) GetProvablyFair(provablyFair models.ProvablyFair)
 		return models.ProvablyFair{}, errors.Wrap(err, "Error parsing int")
 	}
 
-	const maxHexValue float64 = 10000
+	const maxHexValue float64 = 1048575
 	result := float64(decimal) / maxHexValue
 	result = provablyFair.MinChance + (provablyFair.MaxChance-provablyFair.MinChance)*result
 
