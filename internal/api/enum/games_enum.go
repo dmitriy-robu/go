@@ -1,8 +1,8 @@
 package enum
 
-type Games string
+type Game string
 
 const (
-	CaseBattle = "case-battle"
-	Upgrader   = "upgrader"
+	GameCaseBattle = "case-battle"
+	GameUpgrader   = "upgrader"
 )
