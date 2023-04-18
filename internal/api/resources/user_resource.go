@@ -18,7 +18,7 @@ func (ur *UserResources) ToJSON() (map[string]interface{}, error) {
 			"uuid":       ur.User.UUID,
 			"name":       ur.User.Name,
 			"avatar_url": ur.User.AvatarURL,
-			"balance":    ur.util.FromCentsToVault(*ur.User.UserBalance.Balance),
+			"balance":    ur.util.FromCentsToVault(ur.User.UserBalance.Balance),
 			"trade_url":  ur.User.SteamTradeURL,
 			"level":      services.LevelService{}.GetLevelForByExperience(ur.User.Experience),
 		},
