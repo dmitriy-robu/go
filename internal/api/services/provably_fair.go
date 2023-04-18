@@ -14,7 +14,7 @@ import (
 type ProvablyFairService struct {
 }
 
-func (pfs ProvablyFairService) GetProvablyFair(provablyFair models.ProvablyFair) (models.ProvablyFair, error) {
+func (pfs ProvablyFairService) GetProvablyFair(provablyFair *models.ProvablyFair) error {
 	var (
 		err          error
 		message      string
@@ -26,7 +26,7 @@ func (pfs ProvablyFairService) GetProvablyFair(provablyFair models.ProvablyFair)
 
 	provablyFair.ServerSeed, err = generateRandomServerSeed(64)
 	if err != nil {
-		return models.ProvablyFair{}, errors.Wrap(err, "Error generating random server seed")
+		return errors.Wrap(err, "Error generating random server seed")
 	}
 
 	provablyFair.Nonce++
@@ -35,7 +35,7 @@ func (pfs ProvablyFairService) GetProvablyFair(provablyFair models.ProvablyFair)
 	if provablyFair.ClientSeed == "" {
 		provablyFair.ClientSeed, err = generateRandomServerSeed(64)
 		if err != nil {
-			return models.ProvablyFair{}, errors.Wrap(err, "Error generating random server seed")
+			return errors.Wrap(err, "Error generating random server seed")
 		}
 	}
 
@@ -45,21 +45,16 @@ func (pfs ProvablyFairService) GetProvablyFair(provablyFair models.ProvablyFair)
 	partOfHash = hex.EncodeToString(hash)[:5]
 	decimal, err = strconv.ParseUint(partOfHash, 16, 64)
 	if err != nil {
-		return models.ProvablyFair{}, errors.Wrap(err, "Error parsing int")
+		return errors.Wrap(err, "Error parsing int")
 	}
 
 	const maxHexValue float64 = 1048575
 	randomNumber = float64(decimal) / maxHexValue
 	randomNumber = provablyFair.MinChance + (provablyFair.MaxChance-provablyFair.MinChance)*randomNumber
 
-	return models.ProvablyFair{
-		ClientSeed:   provablyFair.ClientSeed,
-		ServerSeed:   provablyFair.ServerSeed,
-		Nonce:        provablyFair.Nonce,
-		RandomNumber: randomNumber,
-		MinChance:    provablyFair.MinChance,
-		MaxChance:    provablyFair.MaxChance,
-	}, nil
+	provablyFair.RandomNumber = randomNumber
+
+	return nil
 }
 
 func generateRandomServerSeed(length int) (string, error) {
