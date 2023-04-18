@@ -26,7 +26,7 @@ func (pfs *ProvablyFairService) GetProvablyFair(provablyFair *models.ProvablyFai
 
 	provablyFair.ServerSeed, err = generateRandomServerSeed(64)
 	if err != nil {
-		return errors.Wrap(err, "Error generating random server seed")
+		return err
 	}
 
 	provablyFair.Nonce++
@@ -35,7 +35,7 @@ func (pfs *ProvablyFairService) GetProvablyFair(provablyFair *models.ProvablyFai
 	if provablyFair.ClientSeed == "" {
 		provablyFair.ClientSeed, err = generateRandomServerSeed(64)
 		if err != nil {
-			return errors.Wrap(err, "Error generating random server seed")
+			return err
 		}
 	}
 
