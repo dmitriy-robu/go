@@ -14,7 +14,7 @@ import (
 type ProvablyFairService struct {
 }
 
-func (pfs ProvablyFairService) GetProvablyFair(provablyFair *models.ProvablyFair) error {
+func (pfs *ProvablyFairService) GetProvablyFair(provablyFair *models.ProvablyFair) error {
 	var (
 		err          error
 		message      string
