@@ -17,8 +17,14 @@ type UserInventoryService struct {
 	userRepo repositories.UserRepository
 }
 
-func (uis UserInventoryService) GetInventoryForUser(userUUID *string) (inventory *models.InventoryData, err error) {
-	userAuth, err := uis.userRepo.GetUserAuthByUserUUID(*userUUID)
+func (uis UserInventoryService) GetInventoryForUser(userUUID *string) (*models.InventoryData, error) {
+	var (
+		err       error
+		userAuth  models.UserAuthSteam
+		inventory *models.InventoryData
+	)
+
+	userAuth, err = uis.userRepo.GetUserAuthByUserUUID(*userUUID)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting user auth")
 	}

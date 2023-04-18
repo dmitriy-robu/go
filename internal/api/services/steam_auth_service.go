@@ -3,6 +3,7 @@ package services
 import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/repositories"
@@ -27,22 +28,28 @@ func (sam SteamAuthService) Login(c *gin.Context) {
 }
 
 func (sam SteamAuthService) Callback(c *gin.Context) error {
+	var (
+		err      error
+		user     goth.User
+		userUuid string
+		session  sessions.Session
+	)
+
 	sam.setProvider()
 
-	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
+	user, err = gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
 		return errors.Wrap(err, "Error completing user auth")
 	}
 
-	userUuid, err := sam.userService.CreateOrUpdateSteamUser(user)
+	userUuid, err = sam.userService.CreateOrUpdateSteamUser(user)
 	if err != nil {
 		return errors.Wrap(err, "Error creating or updating user")
 	}
 
-	session := sessions.Default(c)
+	session = sessions.Default(c)
 	session.Set("userUuid", userUuid)
-	err = session.Save()
-	if err != nil {
+	if err = session.Save(); err != nil {
 		return errors.Wrap(err, "Error saving session")
 	}
 
