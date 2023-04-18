@@ -7,10 +7,10 @@ import (
 )
 
 type Item struct {
-	ID              int                  `json:"id" gorm:"primaryKey"`
+	ID              uint                 `json:"id" gorm:"primaryKey" faker:"-"`
 	UUID            uuid.UUID            `json:"uuid" gorm:"unique"`
 	Name            string               `json:"name"`
-	Price           float64              `json:"price"`
+	Price           int                  `json:"price"`
 	Color           string               `json:"color"`
 	GameEnvironment enum.GameEnvironment `json:"game_environment"`
 	ImageUrl        string               `json:"image_url"`
