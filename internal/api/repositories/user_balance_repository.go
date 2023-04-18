@@ -21,3 +21,21 @@ func (ubr UserBalanceRepository) GetUserBalanceByUserId(userID uint64) (models.U
 
 	return userBalance, nil
 }
+
+func (ubr UserBalanceRepository) CreateUserBalance(userID uint) error {
+	var (
+		err         error
+		userBalance models.UserBalance
+	)
+
+	userBalance = models.UserBalance{
+		UserID:  userID,
+		Balance: 0,
+	}
+
+	if err = MysqlDB.Create(&userBalance).Error; err != nil {
+		return err
+	}
+
+	return nil
+}

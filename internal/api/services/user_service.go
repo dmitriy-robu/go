@@ -13,47 +13,41 @@ import (
 )
 
 type UserService struct {
-	userRepo repositories.UserRepository
+	userRepository        repositories.UserRepository
+	userBalanceRepository repositories.UserBalanceRepository
 }
 
 func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) (string, error) {
-	now := time.Now()
+	var (
+		err           error
+		user          models.User
+		now           time.Time
+		userAuth      models.UserAuthSteam
+		newUUID       uuid.UUID
+		userAuthSteam models.UserAuthSteam
+	)
 
-	user := models.User{
+	now = time.Now()
+
+	user = models.User{
 		AvatarURL: &userGoth.AvatarURL,
 		Name:      &userGoth.NickName,
 		UpdatedAt: now,
 	}
 
-	userAuth, err := us.userRepo.FindUserAuthBySteamID(userGoth.UserID)
-
-	if err != nil && err != mongo.ErrNoDocuments {
-		return "", errors.Wrap(err, "Error finding user by SteamID")
-	}
-
-	userAuthSteam := models.UserAuthSteam{
+	userAuthSteam = models.UserAuthSteam{
 		SteamUserID: &userGoth.UserID,
 		UpdatedAt:   now,
 	}
 
-	if err == nil {
-		user, err = us.userRepo.GetUserByUuid(userAuth.UserUUID)
-		if err != nil {
-			return "", errors.Wrap(err, "Error getting user from database")
+	userAuth, err = us.userRepository.FindUserAuthBySteamID(userGoth.UserID)
+
+	if err != nil {
+		if err != mongo.ErrNoDocuments {
+			return "", errors.Wrap(err, "Error finding user by SteamID")
 		}
 
-		user, err = us.userRepo.UpdateUser(user)
-		if err != nil {
-			return "", errors.Wrap(err, "Error updating user")
-		}
-
-		userAuthSteam.UserUUID = user.UUID
-
-		if err = us.userRepo.UpdateUserAuth(userAuthSteam); err != nil {
-			return "", errors.Wrap(err, "Error updating user auth")
-		}
-	} else {
-		newUUID, err := uuid.NewRandom()
+		newUUID, err = uuid.NewRandom()
 		if err != nil {
 			return "", errors.Wrap(err, "Error generating UUID")
 		}
@@ -61,40 +55,65 @@ func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) (string, error
 		user.UUID = newUUID.String()
 		user.CreatedAt = now
 
-		user, err = us.userRepo.CreateUser(user)
-		if err != nil {
+		if user, err = us.userRepository.CreateUser(user); err != nil {
 			return "", errors.Wrap(err, "Error creating user")
+		}
+
+		if err = us.userBalanceRepository.CreateUserBalance(user.ID); err != nil {
+			return "", errors.Wrap(err, "Error creating user balance")
 		}
 
 		userAuthSteam.UserUUID = user.UUID
 		userAuthSteam.CreatedAt = now
 
-		if err = us.userRepo.CreateUserAuth(userAuthSteam); err != nil {
+		if err = us.userRepository.CreateUserAuth(userAuthSteam); err != nil {
 			return "", errors.Wrap(err, "Error creating user auth")
+		}
+	} else {
+		if user, err = us.userRepository.GetUserByUuid(userAuth.UserUUID); err != nil {
+			return "", errors.Wrap(err, "Error getting user from database")
+		}
+
+		if user, err = us.userRepository.UpdateUser(user); err != nil {
+			return "", errors.Wrap(err, "Error updating user")
+		}
+
+		userAuthSteam.UserUUID = user.UUID
+
+		if err = us.userRepository.UpdateUserAuth(userAuthSteam); err != nil {
+			return "", errors.Wrap(err, "Error updating user auth")
 		}
 	}
 
 	return user.UUID, nil
 }
 
-func (us UserService) GetUser(user models.User) (models.User, error) {
-	var err error
+func (us UserService) GetUserById(userID uint) (models.User, error) {
+	var (
+		err     error
+		getUser models.User
+	)
 
-	userWithBalance, err := us.userRepo.FindUserByID(user.ID)
+	getUser, err = us.userRepository.FindUserByID(userID)
 	if err != nil {
 		return models.User{}, errors.Wrap(err, "An error occurred while retrieving user information")
 	}
 
-	return userWithBalance, nil
+	return getUser, nil
 }
 
-func (us UserService) AuthUser(c *gin.Context) (user models.User, err error) {
+func (us UserService) AuthUser(c *gin.Context) (models.User, error) {
+	var (
+		err  error
+		user models.User
+	)
+
 	userUuid, ok := c.MustGet("userUuid").(string)
 	if !ok {
 		return models.User{}, fmt.Errorf("user not found in context")
 	}
 
-	user, err = us.userRepo.GetUserByUuid(userUuid)
+	user, err = us.userRepository.GetUserByUuid(userUuid)
 	if err != nil {
 		return models.User{}, errors.Wrap(err, "Error getting user from database")
 	}
@@ -103,9 +122,12 @@ func (us UserService) AuthUser(c *gin.Context) (user models.User, err error) {
 }
 
 func (us UserService) GetUserWithBalance(user models.User) (models.User, error) {
-	var err error
+	var (
+		err             error
+		userWithBalance models.User
+	)
 
-	userWithBalance, err := us.userRepo.GetUserByIdWithBalance(user.ID)
+	userWithBalance, err = us.userRepository.GetUserByIdWithBalance(user.ID)
 	if err != nil {
 		return models.User{}, errors.Wrap(err, "An error occurred while retrieving user information")
 	}

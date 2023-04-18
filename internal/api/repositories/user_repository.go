@@ -154,11 +154,11 @@ func (ur UserRepository) GetUserByUuid(uuid string) (models.User, error) {
 	return user, nil
 }
 
-func (ur UserRepository) GetUserByIdWithBalance(userId uint) (models.User, error) {
+func (ur UserRepository) GetUserByIdWithBalance(userID uint) (models.User, error) {
 	var user models.User
 	var err error
 
-	if err = MysqlDB.Preload("UserBalance").Where("id = ?", userId).First(&user).Error; err != nil {
+	if err = MysqlDB.Preload("UserBalance").Where("id = ?", userID).First(&user).Error; err != nil {
 		return user, errors.Wrap(err, "Error finding user with balance")
 	}
 
