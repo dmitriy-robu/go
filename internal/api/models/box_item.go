@@ -2,13 +2,18 @@ package models
 
 import (
 	"go-rust-drop/internal/api/enum"
-	"gorm.io/gorm"
 )
 
+type BoxItems []BoxItem
+
 type BoxItem struct {
-	ID     uint               `json:"ID" gorm:"primaryKey"`
-	BoxID  uint               `json:"box_id" gorm:"foreignId"`
-	ItemID uint               `json:"item_id" gorm:"foreignId"`
+	BoxID  uint               `json:"boxId" gorm:"primaryKey"`
+	ItemID uint               `json:"itemId" gorm:"primaryKey"`
 	Rarity enum.BoxItemRarity `json:"rarity"`
-	gorm.Model
+}
+
+type BoxItemShow struct {
+	ItemID uint `json:"itemId" gorm:"primaryKey"`
+	Item   Item `gorm:"foreignKey:ItemID"`
+	Rarity enum.BoxItemRarity
 }

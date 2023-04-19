@@ -13,8 +13,8 @@ var dbSeedCmd = &cobra.Command{
 	Use:   "db:seed",
 	Short: "Seed the database with some initial data",
 	Run: func(cmd *cobra.Command, args []string) {
-		//seeders.BoxSeeder{}.Seed()
-		//seeders.ItemSeeder{}.Seed()
+		seeders.BoxSeeder{}.Seed()
+		seeders.ItemSeeder{}.Seed()
 		seeders.BoxItemSeeder{}.Seed()
 	},
 }

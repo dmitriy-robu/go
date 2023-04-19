@@ -52,7 +52,7 @@ func getRandBox() uint {
 	}
 
 	var box models.Box
-	db.Table("boxes").Order("RAND()").First(&box)
+	db.Table("boxes").Where("active = ?", 1).Order("RAND()").First(&box)
 
 	return box.ID
 }
