@@ -17,8 +17,6 @@ func (ls LevelService) GetLevelForByExperience(experience int) models.Level {
 
 	level, err = ls.levelRepository.GetLevelByExperience(experience)
 	if err != nil {
-		level.Level = 0
-		level.StartsFrom = 0
 		level.EndsAt = 1
 
 		return level

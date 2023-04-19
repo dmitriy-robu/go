@@ -115,7 +115,6 @@ func (u UserController) GetUpdatableFields(c *gin.Context) {
 		userInfo                    map[string]interface{}
 		userWithBalance             models.User
 		userUpdatableFieldsResource resources.UserUpdatableFieldsResource
-		levelResource               resources.LevelResource
 		userLevel                   models.Level
 	)
 
@@ -133,13 +132,9 @@ func (u UserController) GetUpdatableFields(c *gin.Context) {
 
 	userLevel = u.levelService.GetLevelForByExperience(*user.Experience)
 
-	levelResource = resources.LevelResource{
-		Level: userLevel,
-	}
-
 	userUpdatableFieldsResource = resources.UserUpdatableFieldsResource{
-		User:          userWithBalance,
-		LevelResource: levelResource,
+		User:  userWithBalance,
+		Level: userLevel,
 	}
 
 	userInfo, err = userUpdatableFieldsResource.ToJSON()

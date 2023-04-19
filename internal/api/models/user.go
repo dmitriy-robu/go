@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+type Users []User
+
 // User полная таблица в mysql
 type User struct {
 	gorm.Model
