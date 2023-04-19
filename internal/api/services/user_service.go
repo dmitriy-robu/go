@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/models"
 	"go-rust-drop/internal/api/repositories"
+	"go-rust-drop/internal/api/requests"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"time"
@@ -135,4 +136,18 @@ func (us UserService) GetUserWithBalance(user models.User) (models.User, error) 
 	}
 
 	return userWithBalance, nil
+}
+
+func (us UserService) StoreSteamTradeURL(user models.User, store requests.StoreUserSteamTradeURL) error {
+	var err error
+
+	if user.ReferralCode != nil {
+		return errors.New("Referral code already exists")
+	}
+
+	if err = us.userRepository.StoreSteamTradeURLToUser(user, store.URL); err != nil {
+		return errors.Wrap(err, "Error storing referral code to user")
+	}
+
+	return nil
 }

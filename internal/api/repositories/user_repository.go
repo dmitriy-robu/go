@@ -22,9 +22,9 @@ func (ur UserRepository) FindUserByID(userID uint) (models.User, error) {
 
 	if err = MysqlDB.Where("id = ?", userID).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return models.User{}, err
+			return models.User{}, errors.Wrap(err, "User not found")
 		}
-		return models.User{}, err
+		return models.User{}, errors.Wrap(err, "Error finding user by ID")
 	}
 
 	return user, nil
@@ -33,7 +33,7 @@ func (ur UserRepository) FindUserByID(userID uint) (models.User, error) {
 func (ur UserRepository) UpdateUserBalance(userID uint64, newBalance float64) error {
 	var err error
 
-	if err = MysqlDB.Model(&models.UserBalance{}).Where("id = ?", userID).Update("balance", newBalance).Error; err != nil {
+	if err = MysqlDB.Model(&models.UserBalance{}).Where("user_id = ?", userID).Update("balance", newBalance).Error; err != nil {
 		return err
 	}
 
@@ -62,14 +62,15 @@ func (ur UserRepository) UpdateUser(user models.User) (models.User, error) {
 
 func (ur UserRepository) FindUserAuthBySteamID(steamID string) (models.UserAuthSteam, error) {
 	var (
-		err      error
-		userAuth models.UserAuthSteam
+		err        error
+		userAuth   models.UserAuthSteam
+		collection *mongo.Collection
 	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	collection, err := mongodb.GetCollectionByName("user_auth_steam")
+	collection, err = mongodb.GetCollectionByName("user_auth_steam")
 	if err != nil {
 		return userAuth, errors.Wrap(err, "Error getting MongoDB collection")
 	}
@@ -86,14 +87,15 @@ func (ur UserRepository) FindUserAuthBySteamID(steamID string) (models.UserAuthS
 
 func (ur UserRepository) GetUserAuthByUserUUID(uuid string) (models.UserAuthSteam, error) {
 	var (
-		err      error
-		userAuth models.UserAuthSteam
+		err        error
+		userAuth   models.UserAuthSteam
+		collection *mongo.Collection
 	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	collection, err := mongodb.GetCollectionByName("user_auth_steam")
+	collection, err = mongodb.GetCollectionByName("user_auth_steam")
 	if err != nil {
 		return userAuth, errors.Wrap(err, "Error getting MongoDB collection")
 	}
@@ -154,9 +156,9 @@ func (ur UserRepository) GetUserByUuid(uuid string) (models.User, error) {
 
 	if err = MysqlDB.Where("uuid = ?", uuid).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return user, err
+			return user, errors.Wrap(err, "User not found")
 		}
-		return user, err
+		return user, errors.Wrap(err, "Error finding user by uuid")
 	}
 
 	return user, nil
@@ -173,4 +175,14 @@ func (ur UserRepository) GetUserByIdWithBalance(userID uint) (models.User, error
 	}
 
 	return user, nil
+}
+
+func (ur UserRepository) StoreSteamTradeURLToUser(user models.User, steamTradeURL string) error {
+	var err error
+
+	if err = MysqlDB.Model(user).Update("steam_trade_url", steamTradeURL).Error; err != nil {
+		return errors.Wrap(err, "Error updating user with steam trade url")
+	}
+
+	return nil
 }

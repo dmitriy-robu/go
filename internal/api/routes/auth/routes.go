@@ -18,6 +18,7 @@ func get(router *gin.RouterGroup) {
 }
 
 func post(router *gin.RouterGroup) {
+	router.POST("/users/set-trade-url", controllers.UserController{}.StoreSteamTradeURL)
 	router.POST("/referrals/store-code", controllers.ReferralController{}.StoreCode)
 }
 

@@ -3,7 +3,7 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"go-rust-drop/internal/api/models"
-	"go-rust-drop/internal/api/request"
+	"go-rust-drop/internal/api/requests"
 	"go-rust-drop/internal/api/resources"
 	"go-rust-drop/internal/api/services"
 	"go-rust-drop/internal/api/utils"
@@ -20,7 +20,7 @@ func (rc ReferralController) StoreCode(c *gin.Context) {
 	var (
 		err   error
 		user  models.User
-		store request.StoreUserReferralCode
+		store requests.StoreUserReferralCode
 	)
 
 	user, err = rc.userService.AuthUser(c)

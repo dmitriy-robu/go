@@ -4,14 +4,14 @@ import (
 	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/models"
 	"go-rust-drop/internal/api/repositories"
-	"go-rust-drop/internal/api/request"
+	"go-rust-drop/internal/api/requests"
 )
 
 type ReferralService struct {
 	referralRepository repositories.ReferralRepository
 }
 
-func (rs ReferralService) StoreReferralCode(user *models.User, store *request.StoreUserReferralCode) (*models.User, error) {
+func (rs ReferralService) StoreReferralCode(user *models.User, store *requests.StoreUserReferralCode) (*models.User, error) {
 	var err error
 
 	if user.ReferralCode != nil {
@@ -28,12 +28,13 @@ func (rs ReferralService) StoreReferralCode(user *models.User, store *request.St
 
 func (rs ReferralService) GetReferralDetails(user models.User) (*models.ReferralDetails, error) {
 	var (
-		err             error
-		referralTiers   []models.ReferralTier
-		referral        models.Referral
-		totalEarnings   int
-		referredUsers   []models.ReferredUser
-		referralDetails *models.ReferralDetails
+		err                   error
+		referralTiers         []models.ReferralTier
+		referral              models.Referral
+		totalEarnings         int
+		referredUsers         []models.ReferredUser
+		referralDetails       *models.ReferralDetails
+		currentTierCommission float64
 	)
 
 	referralTiers, err = rs.referralRepository.GetReferralTiers()
@@ -41,7 +42,7 @@ func (rs ReferralService) GetReferralDetails(user models.User) (*models.Referral
 		return referralDetails, errors.Wrap(err, "Error getting referral tiers from repository")
 	}
 
-	currentTierCommission := 0.0
+	currentTierCommission = 0.0
 	if user.ReferralTierLevel > 0 {
 		for _, tier := range referralTiers {
 			if tier.Level == int(user.ReferralTierLevel) {
