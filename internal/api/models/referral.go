@@ -24,10 +24,10 @@ type Referral struct {
 }
 
 type ReferralDetails struct {
-	ReferralCode          *string
-	TotalEarnings         int
-	CurrentTierCommission float64
-	ReferredUsers         []ReferredUser
+	ReferralCode          *string        `json:"referral_code"`
+	TotalEarnings         int            `json:"total_earnings"`
+	CurrentTierCommission float64        `json:"current_tier_commission"`
+	ReferredUsers         []ReferredUser `json:"referred_users"`
 }
 
 type ReferredUser struct {

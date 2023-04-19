@@ -17,6 +17,7 @@ import (
 type UserService struct {
 	userRepository        repositories.UserRepository
 	userBalanceRepository repositories.UserBalanceRepository
+	levelRepository       repositories.LevelRepository
 }
 
 func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) (string, error) {
