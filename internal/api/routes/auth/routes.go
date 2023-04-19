@@ -14,6 +14,7 @@ func Routes(router *gin.RouterGroup) {
 func get(router *gin.RouterGroup) {
 	router.GET("/users/info", controllers.UserController{}.UserInfo)
 	router.GET("/users/inventory", controllers.UserController{}.UserInventory)
+	router.GET("/users/updatable-fields", controllers.UserController{}.GetUpdatableFields)
 	router.GET("/referrals/details", controllers.ReferralController{}.Details)
 }
 

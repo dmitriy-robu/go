@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+type Users []User
+
 // User полная таблица в mysql
 type User struct {
 	gorm.Model
@@ -17,7 +19,7 @@ type User struct {
 	EmailVerifiedAt      sql.NullTime          `gorm:"default:current_timestamp"`
 	Password             *string               `gorm:"type:varchar(255)"`
 	SteamTradeURL        *string               `gorm:"column:steam_trade_url"`
-	Experience           *int                  `gorm:"column:experience"`
+	Experience           *int                  `gorm:"column:experience,default:0"`
 	Active               bool                  `gorm:"column:active"`
 	IsBot                bool                  `gorm:"column:is_bot"`
 	RememberToken        *string               `gorm:"column:remember_token"`

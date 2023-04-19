@@ -12,6 +12,7 @@ import (
 
 type UserController struct {
 	userService          services.UserService
+	levelService         services.LevelService
 	userInventoryService services.UserInventoryService
 	errorHandler         utils.Errors
 }
@@ -109,10 +110,12 @@ func (u UserController) StoreSteamTradeURL(c *gin.Context) {
 
 func (u UserController) GetUpdatableFields(c *gin.Context) {
 	var (
-		err           error
-		user          models.User
-		userInfo      map[string]interface{}
-		userResources resources.UserResources
+		err                         error
+		user                        models.User
+		userInfo                    map[string]interface{}
+		userWithBalance             models.User
+		userUpdatableFieldsResource resources.UserUpdatableFieldsResource
+		userLevel                   models.Level
 	)
 
 	user, err = u.userService.AuthUser(c)
@@ -121,11 +124,20 @@ func (u UserController) GetUpdatableFields(c *gin.Context) {
 		return
 	}
 
-	userResources = resources.UserResources{
-		User: &user,
+	userWithBalance, err = u.userService.GetUserWithBalance(user)
+	if err != nil {
+		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error getting user balance", err)
+		return
 	}
 
-	userInfo, err = userResources.ToJSON()
+	userLevel = u.levelService.GetLevelForByExperience(*user.Experience)
+
+	userUpdatableFieldsResource = resources.UserUpdatableFieldsResource{
+		User:  userWithBalance,
+		Level: userLevel,
+	}
+
+	userInfo, err = userUpdatableFieldsResource.ToJSON()
 	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error converting user information to JSON", err)
 		return
