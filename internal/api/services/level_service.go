@@ -5,11 +5,11 @@ import (
 	"go-rust-drop/internal/api/repositories"
 )
 
-type LevelService struct {
+type LevelManager struct {
 	levelRepository repositories.LevelRepository
 }
 
-func (ls LevelService) GetLevelForByExperience(experience int) models.Level {
+func (ls LevelManager) GetLevelForByExperience(experience int) models.Level {
 	var (
 		err   error
 		level models.Level

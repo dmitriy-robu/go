@@ -7,11 +7,11 @@ import (
 	"go-rust-drop/internal/api/requests"
 )
 
-type ReferralService struct {
+type ReferralManager struct {
 	referralRepository repositories.ReferralRepository
 }
 
-func (rs ReferralService) StoreReferralCode(user models.User, store requests.StoreUserReferralCode) (models.User, error) {
+func (rs ReferralManager) StoreReferralCode(user models.User, store requests.StoreUserReferralCode) (models.User, error) {
 	var err error
 
 	if user.ReferralCode != nil {
@@ -26,7 +26,7 @@ func (rs ReferralService) StoreReferralCode(user models.User, store requests.Sto
 	return user, nil
 }
 
-func (rs ReferralService) GetReferralDetails(user models.User) (models.ReferralDetails, error) {
+func (rs ReferralManager) GetReferralDetails(user models.User) (models.ReferralDetails, error) {
 	var (
 		err                   error
 		referralTiers         []models.ReferralTier
@@ -77,7 +77,7 @@ func (rs ReferralService) GetReferralDetails(user models.User) (models.ReferralD
 	return referralDetails, nil
 }
 
-func (rs ReferralService) getReferredUsers(userID uint, referralID uint) ([]models.ReferredUser, error) {
+func (rs ReferralManager) getReferredUsers(userID uint, referralID uint) ([]models.ReferredUser, error) {
 	var (
 		err           error
 		users         []models.User

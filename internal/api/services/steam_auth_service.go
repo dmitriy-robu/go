@@ -10,24 +10,24 @@ import (
 	"net/http"
 )
 
-type SteamAuthService struct {
-	userService     UserService
+type SteamAuthManager struct {
+	userManager     UserManager
 	steamRepository repositories.SteamRepository
 }
 
-func (sam SteamAuthService) setProvider() {
+func (sam SteamAuthManager) setProvider() {
 	gothic.GetProviderName = func(*http.Request) (string, error) {
 		return "steam", nil
 	}
 }
 
-func (sam SteamAuthService) Login(c *gin.Context) {
+func (sam SteamAuthManager) Login(c *gin.Context) {
 	sam.setProvider()
 
 	gothic.BeginAuthHandler(c.Writer, c.Request)
 }
 
-func (sam SteamAuthService) Callback(c *gin.Context) error {
+func (sam SteamAuthManager) Callback(c *gin.Context) error {
 	var (
 		err      error
 		user     goth.User
@@ -42,7 +42,7 @@ func (sam SteamAuthService) Callback(c *gin.Context) error {
 		return errors.Wrap(err, "Error completing user auth")
 	}
 
-	userUuid, err = sam.userService.CreateOrUpdateSteamUser(user)
+	userUuid, err = sam.userManager.CreateOrUpdateSteamUser(user)
 	if err != nil {
 		return errors.Wrap(err, "Error creating or updating user")
 	}

@@ -10,10 +10,10 @@ import (
 	"strconv"
 )
 
-type ProvablyFairService struct {
+type ProvablyFairManager struct {
 }
 
-func (pfs *ProvablyFairService) GetProvablyFair(provablyFair *models.ProvablyFair) error {
+func (pfs *ProvablyFairManager) GetProvablyFair(provablyFair *models.ProvablyFair) error {
 	var (
 		err          error
 		message      string

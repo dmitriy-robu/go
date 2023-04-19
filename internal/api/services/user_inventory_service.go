@@ -13,11 +13,11 @@ import (
 	"strconv"
 )
 
-type UserInventoryService struct {
+type UserInventoryManager struct {
 	userRepo repositories.UserRepository
 }
 
-func (uis UserInventoryService) GetInventoryForUser(userUUID string) (models.InventoryData, error) {
+func (uis UserInventoryManager) GetInventoryForUser(userUUID string) (models.InventoryData, error) {
 	var (
 		err       error
 		userAuth  models.UserAuthSteam
@@ -37,7 +37,7 @@ func (uis UserInventoryService) GetInventoryForUser(userUUID string) (models.Inv
 	return inventory, nil
 }
 
-func (uis UserInventoryService) getInventory(steamID string, settings config.SteamSettings) (models.InventoryData, error) {
+func (uis UserInventoryManager) getInventory(steamID string, settings config.SteamSettings) (models.InventoryData, error) {
 	var err error
 
 	client := &http.Client{}
@@ -74,7 +74,7 @@ func (uis UserInventoryService) getInventory(steamID string, settings config.Ste
 	return uis.mapResponseToAssetData(response, settings)
 }
 
-func (uis UserInventoryService) mapResponseToAssetData(
+func (uis UserInventoryManager) mapResponseToAssetData(
 	response map[string]interface{},
 	settings config.SteamSettings,
 ) (models.InventoryData, error) {

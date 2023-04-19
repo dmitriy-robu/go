@@ -14,13 +14,13 @@ import (
 	"time"
 )
 
-type UserService struct {
+type UserManager struct {
 	userRepository        repositories.UserRepository
 	userBalanceRepository repositories.UserBalanceRepository
 	levelRepository       repositories.LevelRepository
 }
 
-func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) (string, error) {
+func (us UserManager) CreateOrUpdateSteamUser(userGoth goth.User) (string, error) {
 	var (
 		err           error
 		user          models.User
@@ -92,7 +92,7 @@ func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) (string, error
 	return user.UUID, nil
 }
 
-func (us UserService) GetUserById(userID uint) (models.User, error) {
+func (us UserManager) GetUserById(userID uint) (models.User, error) {
 	var (
 		err     error
 		getUser models.User
@@ -106,7 +106,7 @@ func (us UserService) GetUserById(userID uint) (models.User, error) {
 	return getUser, nil
 }
 
-func (us UserService) AuthUser(c *gin.Context) (models.User, error) {
+func (us UserManager) AuthUser(c *gin.Context) (models.User, error) {
 	var (
 		err  error
 		user models.User
@@ -125,7 +125,7 @@ func (us UserService) AuthUser(c *gin.Context) (models.User, error) {
 	return user, nil
 }
 
-func (us UserService) GetUserWithBalance(user models.User) (models.User, error) {
+func (us UserManager) GetUserWithBalance(user models.User) (models.User, error) {
 	var (
 		err             error
 		userWithBalance models.User
@@ -139,7 +139,7 @@ func (us UserService) GetUserWithBalance(user models.User) (models.User, error) 
 	return userWithBalance, nil
 }
 
-func (us UserService) StoreSteamTradeURL(user models.User, store requests.StoreUserSteamTradeURL) error {
+func (us UserManager) StoreSteamTradeURL(user models.User, store requests.StoreUserSteamTradeURL) error {
 	var err error
 
 	if user.ReferralCode != nil {

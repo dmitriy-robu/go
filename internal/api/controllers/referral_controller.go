@@ -11,8 +11,8 @@ import (
 )
 
 type ReferralController struct {
-	userService     services.UserService
-	referralService services.ReferralService
+	userManager     services.UserManager
+	referralManager services.ReferralManager
 	errorHandler    utils.Errors
 }
 
@@ -23,7 +23,7 @@ func (rc ReferralController) StoreCode(c *gin.Context) {
 		store requests.StoreUserReferralCode
 	)
 
-	user, err = rc.userService.AuthUser(c)
+	user, err = rc.userManager.AuthUser(c)
 	if err != nil {
 		rc.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
 		return
@@ -34,7 +34,7 @@ func (rc ReferralController) StoreCode(c *gin.Context) {
 		return
 	}
 
-	_, err = rc.referralService.StoreReferralCode(user, store)
+	_, err = rc.referralManager.StoreReferralCode(user, store)
 	if err != nil {
 		rc.errorHandler.HandleError(c, http.StatusInternalServerError, "Error storing referral code", err)
 		return
@@ -52,13 +52,13 @@ func (rc ReferralController) Details(c *gin.Context) {
 		referralDetailResources resources.ReferralDetailResource
 	)
 
-	user, err = rc.userService.AuthUser(c)
+	user, err = rc.userManager.AuthUser(c)
 	if err != nil {
 		rc.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
 		return
 	}
 
-	referralDetails, err = rc.referralService.GetReferralDetails(user)
+	referralDetails, err = rc.referralManager.GetReferralDetails(user)
 	if err != nil {
 		rc.errorHandler.HandleError(c, http.StatusInternalServerError, "Error getting referral details", err)
 		return

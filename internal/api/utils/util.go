@@ -49,10 +49,22 @@ func (mc MoneyConvert) FromVaultToCents(value string) (int, error) {
 	return int(parsedValue * 100), nil
 }
 
-func (e Environment) GetEnvOrDefault(key, defaultValue string) string {
+func (e Environment) GetEnvOrDefault(key string, defaultValue interface{}) interface{} {
 	value, exists := os.LookupEnv(key)
 	if !exists {
 		return defaultValue
 	}
-	return value
+
+	switch defaultValue.(type) {
+	case int:
+		intValue, err := strconv.Atoi(value)
+		if err != nil {
+			return defaultValue
+		}
+		return intValue
+	case string:
+		return value
+	default:
+		return defaultValue
+	}
 }

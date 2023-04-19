@@ -11,9 +11,9 @@ import (
 )
 
 type UserController struct {
-	userService          services.UserService
-	levelService         services.LevelService
-	userInventoryService services.UserInventoryService
+	userManager          services.UserManager
+	levelManager         services.LevelManager
+	userInventoryManager services.UserInventoryManager
 	errorHandler         utils.Errors
 }
 
@@ -25,13 +25,13 @@ func (u UserController) UserInfo(c *gin.Context) {
 		userResources resources.UserResources
 	)
 
-	user, err = u.userService.AuthUser(c)
+	user, err = u.userManager.AuthUser(c)
 	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
 		return
 	}
 
-	user, err = u.userService.GetUserWithBalance(user)
+	user, err = u.userManager.GetUserWithBalance(user)
 
 	userResources = resources.UserResources{
 		User: &user,
@@ -55,13 +55,13 @@ func (u UserController) UserInventory(c *gin.Context) {
 		userInventoryResource  []map[string]interface{}
 	)
 
-	user, err = u.userService.AuthUser(c)
+	user, err = u.userManager.AuthUser(c)
 	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
 		return
 	}
 
-	inventory, err = u.userInventoryService.GetInventoryForUser(user.UUID)
+	inventory, err = u.userInventoryManager.GetInventoryForUser(user.UUID)
 	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error getting user inventory", err)
 		return
@@ -87,7 +87,7 @@ func (u UserController) StoreSteamTradeURL(c *gin.Context) {
 		user  models.User
 	)
 
-	user, err = u.userService.AuthUser(c)
+	user, err = u.userManager.AuthUser(c)
 	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
 		return
@@ -98,7 +98,7 @@ func (u UserController) StoreSteamTradeURL(c *gin.Context) {
 		return
 	}
 
-	if err = u.userService.StoreSteamTradeURL(user, store); err != nil {
+	if err = u.userManager.StoreSteamTradeURL(user, store); err != nil {
 		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error updating user trade URL", err)
 		return
 	}
@@ -118,19 +118,19 @@ func (u UserController) GetUpdatableFields(c *gin.Context) {
 		userLevel                   models.Level
 	)
 
-	user, err = u.userService.AuthUser(c)
+	user, err = u.userManager.AuthUser(c)
 	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
 		return
 	}
 
-	userWithBalance, err = u.userService.GetUserWithBalance(user)
+	userWithBalance, err = u.userManager.GetUserWithBalance(user)
 	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error getting user balance", err)
 		return
 	}
 
-	userLevel = u.levelService.GetLevelForByExperience(*user.Experience)
+	userLevel = u.levelManager.GetLevelForByExperience(*user.Experience)
 
 	userUpdatableFieldsResource = resources.UserUpdatableFieldsResource{
 		User:  userWithBalance,
