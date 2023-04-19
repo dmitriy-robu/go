@@ -11,17 +11,22 @@ type ReferralUserResource struct {
 }
 
 func (r *ReferralUserResource) ToJSON() ([]map[string]interface{}, error) {
-	assetMaps := make([]map[string]interface{}, len(*r.referredUser))
+	var (
+		referralUser  map[string]interface{}
+		referralUsers []map[string]interface{}
+	)
 
-	for i, user := range *r.referredUser {
-		assetMaps[i] = map[string]interface{}{
+	for _, user := range *r.referredUser {
+		referralUser = map[string]interface{}{
 			"name":               user.Name,
 			"total_earned":       user.TotalEarnings,
 			"earning_commission": user.EarningCommission,
 			"current_tier":       user.CurrentTier,
 			"created_at":         user.CreatedAt,
 		}
+
+		referralUsers = append(referralUsers, referralUser)
 	}
 
-	return assetMaps, nil
+	return referralUsers, nil
 }

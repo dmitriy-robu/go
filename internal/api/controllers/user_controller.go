@@ -7,7 +7,6 @@ import (
 	"go-rust-drop/internal/api/resources"
 	"go-rust-drop/internal/api/services"
 	"go-rust-drop/internal/api/utils"
-	"log"
 	"net/http"
 )
 
@@ -18,9 +17,14 @@ type UserController struct {
 }
 
 func (u UserController) UserInfo(c *gin.Context) {
-	var err error
+	var (
+		err           error
+		user          models.User
+		userInfo      map[string]interface{}
+		userResources resources.UserResources
+	)
 
-	user, err := u.userService.AuthUser(c)
+	user, err = u.userService.AuthUser(c)
 	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
 		return
@@ -28,11 +32,11 @@ func (u UserController) UserInfo(c *gin.Context) {
 
 	user, err = u.userService.GetUserWithBalance(user)
 
-	userResources := resources.UserResources{
+	userResources = resources.UserResources{
 		User: &user,
 	}
 
-	userInfo, err := userResources.ToJSON()
+	userInfo, err = userResources.ToJSON()
 	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error converting user information to JSON", err)
 		return
@@ -42,26 +46,31 @@ func (u UserController) UserInfo(c *gin.Context) {
 }
 
 func (u UserController) UserInventory(c *gin.Context) {
-	var err error
+	var (
+		err                    error
+		user                   models.User
+		inventory              models.InventoryData
+		userInventoryResources resources.UserInventoryResources
+		userInventoryResource  []map[string]interface{}
+	)
 
-	user, err := u.userService.AuthUser(c)
+	user, err = u.userService.AuthUser(c)
 	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
 		return
 	}
 
-	inventory, err := u.userInventoryService.GetInventoryForUser(&user.UUID)
-	log.Printf("inventory: %+v", inventory)
-	if err != nil || inventory == nil {
+	inventory, err = u.userInventoryService.GetInventoryForUser(user.UUID)
+	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error getting user inventory", err)
 		return
 	}
 
-	userResources := resources.UserInventoryResources{
+	userInventoryResources = resources.UserInventoryResources{
 		AssetData: inventory.AssetData,
 	}
 
-	userInventoryResource, err := userResources.ToJSON()
+	userInventoryResource, err = userInventoryResources.ToJSON()
 	if err != nil {
 		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error converting user information to JSON", err)
 		return
@@ -96,4 +105,31 @@ func (u UserController) StoreSteamTradeURL(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Trade URL updated",
 	})
+}
+
+func (u UserController) GetUpdatableFields(c *gin.Context) {
+	var (
+		err           error
+		user          models.User
+		userInfo      map[string]interface{}
+		userResources resources.UserResources
+	)
+
+	user, err = u.userService.AuthUser(c)
+	if err != nil {
+		u.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
+		return
+	}
+
+	userResources = resources.UserResources{
+		User: &user,
+	}
+
+	userInfo, err = userResources.ToJSON()
+	if err != nil {
+		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error converting user information to JSON", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, userInfo)
 }

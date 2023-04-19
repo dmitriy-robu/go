@@ -38,7 +38,7 @@ func (us UserService) CreateOrUpdateSteamUser(userGoth goth.User) (string, error
 	}
 
 	userAuthSteam = models.UserAuthSteam{
-		SteamUserID: &userGoth.UserID,
+		SteamUserID: userGoth.UserID,
 		UpdatedAt:   now,
 	}
 

@@ -17,34 +17,34 @@ type UserInventoryService struct {
 	userRepo repositories.UserRepository
 }
 
-func (uis UserInventoryService) GetInventoryForUser(userUUID *string) (*models.InventoryData, error) {
+func (uis UserInventoryService) GetInventoryForUser(userUUID string) (models.InventoryData, error) {
 	var (
 		err       error
 		userAuth  models.UserAuthSteam
-		inventory *models.InventoryData
+		inventory models.InventoryData
 	)
 
-	userAuth, err = uis.userRepo.GetUserAuthByUserUUID(*userUUID)
+	userAuth, err = uis.userRepo.GetUserAuthByUserUUID(userUUID)
 	if err != nil {
-		return nil, errors.Wrap(err, "Error getting user auth")
+		return models.InventoryData{}, errors.Wrap(err, "Error getting user auth")
 	}
 
 	inventory, err = uis.getInventory(userAuth.SteamUserID, config.SetSteamSettings())
 	if err != nil {
-		return nil, errors.Wrap(err, "Error getting inventory")
+		return models.InventoryData{}, errors.Wrap(err, "Error getting inventory")
 	}
 
 	return inventory, nil
 }
 
-func (uis UserInventoryService) getInventory(steamID *string, settings config.SteamSettings) (*models.InventoryData, error) {
+func (uis UserInventoryService) getInventory(steamID string, settings config.SteamSettings) (models.InventoryData, error) {
 	var err error
 
 	client := &http.Client{}
 	endpoint := fmt.Sprintf(
 		"%s/%s/%d/%d?api_key=%s",
 		settings.SteamAPIs.Url,
-		*steamID,
+		steamID,
 		&settings.GameInventory.AppID,
 		settings.GameInventory.ContextID,
 		settings.SteamAPIs.APIKey,
@@ -52,7 +52,7 @@ func (uis UserInventoryService) getInventory(steamID *string, settings config.St
 
 	resp, err := client.Get(endpoint)
 	if err != nil {
-		return nil, errors.Wrap(err, "Error getting inventory")
+		return models.InventoryData{}, errors.Wrap(err, "Error getting inventory")
 	}
 	defer func(Body io.ReadCloser) {
 		err = Body.Close()
@@ -62,13 +62,13 @@ func (uis UserInventoryService) getInventory(steamID *string, settings config.St
 	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.Errorf("Error getting inventory: %s", resp.Status)
+		return models.InventoryData{}, errors.Errorf("Error getting inventory: %s", resp.Status)
 	}
 
 	var response map[string]interface{}
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
-		return nil, errors.Wrap(err, "Error decoding response")
+		return models.InventoryData{}, errors.Wrap(err, "Error decoding response")
 	}
 
 	return uis.mapResponseToAssetData(response, settings)
@@ -77,12 +77,12 @@ func (uis UserInventoryService) getInventory(steamID *string, settings config.St
 func (uis UserInventoryService) mapResponseToAssetData(
 	response map[string]interface{},
 	settings config.SteamSettings,
-) (*models.InventoryData, error) {
+) (models.InventoryData, error) {
 	var parsedAssets []models.AssetData
 
 	allDetails, err := getDetailsForAllItems(settings)
 	if err != nil || allDetails == nil {
-		return nil, errors.New("Cannot parse prices")
+		return models.InventoryData{}, errors.New("Cannot parse prices")
 	}
 
 	itemsDetails := filterDetailsByDescriptions(allDetails, response["descriptions"].([]interface{}))
@@ -129,7 +129,7 @@ func (uis UserInventoryService) mapResponseToAssetData(
 	}
 	totalInventoryCount := int(response["total_inventory_count"].(float64))
 
-	return &models.InventoryData{
+	return models.InventoryData{
 		AssetData:           parsedAssets,
 		TotalInventoryCount: totalInventoryCount,
 	}, nil
