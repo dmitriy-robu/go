@@ -146,7 +146,7 @@ func (ur UserRepository) UpdateUserAuth(userAuthSteam models.UserAuthSteam) erro
 		return errors.Wrap(err, "Error getting MongoDB collection")
 	}
 
-	_, err = collection.ReplaceOne(ctx, bson.M{"steam_id": userAuthSteam.SteamUserID}, userAuthSteam)
+	_, err = collection.ReplaceOne(ctx, bson.M{"steam_user_id": userAuthSteam.SteamUserID}, userAuthSteam)
 	if err != nil {
 		return errors.Wrap(err, "Error updating UserAuthSteam in MongoDB")
 	}
