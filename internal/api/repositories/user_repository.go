@@ -22,9 +22,9 @@ func (ur UserRepository) FindUserByID(userID uint) (models.User, error) {
 
 	if err = MysqlDB.Where("id = ?", userID).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return models.User{}, errors.Wrap(err, "User not found")
+			return user, errors.Wrap(err, "User not found")
 		}
-		return models.User{}, errors.Wrap(err, "Error finding user by ID")
+		return user, errors.Wrap(err, "Error finding user by ID")
 	}
 
 	return user, nil
@@ -54,7 +54,7 @@ func (ur UserRepository) UpdateUser(user models.User) (models.User, error) {
 	var err error
 
 	if err = MysqlDB.Save(&user).Error; err != nil {
-		return user, err
+		return user, errors.Wrap(err, "Error updating user")
 	}
 
 	return user, nil

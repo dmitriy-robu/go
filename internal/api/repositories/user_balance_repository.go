@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/models"
 	"gorm.io/gorm"
 )
@@ -14,9 +15,9 @@ func (ubr UserBalanceRepository) GetUserBalanceByUserId(userID uint64) (models.U
 
 	if err = MysqlDB.Where("id = ?", userID).First(&userBalance).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return userBalance, err
+			return userBalance, errors.Wrap(err, "User balance not found")
 		}
-		return userBalance, err
+		return userBalance, errors.Wrap(err, "Error finding user balance by ID")
 	}
 
 	return userBalance, nil
@@ -34,7 +35,7 @@ func (ubr UserBalanceRepository) CreateUserBalance(userID uint) error {
 	}
 
 	if err = MysqlDB.Create(&userBalance).Error; err != nil {
-		return err
+		return errors.Wrap(err, "Error creating user balance")
 	}
 
 	return nil
