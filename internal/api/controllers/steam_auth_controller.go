@@ -26,7 +26,9 @@ func (s SteamAuthController) Login(c *gin.Context) {
 }
 
 func (s SteamAuthController) Callback(c *gin.Context) {
-	err := s.steamAuthService.Callback(c)
+	var err error
+
+	err = s.steamAuthService.Callback(c)
 	if err != nil {
 		s.errorHandler.HandleError(c, http.StatusInternalServerError, "Error logging in", err)
 		return

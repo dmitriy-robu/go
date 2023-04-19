@@ -45,10 +45,11 @@ func (rc ReferralController) StoreCode(c *gin.Context) {
 
 func (rc ReferralController) Details(c *gin.Context) {
 	var (
-		err                    error
-		user                   models.User
-		referralDetails        *models.ReferralDetails
-		referralDetailResource map[string]interface{}
+		err                     error
+		user                    models.User
+		referralDetails         models.ReferralDetails
+		referralDetailResource  map[string]interface{}
+		referralDetailResources resources.ReferralDetailResource
 	)
 
 	user, err = rc.userService.AuthUser(c)
@@ -63,7 +64,7 @@ func (rc ReferralController) Details(c *gin.Context) {
 		return
 	}
 
-	referralDetailResources := resources.ReferralDetailResource{
+	referralDetailResources = resources.ReferralDetailResource{
 		ReferralDetails: referralDetails,
 	}
 

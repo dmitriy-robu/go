@@ -26,14 +26,14 @@ func (rs ReferralService) StoreReferralCode(user *models.User, store *requests.S
 	return user, nil
 }
 
-func (rs ReferralService) GetReferralDetails(user models.User) (*models.ReferralDetails, error) {
+func (rs ReferralService) GetReferralDetails(user models.User) (models.ReferralDetails, error) {
 	var (
 		err                   error
 		referralTiers         []models.ReferralTier
 		referral              models.Referral
 		totalEarnings         int
 		referredUsers         []models.ReferredUser
-		referralDetails       *models.ReferralDetails
+		referralDetails       models.ReferralDetails
 		currentTierCommission float64
 	)
 
@@ -67,7 +67,7 @@ func (rs ReferralService) GetReferralDetails(user models.User) (*models.Referral
 		return referralDetails, errors.Wrap(err, "Error getting referred users by user id")
 	}
 
-	referralDetails = &models.ReferralDetails{
+	referralDetails = models.ReferralDetails{
 		ReferralCode:          user.ReferralCode,
 		TotalEarnings:         totalEarnings,
 		CurrentTierCommission: currentTierCommission,
