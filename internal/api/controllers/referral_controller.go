@@ -34,7 +34,7 @@ func (rc ReferralController) StoreCode(c *gin.Context) {
 		return
 	}
 
-	_, err = rc.referralService.StoreReferralCode(&user, &store)
+	_, err = rc.referralService.StoreReferralCode(user, store)
 	if err != nil {
 		rc.errorHandler.HandleError(c, http.StatusInternalServerError, "Error storing referral code", err)
 		return

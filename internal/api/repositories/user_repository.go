@@ -111,12 +111,15 @@ func (ur UserRepository) GetUserAuthByUserUUID(uuid string) (models.UserAuthStea
 }
 
 func (ur UserRepository) CreateUserAuth(userAuthSteam models.UserAuthSteam) error {
-	var err error
+	var (
+		err        error
+		collection *mongo.Collection
+	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	collection, err := mongodb.GetCollectionByName("user_auth_steam")
+	collection, err = mongodb.GetCollectionByName("user_auth_steam")
 	if err != nil {
 		return errors.Wrap(err, "Error getting MongoDB collection")
 	}
@@ -130,12 +133,15 @@ func (ur UserRepository) CreateUserAuth(userAuthSteam models.UserAuthSteam) erro
 }
 
 func (ur UserRepository) UpdateUserAuth(userAuthSteam models.UserAuthSteam) error {
-	var err error
+	var (
+		err        error
+		collection *mongo.Collection
+	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	collection, err := mongodb.GetCollectionByName("user_auth_steam")
+	collection, err = mongodb.GetCollectionByName("user_auth_steam")
 	if err != nil {
 		return errors.Wrap(err, "Error getting MongoDB collection")
 	}
@@ -166,8 +172,8 @@ func (ur UserRepository) GetUserByUuid(uuid string) (models.User, error) {
 
 func (ur UserRepository) GetUserByIdWithBalance(userID uint) (models.User, error) {
 	var (
-		user models.User
 		err  error
+		user models.User
 	)
 
 	if err = MysqlDB.Preload("UserBalance").Where("id = ?", userID).First(&user).Error; err != nil {

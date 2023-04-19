@@ -99,7 +99,7 @@ func (us UserService) GetUserById(userID uint) (models.User, error) {
 
 	getUser, err = us.userRepository.FindUserByID(userID)
 	if err != nil {
-		return models.User{}, errors.Wrap(err, "An error occurred while retrieving user information")
+		return getUser, errors.Wrap(err, "An error occurred while retrieving user information")
 	}
 
 	return getUser, nil
@@ -113,12 +113,12 @@ func (us UserService) AuthUser(c *gin.Context) (models.User, error) {
 
 	userUuid, ok := c.MustGet("userUuid").(string)
 	if !ok {
-		return models.User{}, fmt.Errorf("user not found in context")
+		return user, fmt.Errorf("user not found in context")
 	}
 
 	user, err = us.userRepository.GetUserByUuid(userUuid)
 	if err != nil {
-		return models.User{}, errors.Wrap(err, "Error getting user from database")
+		return user, errors.Wrap(err, "Error getting user from database")
 	}
 
 	return user, nil
@@ -132,7 +132,7 @@ func (us UserService) GetUserWithBalance(user models.User) (models.User, error) 
 
 	userWithBalance, err = us.userRepository.GetUserByIdWithBalance(user.ID)
 	if err != nil {
-		return models.User{}, errors.Wrap(err, "An error occurred while retrieving user information")
+		return userWithBalance, errors.Wrap(err, "An error occurred while retrieving user information")
 	}
 
 	return userWithBalance, nil

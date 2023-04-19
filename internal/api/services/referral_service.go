@@ -11,16 +11,16 @@ type ReferralService struct {
 	referralRepository repositories.ReferralRepository
 }
 
-func (rs ReferralService) StoreReferralCode(user *models.User, store *requests.StoreUserReferralCode) (*models.User, error) {
+func (rs ReferralService) StoreReferralCode(user models.User, store requests.StoreUserReferralCode) (models.User, error) {
 	var err error
 
 	if user.ReferralCode != nil {
-		return &models.User{}, errors.New("Referral code already exists")
+		return models.User{}, errors.New("Referral code already exists")
 	}
 
 	user, err = rs.referralRepository.StoreReferralCodeToUser(user, store)
 	if err != nil {
-		return &models.User{}, errors.Wrap(err, "Error storing referral code to user")
+		return models.User{}, errors.Wrap(err, "Error storing referral code to user")
 	}
 
 	return user, nil
@@ -88,7 +88,7 @@ func (rs ReferralService) getReferredUsers(userID uint, referralID uint) ([]mode
 
 	users, err = rs.referralRepository.GetReferredUserByUserId(userID)
 	if err != nil {
-		return nil, errors.Wrap(err, "Error getting referred users by user id")
+		return referredUsers, errors.Wrap(err, "Error getting referred users by user id")
 	}
 
 	for _, user := range users {
