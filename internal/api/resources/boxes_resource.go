@@ -10,22 +10,20 @@ type BoxesResource struct {
 	moneyConvert utils.MoneyConvert
 }
 
-func (rr *BoxesResource) ToJSON() ([]map[string]interface{}, error) {
-	var (
-		boxes []map[string]interface{}
-		asset map[string]interface{}
-	)
+func (b BoxesResource) ToJSON() []map[string]interface{} {
+	var boxesResource []map[string]interface{}
 
-	for _, box := range rr.Boxes {
-		asset = map[string]interface{}{
-			"uuid":          box.UUID,
-			"title":         box.Title,
-			"price":         rr.moneyConvert.FromCentsToVault(box.Price),
-			"image_url":     box.Image,
-			"alt_image_url": box.AltImage,
+	for _, box := range b.Boxes {
+		boxResource := map[string]interface{}{
+			"uuid":      box.UUID,
+			"title":     box.Title,
+			"image":     box.Image,
+			"alt_image": box.AltImage,
+			"price":     box.Price,
 		}
-		boxes = append(boxes, asset)
+
+		boxesResource = append(boxesResource, boxResource)
 	}
 
-	return boxes, nil
+	return boxesResource
 }

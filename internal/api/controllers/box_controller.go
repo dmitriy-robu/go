@@ -5,18 +5,19 @@ import (
 	"go-rust-drop/internal/api/models"
 	"go-rust-drop/internal/api/resources"
 	"go-rust-drop/internal/api/services"
+	"go-rust-drop/internal/api/utils"
 	"net/http"
 )
 
 type BoxController struct {
-	BoxService services.BoxService
+	errorHandler utils.Errors
+	BoxService   services.BoxService
 }
 
 func (b BoxController) Index(c *gin.Context) {
 	var (
 		boxes         models.Boxes
 		boxesResource []map[string]interface{}
-		err           error
 	)
 
 	boxes = b.BoxService.FindAll()
@@ -25,28 +26,30 @@ func (b BoxController) Index(c *gin.Context) {
 		Boxes: boxes,
 	}
 
-	boxesResource, err = resource.ToJSON()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Error getting boxes"})
-		return
-	}
+	boxesResource = resource.ToJSON()
 
 	c.JSON(http.StatusOK, boxesResource)
 }
 
 func (b BoxController) Show(c *gin.Context) {
 	var (
-		//box         models.Box
-		boxResource map[string]interface{}
 		err         error
+		box         models.Box
+		boxResource map[string]interface{}
 	)
 
-	b.BoxService.FindByUUID(c.Param("uuid"))
+	box, err = b.BoxService.FindByUUID(c.Param("uuid"))
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Error getting box"})
+		b.errorHandler.HandleError(c, 404, err.Error(), err)
 		return
 	}
+
+	resource := resources.BoxResource{
+		Box: box,
+	}
+
+	boxResource = resource.ToJSON()
 
 	c.JSON(http.StatusOK, boxResource)
 }

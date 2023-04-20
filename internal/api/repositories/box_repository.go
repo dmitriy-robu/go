@@ -1,17 +1,20 @@
 package repositories
 
 import (
+	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/models"
-	"log"
 )
 
 type BoxRepository struct {
 }
 
 func (b BoxRepository) FindAll() models.Boxes {
-	var boxes models.Boxes
+	var (
+		boxes models.Boxes
+	)
 
 	MysqlDB.
+		Preload("BoxItem.Item").
 		Table("boxes").
 		Where("boxes.active = ?", 1).
 		Find(&boxes)
@@ -19,19 +22,22 @@ func (b BoxRepository) FindAll() models.Boxes {
 	return boxes
 }
 
-func (b BoxRepository) FindByUUID(uuid string) models.Box {
+func (b BoxRepository) FindByUUID(uuid string) (models.Box, error) {
 	var (
+		err error
 		box models.Box
 	)
 
-	MysqlDB.
-		Preload("BoxItem.Item").
+	err = MysqlDB.
+		Preload("BoxItems.Item").
 		Table("boxes").
-		Where("boxes.active = ?", 1).
 		Where("boxes.uuid = ?", uuid).
-		Find(&box)
+		Where("boxes.active = ?", 1).
+		First(&box).Error
 
-	log.Printf("items: %v", box)
+	if err != nil {
+		return box, errors.Wrap(err, "Error finding box by UUID")
+	}
 
-	return box
+	return box, nil
 }

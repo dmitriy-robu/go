@@ -19,12 +19,16 @@ func (b BoxService) FindAll() models.Boxes {
 	return boxes
 }
 
-func (b BoxService) FindByUUID(uuid string) models.Box {
+func (b BoxService) FindByUUID(uuid string) (models.Box, error) {
 	var (
+		err error
 		box models.Box
 	)
 
-	box = b.boxRepository.FindByUUID(uuid)
+	box, err = b.boxRepository.FindByUUID(uuid)
+	if err != nil {
+		return box, err
+	}
 
-	return box
+	return box, nil
 }
