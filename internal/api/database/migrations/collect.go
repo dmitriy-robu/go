@@ -30,4 +30,7 @@ func (m Migrations) MigrateAll() {
 	CreateBoxTable()
 	CreateItemsTable()
 	CreateBoxItemsTable()
+	CreateLevelsTable()
+	CreateLevelTiersTable()
+	CreateTierBoxesTable()
 }

@@ -14,10 +14,12 @@ func Routes(router *gin.RouterGroup) {
 func get(router *gin.RouterGroup) {
 	router.GET("/users/info", controllers.UserController{}.UserInfo)
 	router.GET("/users/inventory", controllers.UserController{}.UserInventory)
+	router.GET("/users/updatable-fields", controllers.UserController{}.GetUpdatableFields)
 	router.GET("/referrals/details", controllers.ReferralController{}.Details)
 }
 
 func post(router *gin.RouterGroup) {
+	router.POST("/users/set-trade-url", controllers.UserController{}.StoreSteamTradeURL)
 	router.POST("/referrals/store-code", controllers.ReferralController{}.StoreCode)
 
 	router.POST("/boxes/open/:uuid", controllers.BoxController{}.Open)

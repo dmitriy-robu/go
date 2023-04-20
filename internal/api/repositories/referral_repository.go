@@ -1,18 +1,21 @@
 package repositories
 
 import (
+	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/models"
-	"go-rust-drop/internal/api/request"
+	"go-rust-drop/internal/api/requests"
 )
 
 type ReferralRepository struct {
 }
 
-func (rr ReferralRepository) StoreReferralCodeToUser(user *models.User, store *request.StoreUserReferralCode) (*models.User, error) {
-	var err error
+func (rr ReferralRepository) StoreReferralCodeToUser(user models.User, store requests.StoreUserReferralCode) (models.User, error) {
+	var (
+		err error
+	)
 
 	if err = MysqlDB.Model(user).Update("referral_code", store.ReferralCode).Error; err != nil {
-		return &models.User{}, err
+		return models.User{}, errors.Wrap(err, "Error updating user referral code")
 	}
 
 	return user, nil
@@ -25,7 +28,7 @@ func (rr ReferralRepository) GetReferralTiers() ([]models.ReferralTier, error) {
 	)
 
 	if err = MysqlDB.Find(&referralTiers).Error; err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error getting referral tiers from database")
 	}
 
 	return referralTiers, nil
@@ -38,7 +41,7 @@ func (rr ReferralRepository) GetReferralByUserId(userID uint) (models.Referral, 
 	)
 
 	if err = MysqlDB.Where("referral_user_id = ?", userID).First(&referral).Error; err != nil {
-		return models.Referral{}, err
+		return models.Referral{}, errors.Wrap(err, "Error getting referral by user id")
 	}
 
 	return referral, nil
@@ -51,7 +54,7 @@ func (rr ReferralRepository) GetReferralTransactionsByReferralId(referralID uint
 	)
 
 	if err = MysqlDB.Where("referral_id = ?", referralID).Find(&referralTransactions).Error; err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error getting referral transactions by referral id")
 	}
 
 	return referralTransactions, nil
@@ -64,7 +67,7 @@ func (rr ReferralRepository) GetReferralTransactionSumByReferralId(referralID ui
 	)
 
 	if err = MysqlDB.Model(&models.ReferralTransaction{}).Where("referral_id = ?", referralID).Select("SUM(amount)").Scan(&sum).Error; err != nil {
-		return 0, err
+		return 0, errors.Wrap(err, "Error getting referral transaction sum by referral id")
 	}
 
 	return sum, nil
@@ -77,7 +80,7 @@ func (rr ReferralRepository) GetReferredUserByUserId(userID uint) ([]models.User
 	)
 
 	if err = MysqlDB.Model(&models.User{ID: userID}).Association("ReferralUsers").Find(&referredUsers); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error getting referred users by user id")
 	}
 
 	return referredUsers, nil
@@ -90,7 +93,7 @@ func (rr ReferralRepository) GetReferralTierCommissionByReferralTierLevel(level 
 	)
 
 	if err = MysqlDB.Where("level = ?", level).First(&referralTier).Error; err != nil {
-		return 0.0, err
+		return 0.0, errors.Wrap(err, "Error getting referral tier commission by referral tier level")
 	}
 
 	return referralTier.BonusPercentage, nil

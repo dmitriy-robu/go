@@ -6,7 +6,7 @@ import (
 )
 
 type ReferralDetailResource struct {
-	ReferralDetails *models.ReferralDetails
+	ReferralDetails models.ReferralDetails
 	moneyConvert    utils.MoneyConvert
 }
 

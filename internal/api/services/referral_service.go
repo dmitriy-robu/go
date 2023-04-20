@@ -4,36 +4,37 @@ import (
 	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/models"
 	"go-rust-drop/internal/api/repositories"
-	"go-rust-drop/internal/api/request"
+	"go-rust-drop/internal/api/requests"
 )
 
-type ReferralService struct {
+type ReferralManager struct {
 	referralRepository repositories.ReferralRepository
 }
 
-func (rs ReferralService) StoreReferralCode(user *models.User, store *request.StoreUserReferralCode) (*models.User, error) {
+func (rs ReferralManager) StoreReferralCode(user models.User, store requests.StoreUserReferralCode) (models.User, error) {
 	var err error
 
 	if user.ReferralCode != nil {
-		return &models.User{}, errors.New("Referral code already exists")
+		return models.User{}, errors.New("Referral code already exists")
 	}
 
 	user, err = rs.referralRepository.StoreReferralCodeToUser(user, store)
 	if err != nil {
-		return &models.User{}, errors.Wrap(err, "Error storing referral code to user")
+		return models.User{}, errors.Wrap(err, "Error storing referral code to user")
 	}
 
 	return user, nil
 }
 
-func (rs ReferralService) GetReferralDetails(user models.User) (*models.ReferralDetails, error) {
+func (rs ReferralManager) GetReferralDetails(user models.User) (models.ReferralDetails, error) {
 	var (
-		err             error
-		referralTiers   []models.ReferralTier
-		referral        models.Referral
-		totalEarnings   int
-		referredUsers   []models.ReferredUser
-		referralDetails *models.ReferralDetails
+		err                   error
+		referralTiers         []models.ReferralTier
+		referral              models.Referral
+		totalEarnings         int
+		referredUsers         []models.ReferredUser
+		referralDetails       models.ReferralDetails
+		currentTierCommission float64
 	)
 
 	referralTiers, err = rs.referralRepository.GetReferralTiers()
@@ -41,7 +42,7 @@ func (rs ReferralService) GetReferralDetails(user models.User) (*models.Referral
 		return referralDetails, errors.Wrap(err, "Error getting referral tiers from repository")
 	}
 
-	currentTierCommission := 0.0
+	currentTierCommission = 0.0
 	if user.ReferralTierLevel > 0 {
 		for _, tier := range referralTiers {
 			if tier.Level == int(user.ReferralTierLevel) {
@@ -66,7 +67,7 @@ func (rs ReferralService) GetReferralDetails(user models.User) (*models.Referral
 		return referralDetails, errors.Wrap(err, "Error getting referred users by user id")
 	}
 
-	referralDetails = &models.ReferralDetails{
+	referralDetails = models.ReferralDetails{
 		ReferralCode:          user.ReferralCode,
 		TotalEarnings:         totalEarnings,
 		CurrentTierCommission: currentTierCommission,
@@ -76,7 +77,7 @@ func (rs ReferralService) GetReferralDetails(user models.User) (*models.Referral
 	return referralDetails, nil
 }
 
-func (rs ReferralService) getReferredUsers(userID uint, referralID uint) ([]models.ReferredUser, error) {
+func (rs ReferralManager) getReferredUsers(userID uint, referralID uint) ([]models.ReferredUser, error) {
 	var (
 		err           error
 		users         []models.User
@@ -87,7 +88,7 @@ func (rs ReferralService) getReferredUsers(userID uint, referralID uint) ([]mode
 
 	users, err = rs.referralRepository.GetReferredUserByUserId(userID)
 	if err != nil {
-		return nil, errors.Wrap(err, "Error getting referred users by user id")
+		return referredUsers, errors.Wrap(err, "Error getting referred users by user id")
 	}
 
 	for _, user := range users {
