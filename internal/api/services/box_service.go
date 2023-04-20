@@ -32,3 +32,17 @@ func (b BoxService) FindByUUID(uuid string) (models.Box, error) {
 
 	return box, nil
 }
+
+func (b BoxService) Open(uuid string) (models.Box, error) {
+	var (
+		err error
+		box models.Box
+	)
+
+	box, err = b.boxRepository.FindByUUID(uuid)
+	if err != nil {
+		return box, err
+	}
+
+	return box, nil
+}

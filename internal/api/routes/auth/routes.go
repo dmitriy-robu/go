@@ -19,6 +19,8 @@ func get(router *gin.RouterGroup) {
 
 func post(router *gin.RouterGroup) {
 	router.POST("/referrals/store-code", controllers.ReferralController{}.StoreCode)
+
+	router.POST("/boxes/open/:uuid", controllers.BoxController{}.Open)
 }
 
 func put(router *gin.RouterGroup) {

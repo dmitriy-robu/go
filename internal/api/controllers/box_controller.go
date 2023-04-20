@@ -53,3 +53,26 @@ func (b BoxController) Show(c *gin.Context) {
 
 	c.JSON(http.StatusOK, boxResource)
 }
+
+func (b BoxController) Open(c *gin.Context) {
+	var (
+		err         error
+		box         models.Box
+		boxResource map[string]interface{}
+	)
+
+	box, err = b.BoxService.Open(c.Param("uuid"))
+
+	if err != nil {
+		b.errorHandler.HandleError(c, 500, err.Error(), err)
+		return
+	}
+
+	resource := resources.BoxResource{
+		Box: box,
+	}
+
+	boxResource = resource.ToJSON()
+
+	c.JSON(http.StatusOK, boxResource)
+}
