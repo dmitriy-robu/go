@@ -11,6 +11,12 @@ func Routes(router *gin.RouterGroup) {
 }
 
 func get(router *gin.RouterGroup) {
+	boxes := router.Group("/boxes")
+	{
+		boxes.GET("/", controllers.BoxController{}.Index)
+		boxes.GET("/:uuid", controllers.BoxController{}.Show)
+	}
+  
 	router.GET("/project-statistics", controllers.ProjectStatisticController{}.GetProjectStatistic)
 	router.GET("/provably-fair", func(c *gin.Context) {
 		c.JSON(200, gin.H{
