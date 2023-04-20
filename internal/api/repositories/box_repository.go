@@ -13,7 +13,7 @@ func (b BoxRepository) FindAll() models.Boxes {
 
 	MysqlDB.
 		Table("boxes").
-		Where("boxes.active", 1).
+		Where("boxes.active = ?", 1).
 		Find(&boxes)
 
 	return boxes
@@ -21,22 +21,17 @@ func (b BoxRepository) FindAll() models.Boxes {
 
 func (b BoxRepository) FindByUUID(uuid string) models.Box {
 	var (
-		box   models.Box
-		items []models.BoxItemShow
+		box models.Box
 	)
 
 	MysqlDB.
-		Where("boxes.active", 1).
-		Where("boxes.uuid", uuid).
-		First(&box)
+		Preload("BoxItem.Item").
+		Table("boxes").
+		Where("boxes.active = ?", 1).
+		Where("boxes.uuid = ?", uuid).
+		Find(&box)
 
-	MysqlDB.
-		Preload("Item").
-		Table("box_items").
-		Where("box_items.box_id", box.ID).
-		Find(&items)
-
-	log.Printf("items: %v", items)
+	log.Printf("items: %v", box)
 
 	return box
 }
