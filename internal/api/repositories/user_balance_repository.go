@@ -40,3 +40,13 @@ func (ubr UserBalanceRepository) CreateUserBalance(userID uint) error {
 
 	return nil
 }
+
+func (ubr UserBalanceRepository) UpdateUserBalance(userBalance models.UserBalance) error {
+	var err error
+
+	if err = MysqlDB.Save(&userBalance).Error; err != nil {
+		return errors.Wrap(err, "Error updating user balance")
+	}
+
+	return nil
+}
