@@ -3,7 +3,6 @@ package services
 import (
 	"go-rust-drop/config"
 	"go-rust-drop/internal/api/models"
-	"log"
 	"math/rand"
 	"strconv"
 	"time"
@@ -21,13 +20,13 @@ func (psm ProjectStatisticsManager) GetStatistics() models.ProjectStatistic {
 	var projectStatistic models.ProjectStatistic
 
 	projectStatisticConfig := config.SetProjectStatistic()
-	log.Println(projectStatisticConfig.OpenedCasesStartValue)
+
 	projectStatistic = models.ProjectStatistic{
 		CasesOpened: psm.getOpenedCases(projectStatisticConfig.OpenedCasesStartValue),
 		TotalUsers:  psm.getTotalUsers(projectStatisticConfig.TotalUsersStartValue),
 		OnlineUsers: psm.getOnlineUsers(projectStatisticConfig.OnlineUsersStartValue),
 	}
-	log.Println(projectStatistic.CasesOpened)
+
 	return projectStatistic
 }
 
@@ -38,9 +37,9 @@ func newRand() *rand.Rand {
 func (psm ProjectStatisticsManager) getOpenedCases(startValueOpenedCases int) int {
 	timeNow := time.Now().Unix()
 	lastThreeNumbersFromTimestamp, _ := strconv.Atoi(strconv.FormatInt(timeNow, 10)[len(strconv.FormatInt(timeNow, 10))-3:])
-	dividedCurrentTime := float64(timeNow) / DividerForOpenedCaseTime
+	dividedCurrentTime := int(float64(timeNow) / DividerForOpenedCaseTime)
 
-	return startValueOpenedCases + (lastThreeNumbersFromTimestamp + int(dividedCurrentTime))
+	return startValueOpenedCases + lastThreeNumbersFromTimestamp + dividedCurrentTime
 }
 
 func (psm ProjectStatisticsManager) getTotalUsers(startValueTotalUsers int) int {
