@@ -5,11 +5,11 @@ import (
 	"go-rust-drop/internal/api/repositories"
 )
 
-type BoxService struct {
+type BoxManager struct {
 	boxRepository repositories.BoxRepository
 }
 
-func (b BoxService) FindAll() models.Boxes {
+func (b BoxManager) FindAll() models.Boxes {
 	var (
 		boxes models.Boxes
 	)
@@ -19,7 +19,7 @@ func (b BoxService) FindAll() models.Boxes {
 	return boxes
 }
 
-func (b BoxService) FindByUUID(uuid string) (models.Box, error) {
+func (b BoxManager) FindByUUID(uuid string) (models.Box, error) {
 	var (
 		err error
 		box models.Box
@@ -33,7 +33,7 @@ func (b BoxService) FindByUUID(uuid string) (models.Box, error) {
 	return box, nil
 }
 
-func (b BoxService) Open(uuid string) (models.Box, error) {
+func (b BoxManager) Open(uuid string) (models.Box, error) {
 	var (
 		err error
 		box models.Box

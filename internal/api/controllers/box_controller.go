@@ -11,7 +11,7 @@ import (
 
 type BoxController struct {
 	errorHandler utils.Errors
-	BoxService   services.BoxService
+	BoxManager   services.BoxManager
 }
 
 func (b BoxController) Index(c *gin.Context) {
@@ -20,7 +20,7 @@ func (b BoxController) Index(c *gin.Context) {
 		boxesResource []map[string]interface{}
 	)
 
-	boxes = b.BoxService.FindAll()
+	boxes = b.BoxManager.FindAll()
 
 	resource := resources.BoxesResource{
 		Boxes: boxes,
@@ -38,7 +38,7 @@ func (b BoxController) Show(c *gin.Context) {
 		boxResource map[string]interface{}
 	)
 
-	box, err = b.BoxService.FindByUUID(c.Param("uuid"))
+	box, err = b.BoxManager.FindByUUID(c.Param("uuid"))
 
 	if err != nil {
 		b.errorHandler.HandleError(c, 404, err.Error(), err)
@@ -61,7 +61,7 @@ func (b BoxController) Open(c *gin.Context) {
 		boxResource map[string]interface{}
 	)
 
-	box, err = b.BoxService.Open(c.Param("uuid"))
+	box, err = b.BoxManager.Open(c.Param("uuid"))
 
 	if err != nil {
 		b.errorHandler.HandleError(c, 500, err.Error(), err)
