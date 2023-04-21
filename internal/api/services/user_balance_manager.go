@@ -7,36 +7,36 @@ import (
 )
 
 type UserBalanceManager struct {
-	userRepository        repositories.UserRepository
+	user                  models.User
 	userBalanceRepository repositories.UserBalanceRepository
 }
 
-func (ubm UserBalanceManager) AddBalance(user models.User, amount int) error {
+func (ubm UserBalanceManager) AddBalance(amount int) error {
 	var (
 		err error
 	)
 
-	user.UserBalance.Balance += amount
+	ubm.user.UserBalance.Balance += amount
 
-	if err = ubm.userBalanceRepository.UpdateUserBalance(user.UserBalance); err != nil {
+	if err = ubm.userBalanceRepository.UpdateUserBalance(ubm.user.UserBalance); err != nil {
 		return errors.Wrap(err, "Error updating user balance")
 	}
 
 	return nil
 }
 
-func (ubm UserBalanceManager) SubtractBalance(user models.User, amount int) error {
+func (ubm UserBalanceManager) SubtractBalance(amount int) error {
 	var (
 		err error
 	)
 
-	if user.UserBalance.Balance < amount {
+	if ubm.user.UserBalance.Balance < amount {
 		return errors.New("Insufficient user balance")
 	}
 
-	user.UserBalance.Balance -= amount
+	ubm.user.UserBalance.Balance -= amount
 
-	if err = ubm.userBalanceRepository.UpdateUserBalance(user.UserBalance); err != nil {
+	if err = ubm.userBalanceRepository.UpdateUserBalance(ubm.user.UserBalance); err != nil {
 		return errors.Wrap(err, "Error updating user balance")
 	}
 
