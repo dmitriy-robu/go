@@ -21,8 +21,11 @@ func RouteHandle(router *gin.Engine) {
 	}
 	router.Use(sessions.Sessions("session_name", store))
 
-	router.GET("/auth/steam/login", controllers.SteamAuthController{}.Login)
-	router.GET("/auth/steam/callback", controllers.SteamAuthController{}.Callback)
+	authSteam := router.Group("/auth/steam")
+	{
+		authSteam.GET("/login", controllers.SteamAuthController{}.Login)
+		authSteam.GET("/callback", controllers.SteamAuthController{}.Callback)
+	}
 
 	publicGroup := router.Group("/api/v1")
 	public.Routes(publicGroup)

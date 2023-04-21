@@ -3,9 +3,11 @@ package repositories
 import (
 	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/models"
+	"gorm.io/gorm"
 )
 
 type BoxRepository struct {
+	MysqlDB *gorm.DB
 }
 
 func (b BoxRepository) FindAll() models.Boxes {
@@ -13,7 +15,7 @@ func (b BoxRepository) FindAll() models.Boxes {
 		boxes models.Boxes
 	)
 
-	MysqlDB.
+	b.MysqlDB.
 		Preload("BoxItem.Item").
 		Table("boxes").
 		Where("boxes.active = ?", 1).
@@ -28,7 +30,7 @@ func (b BoxRepository) FindByUUID(uuid string) (models.Box, error) {
 		box models.Box
 	)
 
-	err = MysqlDB.
+	err = b.MysqlDB.
 		Preload("BoxItems.Item").
 		Table("boxes").
 		Where("boxes.uuid = ?", uuid).

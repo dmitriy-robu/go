@@ -7,13 +7,14 @@ import (
 )
 
 type UserBalanceRepository struct {
+	MysqlDB *gorm.DB
 }
 
 func (ubr UserBalanceRepository) GetUserBalanceByUserId(userID uint64) (models.UserBalance, error) {
 	var err error
 	var userBalance models.UserBalance
 
-	if err = MysqlDB.Where("id = ?", userID).First(&userBalance).Error; err != nil {
+	if err = ubr.MysqlDB.Where("id = ?", userID).First(&userBalance).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return userBalance, errors.Wrap(err, "User balance not found")
 		}
@@ -34,7 +35,7 @@ func (ubr UserBalanceRepository) CreateUserBalance(userID uint) error {
 		Balance: 0,
 	}
 
-	if err = MysqlDB.Create(&userBalance).Error; err != nil {
+	if err = ubr.MysqlDB.Create(&userBalance).Error; err != nil {
 		return errors.Wrap(err, "Error creating user balance")
 	}
 
@@ -44,7 +45,7 @@ func (ubr UserBalanceRepository) CreateUserBalance(userID uint) error {
 func (ubr UserBalanceRepository) UpdateUserBalance(userBalance models.UserBalance) error {
 	var err error
 
-	if err = MysqlDB.Save(&userBalance).Error; err != nil {
+	if err = ubr.MysqlDB.Save(&userBalance).Error; err != nil {
 		return errors.Wrap(err, "Error updating user balance")
 	}
 

@@ -16,6 +16,8 @@ func (ubm UserBalanceManager) AddBalance(amount int) error {
 		err error
 	)
 
+	ubm.userBalanceRepository.MysqlDB = MysqlDB
+
 	ubm.user.UserBalance.Balance += amount
 
 	if err = ubm.userBalanceRepository.UpdateUserBalance(ubm.user.UserBalance); err != nil {
@@ -29,6 +31,8 @@ func (ubm UserBalanceManager) SubtractBalance(amount int) error {
 	var (
 		err error
 	)
+
+	ubm.userBalanceRepository.MysqlDB = MysqlDB
 
 	if ubm.user.UserBalance.Balance < amount {
 		return errors.New("Insufficient user balance")

@@ -14,7 +14,7 @@ import (
 )
 
 type UserInventoryManager struct {
-	userRepo repositories.UserRepository
+	userRepository repositories.UserRepository
 }
 
 func (uis UserInventoryManager) GetInventoryForUser(userUUID string) (models.InventoryData, error) {
@@ -24,7 +24,9 @@ func (uis UserInventoryManager) GetInventoryForUser(userUUID string) (models.Inv
 		inventory models.InventoryData
 	)
 
-	userAuth, err = uis.userRepo.GetUserAuthByUserUUID(userUUID)
+	uis.userRepository.MysqlDB = MysqlDB
+
+	userAuth, err = uis.userRepository.GetUserAuthByUserUUID(userUUID)
 	if err != nil {
 		return models.InventoryData{}, errors.Wrap(err, "Error getting user auth")
 	}

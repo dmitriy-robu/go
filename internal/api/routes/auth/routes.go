@@ -12,17 +12,26 @@ func Routes(router *gin.RouterGroup) {
 }
 
 func get(router *gin.RouterGroup) {
-	router.GET("/users/info", controllers.UserController{}.UserInfo)
-	router.GET("/users/inventory", controllers.UserController{}.UserInventory)
-	router.GET("/users/updatable-fields", controllers.UserController{}.GetUpdatableFields)
+	user := router.Group("/users")
+	{
+		user.GET("/info", controllers.UserController{}.UserInfo)
+		user.GET("/inventory", controllers.UserController{}.UserInventory)
+		user.GET("/updatable-fields", controllers.UserController{}.GetUpdatableFields)
+	}
 	router.GET("/referrals/details", controllers.ReferralController{}.Details)
 }
 
 func post(router *gin.RouterGroup) {
 	router.POST("/users/set-trade-url", controllers.UserController{}.StoreSteamTradeURL)
 	router.POST("/referrals/store-code", controllers.ReferralController{}.StoreCode)
-
 	router.POST("/boxes/open/:uuid", controllers.BoxController{}.Open)
+
+	caseBattle := router.Group("/case-battles")
+	{
+		caseBattle.POST("/create", controllers.CaseBattleController{}.Create)
+		caseBattle.POST("/:uuid/join", controllers.CaseBattleController{}.Join)
+		caseBattle.POST("/:uuid/start", controllers.CaseBattleController{}.Start)
+	}
 }
 
 func put(router *gin.RouterGroup) {

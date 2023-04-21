@@ -30,6 +30,9 @@ func (us UserManager) CreateOrUpdateSteamUser(userGoth goth.User) (string, error
 		userAuthSteam models.UserAuthSteam
 	)
 
+	us.userRepository.MysqlDB = MysqlDB
+	us.userBalanceRepository.MysqlDB = MysqlDB
+
 	now = time.Now()
 
 	user = models.User{
@@ -98,6 +101,8 @@ func (us UserManager) GetUserById(userID uint) (models.User, error) {
 		getUser models.User
 	)
 
+	us.userRepository.MysqlDB = MysqlDB
+
 	getUser, err = us.userRepository.FindUserByID(userID)
 	if err != nil {
 		return getUser, errors.Wrap(err, "An error occurred while retrieving user information")
@@ -111,6 +116,8 @@ func (us UserManager) AuthUser(c *gin.Context) (models.User, error) {
 		err  error
 		user models.User
 	)
+
+	us.userRepository.MysqlDB = MysqlDB
 
 	userUuid, ok := c.MustGet("userUuid").(string)
 	if !ok {
@@ -131,6 +138,8 @@ func (us UserManager) GetUserWithBalance(user models.User) (models.User, error) 
 		userWithBalance models.User
 	)
 
+	us.userRepository.MysqlDB = MysqlDB
+
 	userWithBalance, err = us.userRepository.GetUserByIdWithBalance(user.ID)
 	if err != nil {
 		return userWithBalance, errors.Wrap(err, "An error occurred while retrieving user information")
@@ -141,6 +150,8 @@ func (us UserManager) GetUserWithBalance(user models.User) (models.User, error) 
 
 func (us UserManager) StoreSteamTradeURL(user models.User, store requests.StoreUserSteamTradeURL) error {
 	var err error
+
+	us.userRepository.MysqlDB = MysqlDB
 
 	if user.ReferralCode != nil {
 		return errors.New("Referral code already exists")

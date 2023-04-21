@@ -12,6 +12,7 @@ import (
 )
 
 type UserRepository struct {
+	MysqlDB *gorm.DB
 }
 
 func (ur UserRepository) FindUserByID(userID uint) (models.User, error) {
@@ -20,7 +21,7 @@ func (ur UserRepository) FindUserByID(userID uint) (models.User, error) {
 		user models.User
 	)
 
-	if err = MysqlDB.Where("id = ?", userID).First(&user).Error; err != nil {
+	if err = ur.MysqlDB.Where("id = ?", userID).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return user, errors.Wrap(err, "User not found")
 		}
@@ -33,7 +34,7 @@ func (ur UserRepository) FindUserByID(userID uint) (models.User, error) {
 func (ur UserRepository) UpdateUserBalance(userID uint64, newBalance float64) error {
 	var err error
 
-	if err = MysqlDB.Model(&models.UserBalance{}).Where("user_id = ?", userID).Update("balance", newBalance).Error; err != nil {
+	if err = ur.MysqlDB.Model(&models.UserBalance{}).Where("user_id = ?", userID).Update("balance", newBalance).Error; err != nil {
 		return err
 	}
 
@@ -43,7 +44,7 @@ func (ur UserRepository) UpdateUserBalance(userID uint64, newBalance float64) er
 func (ur UserRepository) CreateUser(user models.User) (models.User, error) {
 	var err error
 
-	if err = MysqlDB.Create(&user).Error; err != nil {
+	if err = ur.MysqlDB.Create(&user).Error; err != nil {
 		return models.User{}, err
 	}
 
@@ -53,7 +54,7 @@ func (ur UserRepository) CreateUser(user models.User) (models.User, error) {
 func (ur UserRepository) UpdateUser(user models.User) (models.User, error) {
 	var err error
 
-	if err = MysqlDB.Save(&user).Error; err != nil {
+	if err = ur.MysqlDB.Save(&user).Error; err != nil {
 		return user, errors.Wrap(err, "Error updating user")
 	}
 
@@ -160,7 +161,7 @@ func (ur UserRepository) GetUserByUuid(uuid string) (models.User, error) {
 		user models.User
 	)
 
-	if err = MysqlDB.Where("uuid = ?", uuid).First(&user).Error; err != nil {
+	if err = ur.MysqlDB.Where("uuid = ?", uuid).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return user, errors.Wrap(err, "User not found")
 		}
@@ -176,7 +177,7 @@ func (ur UserRepository) GetUserByIdWithBalance(userID uint) (models.User, error
 		user models.User
 	)
 
-	if err = MysqlDB.Preload("UserBalance").Where("id = ?", userID).First(&user).Error; err != nil {
+	if err = ur.MysqlDB.Preload("UserBalance").Where("id = ?", userID).First(&user).Error; err != nil {
 		return user, errors.Wrap(err, "Error finding user with balance")
 	}
 
@@ -186,7 +187,7 @@ func (ur UserRepository) GetUserByIdWithBalance(userID uint) (models.User, error
 func (ur UserRepository) StoreSteamTradeURLToUser(user models.User, steamTradeURL string) error {
 	var err error
 
-	if err = MysqlDB.Model(user).Update("steam_trade_url", steamTradeURL).Error; err != nil {
+	if err = ur.MysqlDB.Model(user).Update("steam_trade_url", steamTradeURL).Error; err != nil {
 		return errors.Wrap(err, "Error updating user with steam trade url")
 	}
 
