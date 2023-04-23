@@ -149,7 +149,7 @@ func (uis UserInventoryManager) mapResponseToAssetData(
 
 			parsedAssets = append(parsedAssets, models.AssetData{
 				AssetID:         assetID,
-				Amount:          amount,
+				Amount:          uint(amount),
 				Name:            description["name"].(string),
 				ClassID:         classID,
 				MarketHashName:  marketHashName,
@@ -158,7 +158,7 @@ func (uis UserInventoryManager) mapResponseToAssetData(
 				BackgroundColor: backgroundColor,
 				IconURL:         iconURL,
 				IconURLLarge:    iconURLLarge,
-				Price:           price,
+				Price:           uint(price),
 			})
 		}
 	}

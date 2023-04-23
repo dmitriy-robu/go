@@ -10,6 +10,8 @@ type ReferralTier struct {
 	RecommendedPersons  int     `gorm:"column:recommended_persons"`
 }
 
+type ReferralTransactions []ReferralTransaction
+
 type ReferralTransaction struct {
 	ID         uint `gorm:"primaryKey"`
 	ReferralID uint `gorm:"column:referral_id"`
@@ -24,16 +26,16 @@ type Referral struct {
 }
 
 type ReferralDetails struct {
-	ReferralCode          *string        `json:"referral_code"`
-	TotalEarnings         int            `json:"total_earnings"`
+	ReferralCode          string         `json:"referral_code"`
+	TotalEarnings         uint           `json:"total_earnings"`
 	CurrentTierCommission float64        `json:"current_tier_commission"`
 	ReferredUsers         []ReferredUser `json:"referred_users"`
 }
 
 type ReferredUser struct {
 	Name              string
-	TotalEarnings     int
+	TotalEarnings     uint
 	EarningCommission float64
-	CurrentTier       uint
+	CurrentTier       uint8
 	CreatedAt         time.Time
 }

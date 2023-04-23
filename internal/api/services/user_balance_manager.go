@@ -13,7 +13,7 @@ type UserBalanceManager struct {
 	userBalanceRepository repositories.UserBalanceRepository
 }
 
-func (ubm UserBalanceManager) AddBalance(amount int) utils.Errors {
+func (ubm UserBalanceManager) AddBalance(amount uint) utils.Errors {
 	var (
 		err error
 	)
@@ -33,7 +33,7 @@ func (ubm UserBalanceManager) AddBalance(amount int) utils.Errors {
 	return utils.Errors{}
 }
 
-func (ubm UserBalanceManager) SubtractBalance(amount int) utils.Errors {
+func (ubm UserBalanceManager) SubtractBalance(amount uint) utils.Errors {
 	var (
 		err error
 	)

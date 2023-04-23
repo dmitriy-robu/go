@@ -10,7 +10,6 @@ import (
 	"go-rust-drop/internal/api/requests"
 	"go-rust-drop/internal/api/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
 	"time"
 )
@@ -37,8 +36,8 @@ func (us UserManager) CreateOrUpdateSteamUser(userGoth goth.User) (string, utils
 	now = time.Now()
 
 	user = models.User{
-		AvatarURL: &userGoth.AvatarURL,
-		Name:      &userGoth.NickName,
+		AvatarURL: userGoth.AvatarURL,
+		Name:      userGoth.NickName,
 		UpdatedAt: now,
 	}
 
@@ -50,14 +49,6 @@ func (us UserManager) CreateOrUpdateSteamUser(userGoth goth.User) (string, utils
 	userAuth, err = us.userRepository.FindUserAuthBySteamID(userGoth.UserID)
 
 	if err != nil {
-		if err != mongo.ErrNoDocuments {
-			return "", utils.Errors{
-				Code:    http.StatusInternalServerError,
-				Message: "Error getting user auth",
-				Err:     err,
-			}
-		}
-
 		newUUID, _ = uuid.NewRandom()
 
 		user.UUID = newUUID.String()
@@ -161,7 +152,7 @@ func (us UserManager) AuthUser(c *gin.Context) (models.User, utils.Errors) {
 	user, err = us.userRepository.GetUserByUuid(userUuid)
 	if err != nil {
 		return user, utils.Errors{
-			Code:    401,
+			Code:    http.StatusUnauthorized,
 			Message: "Unauthorized",
 			Err:     err,
 		}
@@ -197,9 +188,9 @@ func (us UserManager) StoreSteamTradeURL(user models.User, store requests.StoreU
 
 	us.userRepository.MysqlDB = MysqlDB
 
-	if user.ReferralCode != nil {
+	if user.ReferralCode != "" {
 		return utils.Errors{
-			Code:    400,
+			Code:    http.StatusBadRequest,
 			Message: "You already have a referral code",
 			Err:     err,
 		}

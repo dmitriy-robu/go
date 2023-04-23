@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 )
 
 type Errors struct {
@@ -33,7 +34,7 @@ func (e *Errors) HandleError(c *gin.Context) {
 	}
 }
 
-func (mc MoneyConvert) FromCentsToVault(value int) string {
+func (mc MoneyConvert) FromCentsToVault(value uint) string {
 	if value <= 0 {
 		return "0"
 	}
@@ -68,4 +69,8 @@ func (e Environment) GetEnvOrDefault(key string, defaultValue interface{}) inter
 	default:
 		return defaultValue
 	}
+}
+
+func GetTimeNow() time.Time {
+	return time.Now()
 }

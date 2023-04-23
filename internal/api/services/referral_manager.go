@@ -18,7 +18,7 @@ func (rs ReferralManager) StoreReferralCode(user models.User, store requests.Sto
 		err error
 	)
 
-	if user.ReferralCode != nil {
+	if user.ReferralCode != "" {
 		return models.User{}, utils.Errors{
 			Code:    http.StatusBadRequest,
 			Message: "User already has a referral code",
@@ -45,7 +45,7 @@ func (rs ReferralManager) GetReferralDetails(user models.User) (models.ReferralD
 		err                   error
 		referralTiers         []models.ReferralTier
 		referral              models.Referral
-		totalEarnings         int
+		totalEarnings         uint
 		referredUsers         []models.ReferredUser
 		referralDetails       models.ReferralDetails
 		currentTierCommission float64
@@ -113,7 +113,7 @@ func (rs ReferralManager) getReferredUsers(userID uint, referralID uint) ([]mode
 		referredUser  models.ReferredUser
 		referredUsers []models.ReferredUser
 		commission    float64
-		sum           int
+		sum           uint
 		user          models.User
 	)
 
@@ -140,7 +140,7 @@ func (rs ReferralManager) getReferredUsers(userID uint, referralID uint) ([]mode
 		}
 
 		referredUser = models.ReferredUser{
-			Name:              *user.Name,
+			Name:              user.Name,
 			TotalEarnings:     sum,
 			EarningCommission: commission,
 			CurrentTier:       user.ReferralTierLevel,

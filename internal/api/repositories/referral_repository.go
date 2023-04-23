@@ -62,10 +62,10 @@ func (rr ReferralRepository) GetReferralTransactionsByReferralId(referralID uint
 	return referralTransactions, nil
 }
 
-func (rr ReferralRepository) GetReferralTransactionSumByReferralId(referralID uint) (int, error) {
+func (rr ReferralRepository) GetReferralTransactionSumByReferralId(referralID uint) (uint, error) {
 	var (
 		err error
-		sum int
+		sum uint
 	)
 
 	if err = rr.MysqlDB.Model(&models.ReferralTransaction{}).Where("referral_id = ?", referralID).Select("SUM(amount)").Scan(&sum).Error; err != nil {
@@ -88,7 +88,7 @@ func (rr ReferralRepository) GetReferredUserByUserId(userID uint) ([]models.User
 	return referredUsers, nil
 }
 
-func (rr ReferralRepository) GetReferralTierCommissionByReferralTierLevel(level uint) (float64, error) {
+func (rr ReferralRepository) GetReferralTierCommissionByReferralTierLevel(level uint8) (float64, error) {
 	var (
 		err          error
 		referralTier models.ReferralTier

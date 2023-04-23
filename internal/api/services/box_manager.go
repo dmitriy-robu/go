@@ -8,7 +8,7 @@ import (
 )
 
 type BoxManager struct {
-	boxRepository repositories.BoxRepository
+	BoxRepository repositories.BoxRepository
 }
 
 func (b BoxManager) FindAllWithItems() models.Boxes {
@@ -16,9 +16,9 @@ func (b BoxManager) FindAllWithItems() models.Boxes {
 		boxes models.Boxes
 	)
 
-	b.boxRepository.MysqlDB = MysqlDB
+	b.BoxRepository.MysqlDB = MysqlDB
 
-	boxes = b.boxRepository.FindAllWithItems()
+	boxes = b.BoxRepository.FindAllWithItems()
 
 	return boxes
 }
@@ -29,9 +29,9 @@ func (b BoxManager) FindByUUIDWithItems(uuid string) (models.Box, utils.Errors) 
 		box models.Box
 	)
 
-	b.boxRepository.MysqlDB = MysqlDB
+	b.BoxRepository.MysqlDB = MysqlDB
 
-	box, err = b.boxRepository.FindByUUIDWithItems(uuid)
+	box, err = b.BoxRepository.FindByUUIDWithItems(uuid)
 	if err != nil {
 		return box, utils.Errors{
 			Code:    http.StatusNotFound,
@@ -49,9 +49,9 @@ func (b BoxManager) Open(uuid string) (models.Box, utils.Errors) {
 		box models.Box
 	)
 
-	b.boxRepository.MysqlDB = MysqlDB
+	b.BoxRepository.MysqlDB = MysqlDB
 
-	box, err = b.boxRepository.FindByUUIDWithItems(uuid)
+	box, err = b.BoxRepository.FindByUUIDWithItems(uuid)
 	if err != nil {
 		return box, utils.Errors{
 			Code:    http.StatusNotFound,

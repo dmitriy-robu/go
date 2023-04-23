@@ -7,7 +7,7 @@ type InventoryData struct {
 
 type AssetData struct {
 	AssetID         string
-	Amount          int
+	Amount          uint
 	Name            string
 	ClassID         string
 	MarketHashName  string
@@ -16,5 +16,5 @@ type AssetData struct {
 	BackgroundColor string
 	IconURL         string
 	IconURLLarge    string
-	Price           int
+	Price           uint
 }

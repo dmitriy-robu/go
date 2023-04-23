@@ -9,7 +9,7 @@ type LevelManager struct {
 	levelRepository repositories.LevelRepository
 }
 
-func (ls LevelManager) GetLevelForByExperience(experience int) models.Level {
+func (ls LevelManager) GetLevelForByExperience(experience uint64) models.Level {
 	var (
 		err   error
 		level models.Level

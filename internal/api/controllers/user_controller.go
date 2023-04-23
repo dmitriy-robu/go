@@ -152,7 +152,7 @@ func (u UserController) GetUpdatableFields(c *gin.Context) {
 		return
 	}
 
-	userLevel = u.levelManager.GetLevelForByExperience(*user.Experience)
+	userLevel = u.levelManager.GetLevelForByExperience(user.Experience)
 
 	userUpdatableFieldsResource = resources.UserUpdatableFieldsResource{
 		User:  userWithBalance,

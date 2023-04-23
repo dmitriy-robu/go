@@ -9,7 +9,7 @@ type LevelRepository struct {
 	MysqlDB *gorm.DB
 }
 
-func (lr LevelRepository) GetLevelByExperience(experience int) (models.Level, error) {
+func (lr LevelRepository) GetLevelByExperience(experience uint64) (models.Level, error) {
 	var (
 		err   error
 		level models.Level
