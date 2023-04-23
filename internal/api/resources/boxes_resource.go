@@ -19,7 +19,7 @@ func (b BoxesResource) ToJSON() []map[string]interface{} {
 			"title":     box.Title,
 			"image":     box.Image,
 			"alt_image": box.AltImage,
-			"price":     box.Price,
+			"price":     b.moneyConvert.FromCentsToVault(box.Price),
 		}
 
 		boxesResource = append(boxesResource, boxResource)
