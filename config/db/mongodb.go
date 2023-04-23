@@ -11,6 +11,7 @@ type MongoDBConfig struct {
 	DBName        string
 	AuthDatabase  string
 	AuthMechanism string
+	ReplicaSet    string
 }
 
 func SetMongoDBConfig() MongoDBConfig {
@@ -22,5 +23,6 @@ func SetMongoDBConfig() MongoDBConfig {
 		DBName:        os.Getenv("MONGODB_DBNAME"),
 		AuthDatabase:  os.Getenv("MONGODB_AUTH_DATABASE"),
 		AuthMechanism: os.Getenv("MONGODB_AUTH_MECHANISM"),
+		ReplicaSet:    os.Getenv("MONGODB_REPLICA_SET"),
 	}
 }

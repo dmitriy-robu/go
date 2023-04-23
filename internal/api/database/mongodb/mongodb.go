@@ -26,10 +26,18 @@ type Client struct {
 }
 
 func GetMongoDBConnection() (*Client, error) {
-	mongodbConfig := db.SetMongoDBConfig()
+	var (
+		err           error
+		mongodbConfig db.MongoDBConfig
+		uri           string
+		client        *mongo.Client
+		mongoDBClient *Client
+	)
+
+	mongodbConfig = db.SetMongoDBConfig()
 
 	onceDBMongoDB.Do(func() {
-		uri := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s?authMechanism=%s&authSource=%s",
+		uri = fmt.Sprintf("mongodb://%s:%s@%s:%s/%s?authMechanism=%s&authSource=%s&replicaSet=%s",
 			mongodbConfig.User,
 			url.QueryEscape(mongodbConfig.Password),
 			mongodbConfig.Host,
@@ -37,10 +45,10 @@ func GetMongoDBConnection() (*Client, error) {
 			mongodbConfig.DBName,
 			mongodbConfig.AuthMechanism,
 			mongodbConfig.AuthDatabase,
+			mongodbConfig.ReplicaSet,
 		)
 
-		var err error
-		client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
+		client, err = mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
 		if err != nil {
 			mongoConnection = nil
 		} else {
@@ -52,7 +60,7 @@ func GetMongoDBConnection() (*Client, error) {
 		return nil, errors.New("Failed to connect to MongoDB")
 	}
 
-	mongoDBClient := &Client{
+	mongoDBClient = &Client{
 		Client:   mongoConnection,
 		Database: mongodbConfig.DBName,
 	}
@@ -61,7 +69,12 @@ func GetMongoDBConnection() (*Client, error) {
 }
 
 func GetCollectionByName(collectionName string) (*mongo.Collection, error) {
-	mongoDBClient, err := GetMongoDBConnection()
+	var (
+		err           error
+		mongoDBClient *Client
+	)
+
+	mongoDBClient, err = GetMongoDBConnection()
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting MongoDB connection")
 	}
@@ -73,8 +86,15 @@ func (m *Client) GetCollection(collectionName string) *mongo.Collection {
 	return m.Client.Database(m.Database).Collection(collectionName)
 }
 
-func InitMongoSessionStore() (store sessions.Store, err error) {
-	secretKey := os.Getenv("SESSION_SECRET")
+func InitMongoSessionStore() (sessions.Store, error) {
+	var (
+		secretKey  string
+		collection *mongo.Collection
+		store      sessions.Store
+		err        error
+	)
+
+	secretKey = os.Getenv("SESSION_SECRET")
 	if secretKey == "" {
 		return nil, errors.New("key is not set")
 	}
@@ -84,7 +104,7 @@ func InitMongoSessionStore() (store sessions.Store, err error) {
 	_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	collection, err := GetCollectionByName(collectionName)
+	collection, err = GetCollectionByName(collectionName)
 	if err != nil {
 		return nil, err
 	}
