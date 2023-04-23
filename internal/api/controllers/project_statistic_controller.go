@@ -10,7 +10,6 @@ import (
 )
 
 type ProjectStatisticController struct {
-	errorHandler            utils.Errors
 	ProjectStatisticManager services.ProjectStatisticsManager
 }
 
@@ -18,6 +17,7 @@ func (psc ProjectStatisticController) GetProjectStatistic(c *gin.Context) {
 	var (
 		projectStatistic         models.ProjectStatistic
 		projectStatisticResource resources.ProjectStatisticResource
+		errorHandler             utils.Errors
 	)
 
 	projectStatistic = psc.ProjectStatisticManager.GetStatistics()
@@ -28,7 +28,12 @@ func (psc ProjectStatisticController) GetProjectStatistic(c *gin.Context) {
 
 	projectStatisticJSON, err := projectStatisticResource.ToJSON()
 	if err != nil {
-		psc.errorHandler.HandleError(c, http.StatusInternalServerError, "Error converting project statistic to JSON", err)
+		errorHandler = utils.Errors{
+			Code:    http.StatusInternalServerError,
+			Message: "Error converting project statistic to JSON",
+			Err:     err,
+		}
+		errorHandler.HandleError(c)
 		return
 	}
 
