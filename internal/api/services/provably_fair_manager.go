@@ -7,15 +7,15 @@ import (
 	"encoding/hex"
 	"fmt"
 	"go-rust-drop/internal/api/models"
+	"go-rust-drop/internal/api/utils"
 	"strconv"
 )
 
 type ProvablyFairManager struct {
 }
 
-func (pfs *ProvablyFairManager) GetProvablyFair(provablyFair *models.ProvablyFair) error {
+func (pfs *ProvablyFairManager) GetProvablyFair(provablyFair *models.ProvablyFair) utils.Errors {
 	var (
-		err          error
 		message      string
 		hash         []byte
 		partOfHash   string
@@ -23,29 +23,20 @@ func (pfs *ProvablyFairManager) GetProvablyFair(provablyFair *models.ProvablyFai
 		randomNumber float64
 	)
 
-	provablyFair.ServerSeed, err = generateRandomSeed(64)
-	if err != nil {
-		return err
-	}
+	provablyFair.ServerSeed, _ = generateRandomSeed(64)
 
 	provablyFair.Nonce++
 	provablyFair.MinChance = 0.00
 
 	if provablyFair.ClientSeed == "" {
-		provablyFair.ClientSeed, err = generateRandomSeed(64)
-		if err != nil {
-			return err
-		}
+		provablyFair.ClientSeed, _ = generateRandomSeed(64)
 	}
 
 	message = fmt.Sprintf("%s-%d", provablyFair.ClientSeed, provablyFair.Nonce)
 	hash = createHmac(provablyFair.ServerSeed, message)
 
 	partOfHash = hex.EncodeToString(hash)[:5]
-	decimal, err = strconv.ParseUint(partOfHash, 16, 64)
-	if err != nil {
-		return err
-	}
+	decimal, _ = strconv.ParseUint(partOfHash, 16, 64)
 
 	const maxHexValue float64 = 1048575
 	randomNumber = float64(decimal) / maxHexValue
@@ -53,7 +44,7 @@ func (pfs *ProvablyFairManager) GetProvablyFair(provablyFair *models.ProvablyFai
 
 	provablyFair.RandomNumber = randomNumber
 
-	return nil
+	return utils.Errors{}
 }
 
 func generateRandomSeed(length int) (string, error) {

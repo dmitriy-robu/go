@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/markbates/goth"
@@ -9,8 +8,10 @@ import (
 	"go-rust-drop/internal/api/models"
 	"go-rust-drop/internal/api/repositories"
 	"go-rust-drop/internal/api/requests"
+	"go-rust-drop/internal/api/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"net/http"
 	"time"
 )
 
@@ -20,7 +21,7 @@ type UserManager struct {
 	levelRepository       repositories.LevelRepository
 }
 
-func (us UserManager) CreateOrUpdateSteamUser(userGoth goth.User) (string, error) {
+func (us UserManager) CreateOrUpdateSteamUser(userGoth goth.User) (string, utils.Errors) {
 	var (
 		err           error
 		user          models.User
@@ -50,23 +51,32 @@ func (us UserManager) CreateOrUpdateSteamUser(userGoth goth.User) (string, error
 
 	if err != nil {
 		if err != mongo.ErrNoDocuments {
-			return "", errors.Wrap(err, "Error finding user by SteamID")
+			return "", utils.Errors{
+				Code:    http.StatusInternalServerError,
+				Message: "Error getting user auth",
+				Err:     err,
+			}
 		}
 
-		newUUID, err = uuid.NewRandom()
-		if err != nil {
-			return "", errors.Wrap(err, "Error generating UUID")
-		}
+		newUUID, _ = uuid.NewRandom()
 
 		user.UUID = newUUID.String()
 		user.CreatedAt = now
 
 		if user, err = us.userRepository.CreateUser(user); err != nil {
-			return "", errors.Wrap(err, "Error creating user")
+			return "", utils.Errors{
+				Code:    http.StatusInternalServerError,
+				Message: "Error creating user",
+				Err:     err,
+			}
 		}
 
 		if err = us.userBalanceRepository.CreateUserBalance(user.ID); err != nil {
-			return "", errors.Wrap(err, "Error creating user balance")
+			return "", utils.Errors{
+				Code:    http.StatusInternalServerError,
+				Message: "Error creating user balance",
+				Err:     err,
+			}
 		}
 
 		userAuthSteam.ID = primitive.NewObjectID()
@@ -74,44 +84,64 @@ func (us UserManager) CreateOrUpdateSteamUser(userGoth goth.User) (string, error
 		userAuthSteam.CreatedAt = now
 
 		if err = us.userRepository.CreateUserAuth(userAuthSteam); err != nil {
-			return "", errors.Wrap(err, "Error creating user auth")
+			return "", utils.Errors{
+				Code:    http.StatusInternalServerError,
+				Message: "Error creating user",
+				Err:     err,
+			}
 		}
 	} else {
 		if user, err = us.userRepository.GetUserByUuid(userAuth.UserUUID); err != nil {
-			return "", errors.Wrap(err, "Error getting user from database")
+			return "", utils.Errors{
+				Code:    http.StatusInternalServerError,
+				Message: "Error getting user",
+				Err:     err,
+			}
 		}
 
 		if user, err = us.userRepository.UpdateUser(user); err != nil {
-			return "", errors.Wrap(err, "Error updating user")
+			return "", utils.Errors{
+				Code:    http.StatusInternalServerError,
+				Message: "Error updating user",
+				Err:     err,
+			}
 		}
 
 		userAuthSteam.UserUUID = user.UUID
 
 		if err = us.userRepository.UpdateUserAuth(userAuthSteam); err != nil {
-			return "", errors.Wrap(err, "Error updating user auth")
+			return "", utils.Errors{
+				Code:    http.StatusInternalServerError,
+				Message: "Error updating user auth",
+				Err:     err,
+			}
 		}
 	}
 
-	return user.UUID, nil
+	return user.UUID, utils.Errors{}
 }
 
-func (us UserManager) GetUserById(userID uint) (models.User, error) {
+func (us UserManager) GetUserById(userID uint) (models.User, utils.Errors) {
 	var (
-		err     error
-		getUser models.User
+		err  error
+		user models.User
 	)
 
 	us.userRepository.MysqlDB = MysqlDB
 
-	getUser, err = us.userRepository.FindUserByID(userID)
+	user, err = us.userRepository.FindUserByID(userID)
 	if err != nil {
-		return getUser, errors.Wrap(err, "An error occurred while retrieving user information")
+		return user, utils.Errors{
+			Code:    http.StatusInternalServerError,
+			Message: "An error occurred while retrieving user information",
+			Err:     err,
+		}
 	}
 
-	return getUser, nil
+	return user, utils.Errors{}
 }
 
-func (us UserManager) AuthUser(c *gin.Context) (models.User, error) {
+func (us UserManager) AuthUser(c *gin.Context) (models.User, utils.Errors) {
 	var (
 		err  error
 		user models.User
@@ -121,18 +151,26 @@ func (us UserManager) AuthUser(c *gin.Context) (models.User, error) {
 
 	userUuid, ok := c.MustGet("userUuid").(string)
 	if !ok {
-		return user, fmt.Errorf("user not found in context")
+		return user, utils.Errors{
+			Code:    401,
+			Message: "Unauthorized",
+			Err:     errors.New("Unauthorized"),
+		}
 	}
 
 	user, err = us.userRepository.GetUserByUuid(userUuid)
 	if err != nil {
-		return user, errors.Wrap(err, "Error getting user from database")
+		return user, utils.Errors{
+			Code:    401,
+			Message: "Unauthorized",
+			Err:     err,
+		}
 	}
 
-	return user, nil
+	return user, utils.Errors{}
 }
 
-func (us UserManager) GetUserWithBalance(user models.User) (models.User, error) {
+func (us UserManager) GetUserWithBalance(user models.User) (models.User, utils.Errors) {
 	var (
 		err             error
 		userWithBalance models.User
@@ -142,24 +180,38 @@ func (us UserManager) GetUserWithBalance(user models.User) (models.User, error) 
 
 	userWithBalance, err = us.userRepository.GetUserByIdWithBalance(user.ID)
 	if err != nil {
-		return userWithBalance, errors.Wrap(err, "An error occurred while retrieving user information")
+		return userWithBalance, utils.Errors{
+			Code:    http.StatusInternalServerError,
+			Message: "An error occurred while retrieving user information",
+			Err:     err,
+		}
 	}
 
-	return userWithBalance, nil
+	return userWithBalance, utils.Errors{}
 }
 
-func (us UserManager) StoreSteamTradeURL(user models.User, store requests.StoreUserSteamTradeURL) error {
-	var err error
+func (us UserManager) StoreSteamTradeURL(user models.User, store requests.StoreUserSteamTradeURL) utils.Errors {
+	var (
+		err error
+	)
 
 	us.userRepository.MysqlDB = MysqlDB
 
 	if user.ReferralCode != nil {
-		return errors.New("Referral code already exists")
+		return utils.Errors{
+			Code:    400,
+			Message: "You already have a referral code",
+			Err:     err,
+		}
 	}
 
 	if err = us.userRepository.StoreSteamTradeURLToUser(user, store.URL); err != nil {
-		return errors.Wrap(err, "Error storing referral code to user")
+		return utils.Errors{
+			Code:    http.StatusInternalServerError,
+			Message: "An error occurred while storing Steam trade URL",
+			Err:     err,
+		}
 	}
 
-	return nil
+	return utils.Errors{}
 }

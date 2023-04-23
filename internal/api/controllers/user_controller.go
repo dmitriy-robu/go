@@ -14,7 +14,6 @@ type UserController struct {
 	userManager          services.UserManager
 	levelManager         services.LevelManager
 	userInventoryManager services.UserInventoryManager
-	errorHandler         utils.Errors
 }
 
 func (u UserController) UserInfo(c *gin.Context) {
@@ -23,15 +22,20 @@ func (u UserController) UserInfo(c *gin.Context) {
 		user          models.User
 		userInfo      map[string]interface{}
 		userResources resources.UserResources
+		errorHandler  utils.Errors
 	)
 
-	user, err = u.userManager.AuthUser(c)
-	if err != nil {
-		u.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
+	user, errorHandler = u.userManager.AuthUser(c)
+	if errorHandler.Err != nil {
+		errorHandler.HandleError(c)
 		return
 	}
 
-	user, err = u.userManager.GetUserWithBalance(user)
+	user, errorHandler = u.userManager.GetUserWithBalance(user)
+	if errorHandler.Err != nil {
+		errorHandler.HandleError(c)
+		return
+	}
 
 	userResources = resources.UserResources{
 		User: &user,
@@ -39,7 +43,12 @@ func (u UserController) UserInfo(c *gin.Context) {
 
 	userInfo, err = userResources.ToJSON()
 	if err != nil {
-		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error converting user information to JSON", err)
+		errorHandler = utils.Errors{
+			Code:    http.StatusInternalServerError,
+			Message: "Error converting user information to JSON",
+			Err:     err,
+		}
+		errorHandler.HandleError(c)
 		return
 	}
 
@@ -53,17 +62,18 @@ func (u UserController) UserInventory(c *gin.Context) {
 		inventory              models.InventoryData
 		userInventoryResources resources.UserInventoryResources
 		userInventoryResource  []map[string]interface{}
+		errorHandler           utils.Errors
 	)
 
-	user, err = u.userManager.AuthUser(c)
-	if err != nil {
-		u.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
+	user, errorHandler = u.userManager.AuthUser(c)
+	if errorHandler.Err != nil {
+		errorHandler.HandleError(c)
 		return
 	}
 
-	inventory, err = u.userInventoryManager.GetInventoryForUser(user.UUID)
-	if err != nil {
-		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error getting user inventory", err)
+	inventory, errorHandler = u.userInventoryManager.GetInventoryForUser(user.UUID)
+	if errorHandler.Err != nil {
+		errorHandler.HandleError(c)
 		return
 	}
 
@@ -73,7 +83,12 @@ func (u UserController) UserInventory(c *gin.Context) {
 
 	userInventoryResource, err = userInventoryResources.ToJSON()
 	if err != nil {
-		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error converting user information to JSON", err)
+		errorHandler = utils.Errors{
+			Code:    http.StatusInternalServerError,
+			Message: "Error converting user information to JSON",
+			Err:     err,
+		}
+		errorHandler.HandleError(c)
 		return
 	}
 
@@ -82,24 +97,30 @@ func (u UserController) UserInventory(c *gin.Context) {
 
 func (u UserController) StoreSteamTradeURL(c *gin.Context) {
 	var (
-		err   error
-		store requests.StoreUserSteamTradeURL
-		user  models.User
+		err          error
+		store        requests.StoreUserSteamTradeURL
+		user         models.User
+		errorHandler utils.Errors
 	)
 
-	user, err = u.userManager.AuthUser(c)
-	if err != nil {
-		u.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
+	user, errorHandler = u.userManager.AuthUser(c)
+	if errorHandler.Err != nil {
+		errorHandler.HandleError(c)
 		return
 	}
 
 	if err = c.BindJSON(&store); err != nil {
-		u.errorHandler.HandleError(c, http.StatusBadRequest, "Error binding trade URL", err)
+		errorHandler = utils.Errors{
+			Code:    http.StatusBadRequest,
+			Message: "Error binding trade URL",
+			Err:     err,
+		}
+		errorHandler.HandleError(c)
 		return
 	}
 
-	if err = u.userManager.StoreSteamTradeURL(user, store); err != nil {
-		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error updating user trade URL", err)
+	if errorHandler = u.userManager.StoreSteamTradeURL(user, store); errorHandler.Err != nil {
+		errorHandler.HandleError(c)
 		return
 	}
 
@@ -116,17 +137,18 @@ func (u UserController) GetUpdatableFields(c *gin.Context) {
 		userWithBalance             models.User
 		userUpdatableFieldsResource resources.UserUpdatableFieldsResource
 		userLevel                   models.Level
+		errorHandler                utils.Errors
 	)
 
-	user, err = u.userManager.AuthUser(c)
-	if err != nil {
-		u.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
+	user, errorHandler = u.userManager.AuthUser(c)
+	if errorHandler.Err != nil {
+		errorHandler.HandleError(c)
 		return
 	}
 
-	userWithBalance, err = u.userManager.GetUserWithBalance(user)
-	if err != nil {
-		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error getting user balance", err)
+	userWithBalance, errorHandler = u.userManager.GetUserWithBalance(user)
+	if errorHandler.Err != nil {
+		errorHandler.HandleError(c)
 		return
 	}
 
@@ -139,7 +161,12 @@ func (u UserController) GetUpdatableFields(c *gin.Context) {
 
 	userInfo, err = userUpdatableFieldsResource.ToJSON()
 	if err != nil {
-		u.errorHandler.HandleError(c, http.StatusInternalServerError, "Error converting user information to JSON", err)
+		errorHandler = utils.Errors{
+			Code:    http.StatusInternalServerError,
+			Message: "Error converting user information to JSON",
+			Err:     err,
+		}
+		errorHandler.HandleError(c)
 		return
 	}
 

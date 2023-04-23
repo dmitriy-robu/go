@@ -77,9 +77,6 @@ func (ur UserRepository) FindUserAuthBySteamID(steamID string) (models.UserAuthS
 	}
 
 	if err = collection.FindOne(ctx, bson.M{"steam_user_id": steamID}).Decode(&userAuth); err != nil {
-		if err == mongo.ErrNoDocuments {
-			return userAuth, mongo.ErrNoDocuments
-		}
 		return userAuth, errors.Wrap(err, "Error finding user by steamID")
 	}
 
@@ -102,9 +99,6 @@ func (ur UserRepository) GetUserAuthByUserUUID(uuid string) (models.UserAuthStea
 	}
 
 	if err = collection.FindOne(ctx, bson.M{"user_uuid": uuid}).Decode(&userAuth); err != nil {
-		if err == mongo.ErrNoDocuments {
-			return userAuth, mongo.ErrNoDocuments
-		}
 		return userAuth, errors.Wrap(err, "Error finding user by steamID")
 	}
 
@@ -162,9 +156,6 @@ func (ur UserRepository) GetUserByUuid(uuid string) (models.User, error) {
 	)
 
 	if err = ur.MysqlDB.Where("uuid = ?", uuid).First(&user).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return user, errors.Wrap(err, "User not found")
-		}
 		return user, errors.Wrap(err, "Error finding user by uuid")
 	}
 

@@ -10,8 +10,7 @@ import (
 )
 
 type BoxController struct {
-	errorHandler utils.Errors
-	BoxManager   services.BoxManager
+	BoxManager services.BoxManager
 }
 
 func (b BoxController) Index(c *gin.Context) {
@@ -20,7 +19,7 @@ func (b BoxController) Index(c *gin.Context) {
 		boxesResource []map[string]interface{}
 	)
 
-	boxes = b.BoxManager.FindAll()
+	boxes = b.BoxManager.FindAllWithItems()
 
 	resource := resources.BoxesResource{
 		Boxes: boxes,
@@ -33,15 +32,14 @@ func (b BoxController) Index(c *gin.Context) {
 
 func (b BoxController) Show(c *gin.Context) {
 	var (
-		err         error
-		box         models.Box
-		boxResource map[string]interface{}
+		box          models.Box
+		boxResource  map[string]interface{}
+		errorHandler utils.Errors
 	)
 
-	box, err = b.BoxManager.FindByUUID(c.Param("uuid"))
-
-	if err != nil {
-		b.errorHandler.HandleError(c, 404, err.Error(), err)
+	box, errorHandler = b.BoxManager.FindByUUIDWithItems(c.Param("uuid"))
+	if errorHandler.Err != nil {
+		errorHandler.HandleError(c)
 		return
 	}
 
@@ -56,15 +54,14 @@ func (b BoxController) Show(c *gin.Context) {
 
 func (b BoxController) Open(c *gin.Context) {
 	var (
-		err         error
-		box         models.Box
-		boxResource map[string]interface{}
+		box          models.Box
+		boxResource  map[string]interface{}
+		errorHandler utils.Errors
 	)
 
-	box, err = b.BoxManager.Open(c.Param("uuid"))
-
-	if err != nil {
-		b.errorHandler.HandleError(c, 500, err.Error(), err)
+	box, errorHandler = b.BoxManager.Open(c.Param("uuid"))
+	if errorHandler.Err != nil {
+		errorHandler.HandleError(c)
 		return
 	}
 

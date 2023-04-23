@@ -9,6 +9,9 @@ import (
 )
 
 type Errors struct {
+	Code    int
+	Message string
+	Err     error
 }
 
 type MoneyConvert struct {
@@ -17,18 +20,16 @@ type MoneyConvert struct {
 type Environment struct {
 }
 
-func (e Errors) HandleError(c *gin.Context, httpStatus int, errMsg string, err error) {
-	if err != nil {
-		c.JSON(httpStatus, gin.H{
-			"error": errMsg,
+func (e *Errors) HandleError(c *gin.Context) {
+	if e.Err != nil {
+		message := e.Message
+		if message == "" {
+			message = "An error occurred"
+		}
+		c.JSON(e.Code, gin.H{
+			"error": message,
 		})
-		log.Println(err)
-	}
-}
-
-func (e Errors) ResourcesHandleError(errMsg string, err error) {
-	if err != nil {
-		log.Printf("%s: %s", errMsg, err.Error())
+		log.Println(e.Err)
 	}
 }
 

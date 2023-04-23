@@ -18,7 +18,6 @@ func init() {
 
 type SteamAuthController struct {
 	steamAuthManager services.SteamAuthManager
-	errorHandler     utils.Errors
 }
 
 func (s SteamAuthController) Login(c *gin.Context) {
@@ -26,11 +25,13 @@ func (s SteamAuthController) Login(c *gin.Context) {
 }
 
 func (s SteamAuthController) Callback(c *gin.Context) {
-	var err error
+	var (
+		errorHandler utils.Errors
+	)
 
-	err = s.steamAuthManager.Callback(c)
-	if err != nil {
-		s.errorHandler.HandleError(c, http.StatusInternalServerError, "Error logging in", err)
+	errorHandler = s.steamAuthManager.Callback(c)
+	if errorHandler.Err != nil {
+		errorHandler.HandleError(c)
 		return
 	}
 

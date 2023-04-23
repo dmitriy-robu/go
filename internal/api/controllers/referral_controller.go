@@ -13,30 +13,35 @@ import (
 type ReferralController struct {
 	userManager     services.UserManager
 	referralManager services.ReferralManager
-	errorHandler    utils.Errors
 }
 
 func (rc ReferralController) StoreCode(c *gin.Context) {
 	var (
-		err   error
-		user  models.User
-		store requests.StoreUserReferralCode
+		err          error
+		user         models.User
+		store        requests.StoreUserReferralCode
+		errorHandler utils.Errors
 	)
 
-	user, err = rc.userManager.AuthUser(c)
-	if err != nil {
-		rc.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
+	user, errorHandler = rc.userManager.AuthUser(c)
+	if errorHandler.Err != nil {
+		errorHandler.HandleError(c)
 		return
 	}
 
 	if err = c.ShouldBindJSON(&store); err != nil {
-		rc.errorHandler.HandleError(c, http.StatusBadRequest, "Error binding JSON", err)
+		errorHandler = utils.Errors{
+			Code:    http.StatusBadRequest,
+			Message: "Error binding JSON",
+			Err:     err,
+		}
+		errorHandler.HandleError(c)
 		return
 	}
 
-	_, err = rc.referralManager.StoreReferralCode(user, store)
-	if err != nil {
-		rc.errorHandler.HandleError(c, http.StatusInternalServerError, "Error storing referral code", err)
+	_, errorHandler = rc.referralManager.StoreReferralCode(user, store)
+	if errorHandler.Err != nil {
+		errorHandler.HandleError(c)
 		return
 	}
 
@@ -50,17 +55,18 @@ func (rc ReferralController) Details(c *gin.Context) {
 		referralDetails         models.ReferralDetails
 		referralDetailResource  map[string]interface{}
 		referralDetailResources resources.ReferralDetailResource
+		errorHandler            utils.Errors
 	)
 
-	user, err = rc.userManager.AuthUser(c)
-	if err != nil {
-		rc.errorHandler.HandleError(c, http.StatusUnauthorized, "Unauthorized", err)
+	user, errorHandler = rc.userManager.AuthUser(c)
+	if errorHandler.Err != nil {
+		errorHandler.HandleError(c)
 		return
 	}
 
-	referralDetails, err = rc.referralManager.GetReferralDetails(user)
-	if err != nil {
-		rc.errorHandler.HandleError(c, http.StatusInternalServerError, "Error getting referral details", err)
+	referralDetails, errorHandler = rc.referralManager.GetReferralDetails(user)
+	if errorHandler.Err != nil {
+		errorHandler.HandleError(c)
 		return
 	}
 
@@ -70,7 +76,12 @@ func (rc ReferralController) Details(c *gin.Context) {
 
 	referralDetailResource, err = referralDetailResources.ToJSON()
 	if err != nil {
-		rc.errorHandler.HandleError(c, http.StatusInternalServerError, "Error converting user information to JSON", err)
+		errorHandler = utils.Errors{
+			Code:    http.StatusInternalServerError,
+			Message: "Error converting user information to JSON",
+			Err:     err,
+		}
+		errorHandler.HandleError(c)
 		return
 	}
 

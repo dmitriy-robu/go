@@ -15,10 +15,7 @@ func (ubr UserBalanceRepository) GetUserBalanceByUserId(userID uint64) (models.U
 	var userBalance models.UserBalance
 
 	if err = ubr.MysqlDB.Where("id = ?", userID).First(&userBalance).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return userBalance, errors.Wrap(err, "User balance not found")
-		}
-		return userBalance, errors.Wrap(err, "Error finding user balance by ID")
+		return userBalance, errors.Wrap(err, "Error finding user balance")
 	}
 
 	return userBalance, nil

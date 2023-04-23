@@ -4,6 +4,8 @@ import (
 	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/models"
 	"go-rust-drop/internal/api/repositories"
+	"go-rust-drop/internal/api/utils"
+	"net/http"
 )
 
 type UserBalanceManager struct {
@@ -11,7 +13,7 @@ type UserBalanceManager struct {
 	userBalanceRepository repositories.UserBalanceRepository
 }
 
-func (ubm UserBalanceManager) AddBalance(amount int) error {
+func (ubm UserBalanceManager) AddBalance(amount int) utils.Errors {
 	var (
 		err error
 	)
@@ -21,13 +23,17 @@ func (ubm UserBalanceManager) AddBalance(amount int) error {
 	ubm.user.UserBalance.Balance += amount
 
 	if err = ubm.userBalanceRepository.UpdateUserBalance(ubm.user.UserBalance); err != nil {
-		return errors.Wrap(err, "Error updating user balance")
+		return utils.Errors{
+			Code:    http.StatusInternalServerError,
+			Message: "Error updating user balance",
+			Err:     err,
+		}
 	}
 
-	return nil
+	return utils.Errors{}
 }
 
-func (ubm UserBalanceManager) SubtractBalance(amount int) error {
+func (ubm UserBalanceManager) SubtractBalance(amount int) utils.Errors {
 	var (
 		err error
 	)
@@ -35,14 +41,22 @@ func (ubm UserBalanceManager) SubtractBalance(amount int) error {
 	ubm.userBalanceRepository.MysqlDB = MysqlDB
 
 	if ubm.user.UserBalance.Balance < amount {
-		return errors.New("Insufficient user balance")
+		return utils.Errors{
+			Code:    http.StatusBadRequest,
+			Message: "User balance is not enough",
+			Err:     errors.New("User balance is not enough"),
+		}
 	}
 
 	ubm.user.UserBalance.Balance -= amount
 
 	if err = ubm.userBalanceRepository.UpdateUserBalance(ubm.user.UserBalance); err != nil {
-		return errors.Wrap(err, "Error updating user balance")
+		return utils.Errors{
+			Code:    http.StatusInternalServerError,
+			Message: "Error updating user balance",
+			Err:     err,
+		}
 	}
 
-	return nil
+	return utils.Errors{}
 }

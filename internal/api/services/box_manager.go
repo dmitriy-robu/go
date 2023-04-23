@@ -3,25 +3,27 @@ package services
 import (
 	"go-rust-drop/internal/api/models"
 	"go-rust-drop/internal/api/repositories"
+	"go-rust-drop/internal/api/utils"
+	"net/http"
 )
 
 type BoxManager struct {
 	boxRepository repositories.BoxRepository
 }
 
-func (b BoxManager) FindAll() models.Boxes {
+func (b BoxManager) FindAllWithItems() models.Boxes {
 	var (
 		boxes models.Boxes
 	)
 
 	b.boxRepository.MysqlDB = MysqlDB
 
-	boxes = b.boxRepository.FindAll()
+	boxes = b.boxRepository.FindAllWithItems()
 
 	return boxes
 }
 
-func (b BoxManager) FindByUUID(uuid string) (models.Box, error) {
+func (b BoxManager) FindByUUIDWithItems(uuid string) (models.Box, utils.Errors) {
 	var (
 		err error
 		box models.Box
@@ -29,15 +31,19 @@ func (b BoxManager) FindByUUID(uuid string) (models.Box, error) {
 
 	b.boxRepository.MysqlDB = MysqlDB
 
-	box, err = b.boxRepository.FindByUUID(uuid)
+	box, err = b.boxRepository.FindByUUIDWithItems(uuid)
 	if err != nil {
-		return box, err
+		return box, utils.Errors{
+			Code:    http.StatusNotFound,
+			Message: "Box not found",
+			Err:     err,
+		}
 	}
 
-	return box, nil
+	return box, utils.Errors{}
 }
 
-func (b BoxManager) Open(uuid string) (models.Box, error) {
+func (b BoxManager) Open(uuid string) (models.Box, utils.Errors) {
 	var (
 		err error
 		box models.Box
@@ -45,10 +51,14 @@ func (b BoxManager) Open(uuid string) (models.Box, error) {
 
 	b.boxRepository.MysqlDB = MysqlDB
 
-	box, err = b.boxRepository.FindByUUID(uuid)
+	box, err = b.boxRepository.FindByUUIDWithItems(uuid)
 	if err != nil {
-		return box, err
+		return box, utils.Errors{
+			Code:    http.StatusNotFound,
+			Message: "Box not found",
+			Err:     err,
+		}
 	}
 
-	return box, nil
+	return box, utils.Errors{}
 }

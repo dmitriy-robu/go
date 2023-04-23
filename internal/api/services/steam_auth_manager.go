@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
-	"github.com/pkg/errors"
 	"go-rust-drop/internal/api/repositories"
+	"go-rust-drop/internal/api/utils"
 	"net/http"
 )
 
@@ -27,31 +27,40 @@ func (sam SteamAuthManager) Login(c *gin.Context) {
 	gothic.BeginAuthHandler(c.Writer, c.Request)
 }
 
-func (sam SteamAuthManager) Callback(c *gin.Context) error {
+func (sam SteamAuthManager) Callback(c *gin.Context) utils.Errors {
 	var (
-		err      error
-		user     goth.User
-		userUuid string
-		session  sessions.Session
+		err          error
+		user         goth.User
+		userUuid     string
+		session      sessions.Session
+		errorHandler utils.Errors
 	)
 
 	sam.setProvider()
 
 	user, err = gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
-		return errors.Wrap(err, "Error completing user auth")
+		return utils.Errors{
+			Code:    http.StatusInternalServerError,
+			Message: "Error completing user authentication",
+			Err:     err,
+		}
 	}
 
-	userUuid, err = sam.userManager.CreateOrUpdateSteamUser(user)
-	if err != nil {
-		return errors.Wrap(err, "Error creating or updating user")
+	userUuid, errorHandler = sam.userManager.CreateOrUpdateSteamUser(user)
+	if errorHandler.Err != nil {
+		return errorHandler
 	}
 
 	session = sessions.Default(c)
 	session.Set("userUuid", userUuid)
 	if err = session.Save(); err != nil {
-		return errors.Wrap(err, "Error saving session")
+		return utils.Errors{
+			Code:    http.StatusInternalServerError,
+			Message: "Error saving session",
+			Err:     err,
+		}
 	}
 
-	return nil
+	return utils.Errors{}
 }
