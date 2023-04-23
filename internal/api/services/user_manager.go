@@ -9,7 +9,6 @@ import (
 	"go-rust-drop/internal/api/repositories"
 	"go-rust-drop/internal/api/requests"
 	"go-rust-drop/internal/api/utils"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 	"time"
 )
@@ -70,7 +69,6 @@ func (us UserManager) CreateOrUpdateSteamUser(userGoth goth.User) (string, utils
 			}
 		}
 
-		userAuthSteam.ID = primitive.NewObjectID()
 		userAuthSteam.UserUUID = user.UUID
 		userAuthSteam.CreatedAt = now
 
@@ -97,8 +95,6 @@ func (us UserManager) CreateOrUpdateSteamUser(userGoth goth.User) (string, utils
 				Err:     err,
 			}
 		}
-
-		userAuthSteam.UserUUID = user.UUID
 
 		if err = us.userRepository.UpdateUserAuth(userAuthSteam); err != nil {
 			return "", utils.Errors{
