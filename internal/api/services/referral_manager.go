@@ -13,6 +13,14 @@ type ReferralManager struct {
 	referralRepository repositories.ReferralRepository
 }
 
+func NewReferralManager(
+	referralRepository repositories.ReferralRepository,
+) ReferralManager {
+	return ReferralManager{
+		referralRepository: referralRepository,
+	}
+}
+
 func (rs ReferralManager) StoreReferralCode(user models.User, store requests.StoreUserReferralCode) (models.User, *utils.Errors) {
 	var (
 		err error

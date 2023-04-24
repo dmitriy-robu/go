@@ -18,6 +18,12 @@ type UserInventoryManager struct {
 	userRepository repositories.UserRepository
 }
 
+func NewUserInventoryManager(ur repositories.UserRepository) UserInventoryManager {
+	return UserInventoryManager{
+		userRepository: ur,
+	}
+}
+
 func (uis UserInventoryManager) GetInventoryForUser(userUUID string) (models.InventoryData, *utils.Errors) {
 	var (
 		err          error
@@ -34,7 +40,7 @@ func (uis UserInventoryManager) GetInventoryForUser(userUUID string) (models.Inv
 	}
 
 	inventory, errorHandler = uis.getInventory(userAuth.SteamUserID, config.SetSteamSettings())
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		return inventory, errorHandler
 	}
 
@@ -82,7 +88,7 @@ func (uis UserInventoryManager) getInventory(steamID string, settings config.Ste
 	}
 
 	data, errorHandler = uis.mapResponseToAssetData(response, settings)
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		return data, errorHandler
 	}
 
@@ -100,7 +106,7 @@ func (uis UserInventoryManager) mapResponseToAssetData(
 	)
 
 	allDetails, errorHandler = getDetailsForAllItems(settings)
-	if errorHandler.Err != nil || allDetails == nil {
+	if errorHandler != nil || allDetails == nil {
 		return models.InventoryData{}, errorHandler
 	}
 

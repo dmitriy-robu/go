@@ -7,7 +7,6 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
-	"os"
 	"sync"
 
 	"github.com/pkg/errors"
@@ -21,7 +20,7 @@ var (
 func GetGormConnection() (*gorm.DB, error) {
 	var err error
 
-	if err = godotenv.Load(os.Getenv("ROOT_PATH") + "/.env"); err != nil {
+	if err = godotenv.Load(".env"); err != nil {
 		log.Fatalln(err)
 	}
 

@@ -17,16 +17,20 @@ import (
 )
 
 type CaseBattleManager struct {
-	caseBattleRepository      *repositories.CaseBattleRepository
-	caseBattleRoundRepository *repositories.CaseBattleRoundRepository
-	boxRepository             *repositories.BoxRepository
+	caseBattleRepository      repositories.CaseBattleRepository
+	caseBattleRoundRepository repositories.CaseBattleRoundRepository
+	boxRepository             repositories.BoxRepository
 }
 
-func NewCaseBattleManager(cbr *repositories.CaseBattleRepository, cbrR *repositories.CaseBattleRoundRepository, br *repositories.BoxRepository) *CaseBattleManager {
-	return &CaseBattleManager{
-		caseBattleRepository:      cbr,
-		caseBattleRoundRepository: cbrR,
-		boxRepository:             br,
+func NewCaseBattleManager(
+	caseBattleRepo repositories.CaseBattleRepository,
+	caseBattleRoundRepo repositories.CaseBattleRoundRepository,
+	boxRepo repositories.BoxRepository,
+) CaseBattleManager {
+	return CaseBattleManager{
+		caseBattleRepository:      caseBattleRepo,
+		caseBattleRoundRepository: caseBattleRoundRepo,
+		boxRepository:             boxRepo,
 	}
 }
 
@@ -43,7 +47,6 @@ func (cbm *CaseBattleManager) Create(caseBattleRequest requests.CaseBattleStoreR
 		now             time.Time
 	)
 
-	cbm.caseBattleRepository.MysqlDB = MysqlDB
 	cbm.boxRepository.MysqlDB = MysqlDB
 
 	tx = MysqlDB.Begin()
@@ -102,7 +105,7 @@ func (cbm *CaseBattleManager) Create(caseBattleRequest requests.CaseBattleStoreR
 		return "", utils.NewErrors(http.StatusInternalServerError, "Error creating case battle", err)
 	}
 
-	userBalanceManager := NewUserBalanceManager(user, &repositories.UserBalanceRepository{MysqlDB: tx})
+	userBalanceManager := NewUserBalanceManager(&user, repositories.UserBalanceRepository{MysqlDB: tx})
 
 	if errorHandler = userBalanceManager.SubtractBalance(totalCost); errorHandler != nil {
 		tx.Rollback()

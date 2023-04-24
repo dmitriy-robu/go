@@ -11,6 +11,12 @@ type ReferralRepository struct {
 	MysqlDB *gorm.DB
 }
 
+func NewReferralRepository(mysql *gorm.DB) ReferralRepository {
+	return ReferralRepository{
+		MysqlDB: mysql,
+	}
+}
+
 func (rr ReferralRepository) StoreReferralCodeToUser(user models.User, store requests.StoreUserReferralCode) (models.User, error) {
 	var (
 		err error

@@ -15,6 +15,16 @@ type ReferralController struct {
 	referralManager services.ReferralManager
 }
 
+func NewReferralController(
+	userManager services.UserManager,
+	referralManager services.ReferralManager,
+) ReferralController {
+	return ReferralController{
+		userManager:     userManager,
+		referralManager: referralManager,
+	}
+}
+
 func (rc ReferralController) StoreCode(c *gin.Context) {
 	var (
 		err          error
@@ -24,7 +34,7 @@ func (rc ReferralController) StoreCode(c *gin.Context) {
 	)
 
 	user, errorHandler = rc.userManager.AuthUser(c)
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		errorHandler.HandleError(c)
 		return
 	}
@@ -36,7 +46,7 @@ func (rc ReferralController) StoreCode(c *gin.Context) {
 	}
 
 	_, errorHandler = rc.referralManager.StoreReferralCode(user, store)
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		errorHandler.HandleError(c)
 		return
 	}
@@ -55,13 +65,13 @@ func (rc ReferralController) Details(c *gin.Context) {
 	)
 
 	user, errorHandler = rc.userManager.AuthUser(c)
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		errorHandler.HandleError(c)
 		return
 	}
 
 	referralDetails, errorHandler = rc.referralManager.GetReferralDetails(user)
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		errorHandler.HandleError(c)
 		return
 	}

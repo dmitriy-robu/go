@@ -15,6 +15,16 @@ type CaseBattleController struct {
 	caseBattleManager services.CaseBattleManager
 }
 
+func NewCaseBattleController(
+	userManager services.UserManager,
+	caseBattleManager services.CaseBattleManager,
+) CaseBattleController {
+	return CaseBattleController{
+		userManager:       userManager,
+		caseBattleManager: caseBattleManager,
+	}
+}
+
 func (cbc CaseBattleController) Create(c *gin.Context) {
 	var (
 		err               error

@@ -19,6 +19,18 @@ type UserManager struct {
 	levelRepository       repositories.LevelRepository
 }
 
+func NewUserManager(
+	userRepository repositories.UserRepository,
+	userBalanceRepository repositories.UserBalanceRepository,
+	levelRepository repositories.LevelRepository,
+) UserManager {
+	return UserManager{
+		userRepository:        userRepository,
+		userBalanceRepository: userBalanceRepository,
+		levelRepository:       levelRepository,
+	}
+}
+
 func (us UserManager) CreateOrUpdateSteamUser(userGoth goth.User) (string, *utils.Errors) {
 	var (
 		err           error
@@ -28,9 +40,6 @@ func (us UserManager) CreateOrUpdateSteamUser(userGoth goth.User) (string, *util
 		newUUID       uuid.UUID
 		userAuthSteam models.UserAuthSteam
 	)
-
-	us.userRepository.MysqlDB = MysqlDB
-	us.userBalanceRepository.MysqlDB = MysqlDB
 
 	now = time.Now()
 
@@ -92,8 +101,6 @@ func (us UserManager) GetUserById(userID uint) (models.User, *utils.Errors) {
 		user models.User
 	)
 
-	us.userRepository.MysqlDB = MysqlDB
-
 	user, err = us.userRepository.FindUserByID(userID)
 	if err != nil {
 		return user, utils.NewErrors(http.StatusInternalServerError, "An error occurred while retrieving user information", err)
@@ -107,8 +114,6 @@ func (us UserManager) AuthUser(c *gin.Context) (models.User, *utils.Errors) {
 		err  error
 		user models.User
 	)
-
-	us.userRepository.MysqlDB = MysqlDB
 
 	userUuid, ok := c.MustGet("userUuid").(string)
 	if !ok {
@@ -129,8 +134,6 @@ func (us UserManager) GetUserWithBalance(user models.User) (models.User, *utils.
 		userWithBalance models.User
 	)
 
-	us.userRepository.MysqlDB = MysqlDB
-
 	userWithBalance, err = us.userRepository.GetUserByIdWithBalance(user.ID)
 	if err != nil {
 		return userWithBalance, utils.NewErrors(http.StatusInternalServerError, "An error occurred while retrieving user information", err)
@@ -143,8 +146,6 @@ func (us UserManager) StoreSteamTradeURL(user models.User, store requests.StoreU
 	var (
 		err error
 	)
-
-	us.userRepository.MysqlDB = MysqlDB
 
 	if user.ReferralCode != "" {
 		return utils.NewErrors(http.StatusBadRequest, "You already have a referral code", err)

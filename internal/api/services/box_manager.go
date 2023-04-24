@@ -11,12 +11,18 @@ type BoxManager struct {
 	BoxRepository repositories.BoxRepository
 }
 
+func NewBoxManager(
+	BoxRepository repositories.BoxRepository,
+) BoxManager {
+	return BoxManager{
+		BoxRepository: BoxRepository,
+	}
+}
+
 func (b BoxManager) FindAllWithItems() models.Boxes {
 	var (
 		boxes models.Boxes
 	)
-
-	b.BoxRepository.MysqlDB = MysqlDB
 
 	boxes = b.BoxRepository.FindAllWithItems()
 

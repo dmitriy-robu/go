@@ -10,6 +10,12 @@ type BoxRepository struct {
 	MysqlDB *gorm.DB
 }
 
+func NewBoxRepository(mysql *gorm.DB) BoxRepository {
+	return BoxRepository{
+		MysqlDB: mysql,
+	}
+}
+
 func (b BoxRepository) FindAllWithItems() models.Boxes {
 	var (
 		boxes models.Boxes
