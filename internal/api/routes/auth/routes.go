@@ -5,34 +5,34 @@ import (
 	"go-rust-drop/internal/api/controllers"
 )
 
-func Routes(router *gin.RouterGroup) {
-	get(router)
-	post(router)
-	put(router)
+func Routes(router *gin.RouterGroup, controllersInstance controllers.Controllers) {
+	get(router, controllersInstance)
+	post(router, controllersInstance)
+	put(router, controllersInstance)
 }
 
-func get(router *gin.RouterGroup) {
+func get(router *gin.RouterGroup, controllersInstance controllers.Controllers) {
 	user := router.Group("/users")
 	{
-		user.GET("/info", controllers.UserController{}.UserInfo)
-		user.GET("/inventory", controllers.UserController{}.UserInventory)
-		user.GET("/updatable-fields", controllers.UserController{}.GetUpdatableFields)
+		user.GET("/info", controllersInstance.UserController.UserInfo)
+		user.GET("/inventory", controllersInstance.UserController.UserInventory)
+		user.GET("/updatable-fields", controllersInstance.UserController.GetUpdatableFields)
 	}
-	router.GET("/referrals/details", controllers.ReferralController{}.Details)
+	router.GET("/referrals/details", controllersInstance.ReferralController.Details)
 }
 
-func post(router *gin.RouterGroup) {
-	router.POST("/users/set-trade-url", controllers.UserController{}.StoreSteamTradeURL)
-	router.POST("/referrals/store-code", controllers.ReferralController{}.StoreCode)
-	router.POST("/boxes/open/:uuid", controllers.BoxController{}.Open)
+func post(router *gin.RouterGroup, controllersInstance controllers.Controllers) {
+	router.POST("/users/set-trade-url", controllersInstance.UserController.StoreSteamTradeURL)
+	router.POST("/referrals/store-code", controllersInstance.ReferralController.StoreCode)
+	router.POST("/boxes/open/:uuid", controllersInstance.BoxController.Open)
 
 	caseBattle := router.Group("/case-battles")
 	{
-		caseBattle.POST("/create", controllers.CaseBattleController{}.Create)
-		caseBattle.POST("/:uuid/join", controllers.CaseBattleController{}.Join)
-		caseBattle.POST("/:uuid/start", controllers.CaseBattleController{}.Start)
+		caseBattle.POST("/create", controllersInstance.CaseBattleController.Create)
+		caseBattle.POST("/:uuid/join", controllersInstance.CaseBattleController.Join)
+		caseBattle.POST("/:uuid/start", controllersInstance.CaseBattleController.Start)
 	}
 }
 
-func put(router *gin.RouterGroup) {
+func put(router *gin.RouterGroup, controllersInstance controllers.Controllers) {
 }

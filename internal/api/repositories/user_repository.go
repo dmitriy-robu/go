@@ -15,6 +15,12 @@ type UserRepository struct {
 	MysqlDB *gorm.DB
 }
 
+func NewUserRepository(mysqlDB *gorm.DB) UserRepository {
+	return UserRepository{
+		MysqlDB: mysqlDB,
+	}
+}
+
 func (ur UserRepository) FindUserByID(userID uint) (models.User, error) {
 	var (
 		err  error

@@ -7,12 +7,14 @@ import (
 	"go-rust-drop/internal/api/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"gorm.io/gorm"
 	"time"
 )
 
 type CaseBattleRoundRepository struct {
-	MysqlDB *gorm.DB
+}
+
+func NewCaseBattleRoundRepository() CaseBattleRoundRepository {
+	return CaseBattleRoundRepository{}
 }
 
 func (cbrr CaseBattleRoundRepository) CreateCaseBattleRound(ctx context.Context, caseBattleRound models.CaseBattleRound) error {

@@ -6,11 +6,13 @@ import (
 	"go-rust-drop/internal/api/database/mongodb"
 	"go-rust-drop/internal/api/models"
 	"go.mongodb.org/mongo-driver/mongo"
-	"gorm.io/gorm"
 )
 
 type CaseBattleRepository struct {
-	MysqlDB *gorm.DB
+}
+
+func NewCaseBattleRepository() CaseBattleRepository {
+	return CaseBattleRepository{}
 }
 
 func (cbr CaseBattleRepository) CreateCaseBattle(ctx context.Context, caseBattle models.CaseBattle) error {

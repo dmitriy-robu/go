@@ -10,6 +10,12 @@ type UserBalanceRepository struct {
 	MysqlDB *gorm.DB
 }
 
+func NewUserBalanceRepository(mysql *gorm.DB) UserBalanceRepository {
+	return UserBalanceRepository{
+		MysqlDB: mysql,
+	}
+}
+
 func (ubr UserBalanceRepository) GetUserBalanceByUserId(userID uint64) (models.UserBalance, error) {
 	var err error
 	var userBalance models.UserBalance

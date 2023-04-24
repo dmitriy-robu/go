@@ -17,16 +17,23 @@ import (
 )
 
 type CaseBattleManager struct {
-	caseBattleRepository      *repositories.CaseBattleRepository
-	caseBattleRoundRepository *repositories.CaseBattleRoundRepository
-	boxRepository             *repositories.BoxRepository
+	caseBattleRepository      repositories.CaseBattleRepository
+	caseBattleRoundRepository repositories.CaseBattleRoundRepository
+	boxRepository             repositories.BoxRepository
+	MysqlDB                   *gorm.DB
 }
 
-func NewCaseBattleManager(cbr *repositories.CaseBattleRepository, cbrR *repositories.CaseBattleRoundRepository, br *repositories.BoxRepository) *CaseBattleManager {
-	return &CaseBattleManager{
-		caseBattleRepository:      cbr,
-		caseBattleRoundRepository: cbrR,
-		boxRepository:             br,
+func NewCaseBattleManager(
+	caseBattleRepo repositories.CaseBattleRepository,
+	caseBattleRoundRepo repositories.CaseBattleRoundRepository,
+	boxRepo repositories.BoxRepository,
+	mysql *gorm.DB,
+) CaseBattleManager {
+	return CaseBattleManager{
+		caseBattleRepository:      caseBattleRepo,
+		caseBattleRoundRepository: caseBattleRoundRepo,
+		boxRepository:             boxRepo,
+		MysqlDB:                   mysql,
 	}
 }
 
@@ -43,10 +50,7 @@ func (cbm *CaseBattleManager) Create(caseBattleRequest requests.CaseBattleStoreR
 		now             time.Time
 	)
 
-	cbm.caseBattleRepository.MysqlDB = MysqlDB
-	cbm.boxRepository.MysqlDB = MysqlDB
-
-	tx = MysqlDB.Begin()
+	tx = cbm.MysqlDB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
@@ -102,7 +106,7 @@ func (cbm *CaseBattleManager) Create(caseBattleRequest requests.CaseBattleStoreR
 		return "", utils.NewErrors(http.StatusInternalServerError, "Error creating case battle", err)
 	}
 
-	userBalanceManager := NewUserBalanceManager(user, &repositories.UserBalanceRepository{MysqlDB: tx})
+	userBalanceManager := NewUserBalanceManager(&user, repositories.UserBalanceRepository{MysqlDB: tx})
 
 	if errorHandler = userBalanceManager.SubtractBalance(totalCost); errorHandler != nil {
 		tx.Rollback()
@@ -130,7 +134,7 @@ func (cbm *CaseBattleManager) withTransaction(fn func(ctx mongo.SessionContext) 
 	defer session.EndSession(context.Background())
 
 	callback := func(sessCtx mongo.SessionContext) (interface{}, error) {
-		err := fn(sessCtx)
+		err = fn(sessCtx)
 		if err != nil {
 			return nil, err
 		}

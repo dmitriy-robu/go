@@ -15,6 +15,16 @@ type SteamAuthManager struct {
 	steamRepository repositories.SteamRepository
 }
 
+func NewSteamAuthManager(
+	userManager UserManager,
+	steamRepository repositories.SteamRepository,
+) SteamAuthManager {
+	return SteamAuthManager{
+		userManager:     userManager,
+		steamRepository: steamRepository,
+	}
+}
+
 func (sam SteamAuthManager) setProvider() {
 	gothic.GetProviderName = func(*http.Request) (string, error) {
 		return "steam", nil
@@ -45,7 +55,7 @@ func (sam SteamAuthManager) Callback(c *gin.Context) *utils.Errors {
 	}
 
 	userUuid, errorHandler = sam.userManager.CreateOrUpdateSteamUser(user)
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		return errorHandler
 	}
 

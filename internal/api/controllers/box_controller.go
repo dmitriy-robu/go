@@ -13,6 +13,14 @@ type BoxController struct {
 	BoxManager services.BoxManager
 }
 
+func NewBoxController(
+	BoxManager services.BoxManager,
+) BoxController {
+	return BoxController{
+		BoxManager: BoxManager,
+	}
+}
+
 func (b BoxController) Index(c *gin.Context) {
 	var (
 		boxes         models.Boxes
@@ -38,7 +46,7 @@ func (b BoxController) Show(c *gin.Context) {
 	)
 
 	box, errorHandler = b.BoxManager.FindByUUIDWithItems(c.Param("uuid"))
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		errorHandler.HandleError(c)
 		return
 	}
@@ -60,7 +68,7 @@ func (b BoxController) Open(c *gin.Context) {
 	)
 
 	box, errorHandler = b.BoxManager.Open(c.Param("uuid"))
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		errorHandler.HandleError(c)
 		return
 	}

@@ -20,6 +20,14 @@ type SteamAuthController struct {
 	steamAuthManager services.SteamAuthManager
 }
 
+func NewSteamAuthController(
+	steamAuthManager services.SteamAuthManager,
+) SteamAuthController {
+	return SteamAuthController{
+		steamAuthManager: steamAuthManager,
+	}
+}
+
 func (s SteamAuthController) Login(c *gin.Context) {
 	s.steamAuthManager.Login(c)
 }
@@ -30,7 +38,7 @@ func (s SteamAuthController) Callback(c *gin.Context) {
 	)
 
 	errorHandler = s.steamAuthManager.Callback(c)
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		errorHandler.HandleError(c)
 		return
 	}

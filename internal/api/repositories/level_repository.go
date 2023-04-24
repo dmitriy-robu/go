@@ -9,6 +9,12 @@ type LevelRepository struct {
 	MysqlDB *gorm.DB
 }
 
+func NewLevelRepository(mysql *gorm.DB) LevelRepository {
+	return LevelRepository{
+		MysqlDB: mysql,
+	}
+}
+
 func (lr LevelRepository) GetLevelByExperience(experience uint64) (models.Level, error) {
 	var (
 		err   error

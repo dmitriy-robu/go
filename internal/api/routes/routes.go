@@ -14,7 +14,7 @@ import (
 type Route interface {
 }
 
-func RouteHandle(router *gin.Engine) {
+func RouteHandle(router *gin.Engine, controllersInstance controllers.Controllers) {
 	store, err := mongodb.InitMongoSessionStore()
 	if err != nil {
 		log.Fatalf("Failed to initialize MongoDB session store: %v", err)
@@ -23,8 +23,8 @@ func RouteHandle(router *gin.Engine) {
 
 	authSteam := router.Group("/auth/steam")
 	{
-		authSteam.GET("/login", controllers.SteamAuthController{}.Login)
-		authSteam.GET("/callback", controllers.SteamAuthController{}.Callback)
+		authSteam.GET("/login", controllersInstance.SteamAuthController.Login)
+		authSteam.GET("/callback", controllersInstance.SteamAuthController.Callback)
 	}
 
 	publicGroup := router.Group("/api/v1")
@@ -35,6 +35,6 @@ func RouteHandle(router *gin.Engine) {
 
 	authGroup.Use(Middleware.AuthRequired)
 	{
-		auth.Routes(authGroup)
+		auth.Routes(authGroup, controllersInstance)
 	}
 }

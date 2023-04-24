@@ -16,6 +16,18 @@ type UserController struct {
 	userInventoryManager services.UserInventoryManager
 }
 
+func NewUserController(
+	userManager services.UserManager,
+	levelManager services.LevelManager,
+	userInventoryManager services.UserInventoryManager,
+) UserController {
+	return UserController{
+		userManager:          userManager,
+		levelManager:         levelManager,
+		userInventoryManager: userInventoryManager,
+	}
+}
+
 func (u UserController) UserInfo(c *gin.Context) {
 	var (
 		err           error
@@ -26,13 +38,13 @@ func (u UserController) UserInfo(c *gin.Context) {
 	)
 
 	user, errorHandler = u.userManager.AuthUser(c)
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		errorHandler.HandleError(c)
 		return
 	}
 
 	user, errorHandler = u.userManager.GetUserWithBalance(user)
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		errorHandler.HandleError(c)
 		return
 	}
@@ -62,13 +74,13 @@ func (u UserController) UserInventory(c *gin.Context) {
 	)
 
 	user, errorHandler = u.userManager.AuthUser(c)
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		errorHandler.HandleError(c)
 		return
 	}
 
 	inventory, errorHandler = u.userInventoryManager.GetInventoryForUser(user.UUID)
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		errorHandler.HandleError(c)
 		return
 	}
@@ -96,7 +108,7 @@ func (u UserController) StoreSteamTradeURL(c *gin.Context) {
 	)
 
 	user, errorHandler = u.userManager.AuthUser(c)
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		errorHandler.HandleError(c)
 		return
 	}
@@ -107,7 +119,7 @@ func (u UserController) StoreSteamTradeURL(c *gin.Context) {
 		return
 	}
 
-	if errorHandler = u.userManager.StoreSteamTradeURL(user, store); errorHandler.Err != nil {
+	if errorHandler = u.userManager.StoreSteamTradeURL(user, store); errorHandler != nil {
 		errorHandler.HandleError(c)
 		return
 	}
@@ -129,13 +141,13 @@ func (u UserController) GetUpdatableFields(c *gin.Context) {
 	)
 
 	user, errorHandler = u.userManager.AuthUser(c)
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		errorHandler.HandleError(c)
 		return
 	}
 
 	userWithBalance, errorHandler = u.userManager.GetUserWithBalance(user)
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		errorHandler.HandleError(c)
 		return
 	}

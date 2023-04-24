@@ -11,14 +11,18 @@ type BoxManager struct {
 	BoxRepository repositories.BoxRepository
 }
 
+func NewBoxManager(
+	BoxRepository repositories.BoxRepository,
+) BoxManager {
+	return BoxManager{
+		BoxRepository: BoxRepository,
+	}
+}
+
 func (b BoxManager) FindAllWithItems() models.Boxes {
 	var (
 		boxes models.Boxes
 	)
-
-	b.BoxRepository.MysqlDB = MysqlDB
-
-	boxes = b.BoxRepository.FindAllWithItems()
 
 	return boxes
 }
@@ -28,8 +32,6 @@ func (b BoxManager) FindByUUIDWithItems(uuid string) (models.Box, *utils.Errors)
 		err error
 		box models.Box
 	)
-
-	b.BoxRepository.MysqlDB = MysqlDB
 
 	box, err = b.BoxRepository.FindByUUIDWithItems(uuid)
 	if err != nil {
@@ -44,8 +46,6 @@ func (b BoxManager) Open(uuid string) (models.Box, *utils.Errors) {
 		err error
 		box models.Box
 	)
-
-	b.BoxRepository.MysqlDB = MysqlDB
 
 	box, err = b.BoxRepository.FindByUUIDWithItems(uuid)
 	if err != nil {
