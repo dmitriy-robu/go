@@ -19,7 +19,7 @@ type UserManager struct {
 	levelRepository       repositories.LevelRepository
 }
 
-func (us UserManager) CreateOrUpdateSteamUser(userGoth goth.User) (string, utils.Errors) {
+func (us UserManager) CreateOrUpdateSteamUser(userGoth goth.User) (string, *utils.Errors) {
 	var (
 		err           error
 		user          models.User
@@ -54,61 +54,39 @@ func (us UserManager) CreateOrUpdateSteamUser(userGoth goth.User) (string, utils
 		user.CreatedAt = now
 
 		if user, err = us.userRepository.CreateUser(user); err != nil {
-			return "", utils.Errors{
-				Code:    http.StatusInternalServerError,
-				Message: "Error creating user",
-				Err:     err,
-			}
+			return "", utils.NewErrors(http.StatusInternalServerError, "Error creating user", err)
 		}
 
 		if err = us.userBalanceRepository.CreateUserBalance(user.ID); err != nil {
-			return "", utils.Errors{
-				Code:    http.StatusInternalServerError,
-				Message: "Error creating user balance",
-				Err:     err,
-			}
+			return "", utils.NewErrors(http.StatusInternalServerError, "Error creating user balance", err)
 		}
 
 		userAuthSteam.UserUUID = user.UUID
 		userAuthSteam.CreatedAt = now
 
 		if err = us.userRepository.CreateUserAuth(userAuthSteam); err != nil {
-			return "", utils.Errors{
-				Code:    http.StatusInternalServerError,
-				Message: "Error creating user",
-				Err:     err,
-			}
+			return "", utils.NewErrors(http.StatusInternalServerError, "Error creating user", err)
 		}
 	} else {
 		if user, err = us.userRepository.GetUserByUuid(userAuth.UserUUID); err != nil {
-			return "", utils.Errors{
-				Code:    http.StatusInternalServerError,
-				Message: "Error getting user",
-				Err:     err,
-			}
+			return "", utils.NewErrors(http.StatusInternalServerError, "Error getting user", err)
 		}
 
 		if user, err = us.userRepository.UpdateUser(user); err != nil {
-			return "", utils.Errors{
-				Code:    http.StatusInternalServerError,
-				Message: "Error updating user",
-				Err:     err,
-			}
+			return "", utils.NewErrors(http.StatusInternalServerError, "Error updating user", err)
 		}
 
+		userAuthSteam.UserUUID = user.UUID
+
 		if err = us.userRepository.UpdateUserAuth(userAuthSteam); err != nil {
-			return "", utils.Errors{
-				Code:    http.StatusInternalServerError,
-				Message: "Error updating user auth",
-				Err:     err,
-			}
+			return "", utils.NewErrors(http.StatusInternalServerError, "Error updating user auth", err)
 		}
 	}
 
-	return user.UUID, utils.Errors{}
+	return user.UUID, nil
 }
 
-func (us UserManager) GetUserById(userID uint) (models.User, utils.Errors) {
+func (us UserManager) GetUserById(userID uint) (models.User, *utils.Errors) {
 	var (
 		err  error
 		user models.User
@@ -118,17 +96,13 @@ func (us UserManager) GetUserById(userID uint) (models.User, utils.Errors) {
 
 	user, err = us.userRepository.FindUserByID(userID)
 	if err != nil {
-		return user, utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "An error occurred while retrieving user information",
-			Err:     err,
-		}
+		return user, utils.NewErrors(http.StatusInternalServerError, "An error occurred while retrieving user information", err)
 	}
 
-	return user, utils.Errors{}
+	return user, nil
 }
 
-func (us UserManager) AuthUser(c *gin.Context) (models.User, utils.Errors) {
+func (us UserManager) AuthUser(c *gin.Context) (models.User, *utils.Errors) {
 	var (
 		err  error
 		user models.User
@@ -138,26 +112,18 @@ func (us UserManager) AuthUser(c *gin.Context) (models.User, utils.Errors) {
 
 	userUuid, ok := c.MustGet("userUuid").(string)
 	if !ok {
-		return user, utils.Errors{
-			Code:    401,
-			Message: "Unauthorized",
-			Err:     errors.New("Unauthorized"),
-		}
+		return user, utils.NewErrors(http.StatusUnauthorized, "Unauthorized", errors.New("Unauthorized"))
 	}
 
 	user, err = us.userRepository.GetUserByUuid(userUuid)
 	if err != nil {
-		return user, utils.Errors{
-			Code:    http.StatusUnauthorized,
-			Message: "Unauthorized",
-			Err:     err,
-		}
+		return user, utils.NewErrors(http.StatusUnauthorized, "Unauthorized", err)
 	}
 
-	return user, utils.Errors{}
+	return user, nil
 }
 
-func (us UserManager) GetUserWithBalance(user models.User) (models.User, utils.Errors) {
+func (us UserManager) GetUserWithBalance(user models.User) (models.User, *utils.Errors) {
 	var (
 		err             error
 		userWithBalance models.User
@@ -167,17 +133,13 @@ func (us UserManager) GetUserWithBalance(user models.User) (models.User, utils.E
 
 	userWithBalance, err = us.userRepository.GetUserByIdWithBalance(user.ID)
 	if err != nil {
-		return userWithBalance, utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "An error occurred while retrieving user information",
-			Err:     err,
-		}
+		return userWithBalance, utils.NewErrors(http.StatusInternalServerError, "An error occurred while retrieving user information", err)
 	}
 
-	return userWithBalance, utils.Errors{}
+	return userWithBalance, nil
 }
 
-func (us UserManager) StoreSteamTradeURL(user models.User, store requests.StoreUserSteamTradeURL) utils.Errors {
+func (us UserManager) StoreSteamTradeURL(user models.User, store requests.StoreUserSteamTradeURL) *utils.Errors {
 	var (
 		err error
 	)
@@ -185,20 +147,12 @@ func (us UserManager) StoreSteamTradeURL(user models.User, store requests.StoreU
 	us.userRepository.MysqlDB = MysqlDB
 
 	if user.ReferralCode != "" {
-		return utils.Errors{
-			Code:    http.StatusBadRequest,
-			Message: "You already have a referral code",
-			Err:     err,
-		}
+		return utils.NewErrors(http.StatusBadRequest, "You already have a referral code", err)
 	}
 
 	if err = us.userRepository.StoreSteamTradeURLToUser(user, store.URL); err != nil {
-		return utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "An error occurred while storing Steam trade URL",
-			Err:     err,
-		}
+		return utils.NewErrors(http.StatusInternalServerError, "An error occurred while storing Steam trade URL", err)
 	}
 
-	return utils.Errors{}
+	return nil
 }

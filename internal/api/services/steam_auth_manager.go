@@ -27,24 +27,21 @@ func (sam SteamAuthManager) Login(c *gin.Context) {
 	gothic.BeginAuthHandler(c.Writer, c.Request)
 }
 
-func (sam SteamAuthManager) Callback(c *gin.Context) utils.Errors {
+func (sam SteamAuthManager) Callback(c *gin.Context) *utils.Errors {
 	var (
 		err          error
 		user         goth.User
 		userUuid     string
 		session      sessions.Session
-		errorHandler utils.Errors
+		errorHandler *utils.Errors
 	)
 
 	sam.setProvider()
 
 	user, err = gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
-		return utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error completing user authentication",
-			Err:     err,
-		}
+
+		return utils.NewErrors(http.StatusInternalServerError, "Error completing user auth", err)
 	}
 
 	userUuid, errorHandler = sam.userManager.CreateOrUpdateSteamUser(user)
@@ -55,12 +52,8 @@ func (sam SteamAuthManager) Callback(c *gin.Context) utils.Errors {
 	session = sessions.Default(c)
 	session.Set("userUuid", userUuid)
 	if err = session.Save(); err != nil {
-		return utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error saving session",
-			Err:     err,
-		}
+		return utils.NewErrors(http.StatusInternalServerError, "Error saving session", err)
 	}
 
-	return utils.Errors{}
+	return nil
 }

@@ -20,7 +20,7 @@ func (rc ReferralController) StoreCode(c *gin.Context) {
 		err          error
 		user         models.User
 		store        requests.StoreUserReferralCode
-		errorHandler utils.Errors
+		errorHandler *utils.Errors
 	)
 
 	user, errorHandler = rc.userManager.AuthUser(c)
@@ -30,11 +30,7 @@ func (rc ReferralController) StoreCode(c *gin.Context) {
 	}
 
 	if err = c.ShouldBindJSON(&store); err != nil {
-		errorHandler = utils.Errors{
-			Code:    http.StatusBadRequest,
-			Message: "Error binding JSON",
-			Err:     err,
-		}
+		errorHandler = utils.NewErrors(http.StatusBadRequest, "Error binding JSON", err)
 		errorHandler.HandleError(c)
 		return
 	}
@@ -55,7 +51,7 @@ func (rc ReferralController) Details(c *gin.Context) {
 		referralDetails         models.ReferralDetails
 		referralDetailResource  map[string]interface{}
 		referralDetailResources resources.ReferralDetailResource
-		errorHandler            utils.Errors
+		errorHandler            *utils.Errors
 	)
 
 	user, errorHandler = rc.userManager.AuthUser(c)
@@ -76,11 +72,7 @@ func (rc ReferralController) Details(c *gin.Context) {
 
 	referralDetailResource, err = referralDetailResources.ToJSON()
 	if err != nil {
-		errorHandler = utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error converting user information to JSON",
-			Err:     err,
-		}
+		errorHandler = utils.NewErrors(http.StatusInternalServerError, "Error converting to JSON", err)
 		errorHandler.HandleError(c)
 		return
 	}

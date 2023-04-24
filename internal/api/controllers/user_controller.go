@@ -22,7 +22,7 @@ func (u UserController) UserInfo(c *gin.Context) {
 		user          models.User
 		userInfo      map[string]interface{}
 		userResources resources.UserResources
-		errorHandler  utils.Errors
+		errorHandler  *utils.Errors
 	)
 
 	user, errorHandler = u.userManager.AuthUser(c)
@@ -43,11 +43,7 @@ func (u UserController) UserInfo(c *gin.Context) {
 
 	userInfo, err = userResources.ToJSON()
 	if err != nil {
-		errorHandler = utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error converting user information to JSON",
-			Err:     err,
-		}
+		errorHandler = utils.NewErrors(http.StatusInternalServerError, "Error converting user information to JSON", err)
 		errorHandler.HandleError(c)
 		return
 	}
@@ -62,7 +58,7 @@ func (u UserController) UserInventory(c *gin.Context) {
 		inventory              models.InventoryData
 		userInventoryResources resources.UserInventoryResources
 		userInventoryResource  []map[string]interface{}
-		errorHandler           utils.Errors
+		errorHandler           *utils.Errors
 	)
 
 	user, errorHandler = u.userManager.AuthUser(c)
@@ -83,11 +79,7 @@ func (u UserController) UserInventory(c *gin.Context) {
 
 	userInventoryResource, err = userInventoryResources.ToJSON()
 	if err != nil {
-		errorHandler = utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error converting user information to JSON",
-			Err:     err,
-		}
+		errorHandler = utils.NewErrors(http.StatusInternalServerError, "Error converting user inventory to JSON", err)
 		errorHandler.HandleError(c)
 		return
 	}
@@ -100,7 +92,7 @@ func (u UserController) StoreSteamTradeURL(c *gin.Context) {
 		err          error
 		store        requests.StoreUserSteamTradeURL
 		user         models.User
-		errorHandler utils.Errors
+		errorHandler *utils.Errors
 	)
 
 	user, errorHandler = u.userManager.AuthUser(c)
@@ -110,11 +102,7 @@ func (u UserController) StoreSteamTradeURL(c *gin.Context) {
 	}
 
 	if err = c.BindJSON(&store); err != nil {
-		errorHandler = utils.Errors{
-			Code:    http.StatusBadRequest,
-			Message: "Error binding trade URL",
-			Err:     err,
-		}
+		errorHandler = utils.NewErrors(http.StatusBadRequest, "Error binding JSON", err)
 		errorHandler.HandleError(c)
 		return
 	}
@@ -137,7 +125,7 @@ func (u UserController) GetUpdatableFields(c *gin.Context) {
 		userWithBalance             models.User
 		userUpdatableFieldsResource resources.UserUpdatableFieldsResource
 		userLevel                   models.Level
-		errorHandler                utils.Errors
+		errorHandler                *utils.Errors
 	)
 
 	user, errorHandler = u.userManager.AuthUser(c)
@@ -161,11 +149,7 @@ func (u UserController) GetUpdatableFields(c *gin.Context) {
 
 	userInfo, err = userUpdatableFieldsResource.ToJSON()
 	if err != nil {
-		errorHandler = utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error converting user information to JSON",
-			Err:     err,
-		}
+		errorHandler = utils.NewErrors(http.StatusInternalServerError, "Error converting user information to JSON", err)
 		errorHandler.HandleError(c)
 		return
 	}

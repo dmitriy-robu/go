@@ -9,8 +9,15 @@ import (
 )
 
 type UserBalanceManager struct {
-	user                  models.User
-	userBalanceRepository repositories.UserBalanceRepository
+	user                  *models.User
+	userBalanceRepository *repositories.UserBalanceRepository
+}
+
+func NewUserBalanceManager(user *models.User, ubr *repositories.UserBalanceRepository) *UserBalanceManager {
+	return &UserBalanceManager{
+		user:                  user,
+		userBalanceRepository: ubr,
+	}
 }
 
 func (ubm UserBalanceManager) AddBalance(amount uint) utils.Errors {

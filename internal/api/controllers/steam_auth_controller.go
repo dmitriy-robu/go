@@ -26,7 +26,7 @@ func (s SteamAuthController) Login(c *gin.Context) {
 
 func (s SteamAuthController) Callback(c *gin.Context) {
 	var (
-		errorHandler utils.Errors
+		errorHandler *utils.Errors
 	)
 
 	errorHandler = s.steamAuthManager.Callback(c)

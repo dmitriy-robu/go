@@ -13,34 +13,26 @@ type ReferralManager struct {
 	referralRepository repositories.ReferralRepository
 }
 
-func (rs ReferralManager) StoreReferralCode(user models.User, store requests.StoreUserReferralCode) (models.User, utils.Errors) {
+func (rs ReferralManager) StoreReferralCode(user models.User, store requests.StoreUserReferralCode) (models.User, *utils.Errors) {
 	var (
 		err error
 	)
 
 	if user.ReferralCode != "" {
-		return models.User{}, utils.Errors{
-			Code:    http.StatusBadRequest,
-			Message: "User already has a referral code",
-			Err:     errors.New("User already has a referral code"),
-		}
+		return models.User{}, utils.NewErrors(http.StatusBadRequest, "User already has a referral code", errors.New("User already has a referral code"))
 	}
 
 	rs.referralRepository.MysqlDB = MysqlDB
 
 	user, err = rs.referralRepository.StoreReferralCodeToUser(user, store)
 	if err != nil {
-		return models.User{}, utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error storing referral code to user",
-			Err:     err,
-		}
+		return models.User{}, utils.NewErrors(http.StatusInternalServerError, "Error storing referral code to user", err)
 	}
 
-	return user, utils.Errors{}
+	return user, nil
 }
 
-func (rs ReferralManager) GetReferralDetails(user models.User) (models.ReferralDetails, utils.Errors) {
+func (rs ReferralManager) GetReferralDetails(user models.User) (models.ReferralDetails, *utils.Errors) {
 	var (
 		err                   error
 		referralTiers         []models.ReferralTier
@@ -49,18 +41,13 @@ func (rs ReferralManager) GetReferralDetails(user models.User) (models.ReferralD
 		referredUsers         []models.ReferredUser
 		referralDetails       models.ReferralDetails
 		currentTierCommission float64
-		errorHandler          utils.Errors
 	)
 
 	rs.referralRepository.MysqlDB = MysqlDB
 
 	referralTiers, err = rs.referralRepository.GetReferralTiers()
 	if err != nil {
-		return referralDetails, utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error getting referral tiers",
-			Err:     err,
-		}
+		return referralDetails, utils.NewErrors(http.StatusInternalServerError, "Error getting referral tiers", err)
 	}
 
 	currentTierCommission = 0.0
@@ -75,25 +62,17 @@ func (rs ReferralManager) GetReferralDetails(user models.User) (models.ReferralD
 
 	referral, err = rs.referralRepository.GetReferralByUserId(user.ID)
 	if err != nil {
-		return referralDetails, utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error getting referral by user id",
-			Err:     err,
-		}
+		return referralDetails, utils.NewErrors(http.StatusInternalServerError, "Error getting referral by user id", err)
 	}
 
 	totalEarnings, err = rs.referralRepository.GetReferralTransactionSumByReferralId(referral.ID)
 	if err != nil {
-		return referralDetails, utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error getting referral transaction sum by referral id",
-			Err:     err,
-		}
+		return referralDetails, utils.NewErrors(http.StatusInternalServerError, "Error getting referral transaction sum by referral id", err)
 	}
 
-	referredUsers, errorHandler = rs.getReferredUsers(referral.ReferralUserID, referral.ID)
-	if errorHandler.Err != nil {
-		return referralDetails, errorHandler
+	referredUsers, err = rs.getReferredUsers(referral.ReferralUserID, referral.ID)
+	if err != nil {
+		return referralDetails, utils.NewErrors(http.StatusInternalServerError, "Error getting referred users", err)
 	}
 
 	referralDetails = models.ReferralDetails{
@@ -103,10 +82,10 @@ func (rs ReferralManager) GetReferralDetails(user models.User) (models.ReferralD
 		ReferredUsers:         referredUsers,
 	}
 
-	return referralDetails, errorHandler
+	return referralDetails, nil
 }
 
-func (rs ReferralManager) getReferredUsers(userID uint, referralID uint) ([]models.ReferredUser, utils.Errors) {
+func (rs ReferralManager) getReferredUsers(userID uint, referralID uint) ([]models.ReferredUser, error) {
 	var (
 		err           error
 		users         []models.User
@@ -121,11 +100,7 @@ func (rs ReferralManager) getReferredUsers(userID uint, referralID uint) ([]mode
 
 	users, err = rs.referralRepository.GetReferredUserByUserId(userID)
 	if err != nil {
-		return referredUsers, utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error getting referred users by user id",
-			Err:     err,
-		}
+		return referredUsers, err
 	}
 
 	for _, user = range users {
@@ -150,5 +125,5 @@ func (rs ReferralManager) getReferredUsers(userID uint, referralID uint) ([]mode
 		referredUsers = append(referredUsers, referredUser)
 	}
 
-	return referredUsers, utils.Errors{}
+	return referredUsers, nil
 }

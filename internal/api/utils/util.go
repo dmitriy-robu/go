@@ -15,23 +15,24 @@ type Errors struct {
 	Err     error
 }
 
-type MoneyConvert struct {
-}
-
-type Environment struct {
+func NewErrors(code int, msg string, err error) *Errors {
+	return &Errors{
+		Code:    code,
+		Message: msg,
+		Err:     err,
+	}
 }
 
 func (e *Errors) HandleError(c *gin.Context) {
 	if e.Err != nil {
-		message := e.Message
-		if message == "" {
-			message = "An error occurred"
-		}
 		c.JSON(e.Code, gin.H{
-			"error": message,
+			"error": e.Message,
 		})
 		log.Println(e.Err)
 	}
+}
+
+type MoneyConvert struct {
 }
 
 func (mc MoneyConvert) FromCentsToVault(value uint) string {
@@ -49,6 +50,9 @@ func (mc MoneyConvert) FromVaultToCents(value string) (int, error) {
 	}
 
 	return int(parsedValue * 100), nil
+}
+
+type Environment struct {
 }
 
 func (e Environment) GetEnvOrDefault(key string, defaultValue interface{}) interface{} {

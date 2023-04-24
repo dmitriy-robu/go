@@ -7,14 +7,13 @@ import (
 	"encoding/hex"
 	"fmt"
 	"go-rust-drop/internal/api/models"
-	"go-rust-drop/internal/api/utils"
 	"strconv"
 )
 
 type ProvablyFairManager struct {
 }
 
-func (pfs *ProvablyFairManager) GetProvablyFair(provablyFair *models.ProvablyFair) utils.Errors {
+func (pfs *ProvablyFairManager) GetProvablyFair(provablyFair *models.ProvablyFair) {
 	var (
 		message      string
 		hash         []byte
@@ -43,8 +42,6 @@ func (pfs *ProvablyFairManager) GetProvablyFair(provablyFair *models.ProvablyFai
 	randomNumber = provablyFair.MinChance + (provablyFair.MaxChance-provablyFair.MinChance)*randomNumber
 
 	provablyFair.RandomNumber = randomNumber
-
-	return utils.Errors{}
 }
 
 func generateRandomSeed(length int) (string, error) {

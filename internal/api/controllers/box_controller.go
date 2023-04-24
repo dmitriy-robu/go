@@ -34,7 +34,7 @@ func (b BoxController) Show(c *gin.Context) {
 	var (
 		box          models.Box
 		boxResource  map[string]interface{}
-		errorHandler utils.Errors
+		errorHandler *utils.Errors
 	)
 
 	box, errorHandler = b.BoxManager.FindByUUIDWithItems(c.Param("uuid"))
@@ -56,7 +56,7 @@ func (b BoxController) Open(c *gin.Context) {
 	var (
 		box          models.Box
 		boxResource  map[string]interface{}
-		errorHandler utils.Errors
+		errorHandler *utils.Errors
 	)
 
 	box, errorHandler = b.BoxManager.Open(c.Param("uuid"))

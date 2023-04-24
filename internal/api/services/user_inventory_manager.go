@@ -18,23 +18,19 @@ type UserInventoryManager struct {
 	userRepository repositories.UserRepository
 }
 
-func (uis UserInventoryManager) GetInventoryForUser(userUUID string) (models.InventoryData, utils.Errors) {
+func (uis UserInventoryManager) GetInventoryForUser(userUUID string) (models.InventoryData, *utils.Errors) {
 	var (
 		err          error
 		userAuth     models.UserAuthSteam
 		inventory    models.InventoryData
-		errorHandler utils.Errors
+		errorHandler *utils.Errors
 	)
 
 	uis.userRepository.MysqlDB = MysqlDB
 
 	userAuth, err = uis.userRepository.GetUserAuthByUserUUID(userUUID)
 	if err != nil {
-		return inventory, utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error getting user auth",
-			Err:     err,
-		}
+		return inventory, utils.NewErrors(http.StatusNotFound, "User not found", err)
 	}
 
 	inventory, errorHandler = uis.getInventory(userAuth.SteamUserID, config.SetSteamSettings())
@@ -45,13 +41,13 @@ func (uis UserInventoryManager) GetInventoryForUser(userUUID string) (models.Inv
 	return inventory, errorHandler
 }
 
-func (uis UserInventoryManager) getInventory(steamID string, settings config.SteamSettings) (models.InventoryData, utils.Errors) {
+func (uis UserInventoryManager) getInventory(steamID string, settings config.SteamSettings) (models.InventoryData, *utils.Errors) {
 	var (
 		err          error
 		inventory    models.InventoryData
 		resp         *http.Response
 		response     map[string]interface{}
-		errorHandler utils.Errors
+		errorHandler *utils.Errors
 		data         models.InventoryData
 	)
 
@@ -67,11 +63,7 @@ func (uis UserInventoryManager) getInventory(steamID string, settings config.Ste
 
 	resp, err = client.Get(endpoint)
 	if err != nil {
-		return inventory, utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error getting inventory",
-			Err:     err,
-		}
+		return inventory, utils.NewErrors(http.StatusInternalServerError, "Error getting inventory", err)
 	}
 	defer func(Body io.ReadCloser) {
 		err = Body.Close()
@@ -81,20 +73,12 @@ func (uis UserInventoryManager) getInventory(steamID string, settings config.Ste
 	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
-		return inventory, utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error getting inventory",
-			Err:     errors.New("Error getting inventory"),
-		}
+		return inventory, utils.NewErrors(resp.StatusCode, "Error getting inventory", errors.New("Status code: "+strconv.Itoa(resp.StatusCode)))
 	}
 
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
-		return inventory, utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error parsing inventory",
-			Err:     err,
-		}
+		return inventory, utils.NewErrors(http.StatusInternalServerError, "Error getting inventory", err)
 	}
 
 	data, errorHandler = uis.mapResponseToAssetData(response, settings)
@@ -102,16 +86,16 @@ func (uis UserInventoryManager) getInventory(steamID string, settings config.Ste
 		return data, errorHandler
 	}
 
-	return data, utils.Errors{}
+	return data, nil
 }
 
 func (uis UserInventoryManager) mapResponseToAssetData(
 	response map[string]interface{},
 	settings config.SteamSettings,
-) (models.InventoryData, utils.Errors) {
+) (models.InventoryData, *utils.Errors) {
 	var (
 		parsedAssets []models.AssetData
-		errorHandler utils.Errors
+		errorHandler *utils.Errors
 		allDetails   map[string]interface{}
 	)
 
@@ -167,7 +151,7 @@ func (uis UserInventoryManager) mapResponseToAssetData(
 	return models.InventoryData{
 		AssetData:           parsedAssets,
 		TotalInventoryCount: totalInventoryCount,
-	}, utils.Errors{}
+	}, nil
 }
 
 func filterDetailsByDescriptions(allDetails map[string]interface{}, descriptions []interface{}) map[string]interface{} {
@@ -191,7 +175,7 @@ func findDescriptionByClassID(descriptions []interface{}, classID string) map[st
 	return nil
 }
 
-func getDetailsForAllItems(settings config.SteamSettings) (map[string]interface{}, utils.Errors) {
+func getDetailsForAllItems(settings config.SteamSettings) (map[string]interface{}, *utils.Errors) {
 	client := &http.Client{}
 	endpoint := fmt.Sprintf(
 		"%s/%d?api_key=%s",
@@ -201,11 +185,7 @@ func getDetailsForAllItems(settings config.SteamSettings) (map[string]interface{
 	)
 	resp, err := client.Get(endpoint)
 	if err != nil {
-		return nil, utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error getting items details",
-			Err:     err,
-		}
+		return nil, utils.NewErrors(http.StatusInternalServerError, "Error getting items details", err)
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -215,24 +195,16 @@ func getDetailsForAllItems(settings config.SteamSettings) (map[string]interface{
 	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error getting items details",
-			Err:     errors.New("Error getting items details"),
-		}
+		return nil, utils.NewErrors(resp.StatusCode, "Error getting items details", errors.New(strconv.Itoa(resp.StatusCode)))
 	}
 
 	var response map[string]interface{}
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
-		return nil, utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error parsing items details",
-			Err:     err,
-		}
+		return nil, utils.NewErrors(http.StatusInternalServerError, "Error getting items details", err)
 	}
 
 	data := response["data"].(map[string]interface{})
 
-	return data, utils.Errors{}
+	return data, nil
 }

@@ -23,7 +23,7 @@ func (b BoxManager) FindAllWithItems() models.Boxes {
 	return boxes
 }
 
-func (b BoxManager) FindByUUIDWithItems(uuid string) (models.Box, utils.Errors) {
+func (b BoxManager) FindByUUIDWithItems(uuid string) (models.Box, *utils.Errors) {
 	var (
 		err error
 		box models.Box
@@ -33,17 +33,13 @@ func (b BoxManager) FindByUUIDWithItems(uuid string) (models.Box, utils.Errors) 
 
 	box, err = b.BoxRepository.FindByUUIDWithItems(uuid)
 	if err != nil {
-		return box, utils.Errors{
-			Code:    http.StatusNotFound,
-			Message: "Box not found",
-			Err:     err,
-		}
+		return box, utils.NewErrors(http.StatusNotFound, "Box not found", err)
 	}
 
-	return box, utils.Errors{}
+	return box, nil
 }
 
-func (b BoxManager) Open(uuid string) (models.Box, utils.Errors) {
+func (b BoxManager) Open(uuid string) (models.Box, *utils.Errors) {
 	var (
 		err error
 		box models.Box
@@ -53,12 +49,8 @@ func (b BoxManager) Open(uuid string) (models.Box, utils.Errors) {
 
 	box, err = b.BoxRepository.FindByUUIDWithItems(uuid)
 	if err != nil {
-		return box, utils.Errors{
-			Code:    http.StatusNotFound,
-			Message: "Box not found",
-			Err:     err,
-		}
+		return box, utils.NewErrors(http.StatusNotFound, "Box not found", err)
 	}
 
-	return box, utils.Errors{}
+	return box, nil
 }
