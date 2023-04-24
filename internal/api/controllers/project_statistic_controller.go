@@ -13,6 +13,14 @@ type ProjectStatisticController struct {
 	ProjectStatisticManager services.ProjectStatisticsManager
 }
 
+func NewProjectStatisticController(
+	projectStatisticManager services.ProjectStatisticsManager,
+) ProjectStatisticController {
+	return ProjectStatisticController{
+		ProjectStatisticManager: projectStatisticManager,
+	}
+}
+
 func (psc ProjectStatisticController) GetProjectStatistic(c *gin.Context) {
 	var (
 		projectStatistic         models.ProjectStatistic

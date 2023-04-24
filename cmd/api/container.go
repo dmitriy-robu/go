@@ -31,6 +31,8 @@ func NewContainer() *dig.Container {
 	container.Provide(controllers.NewUserController)
 	container.Provide(controllers.NewBoxController)
 	container.Provide(controllers.NewSteamAuthController)
+	container.Provide(controllers.NewSteamAuthController)
+	container.Provide(controllers.NewProjectStatisticController)
 	container.Provide(controllers.NewControllers)
 
 	return container

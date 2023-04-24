@@ -5,8 +5,9 @@ type Controllers struct {
 	UserController       UserController
 	ReferralController   ReferralController
 	//ProvablyFairController ProvablyFairController
-	BoxController       BoxController
-	SteamAuthController SteamAuthController
+	BoxController              BoxController
+	SteamAuthController        SteamAuthController
+	ProjectStatisticController ProjectStatisticController
 }
 
 func NewControllers(
@@ -16,13 +17,15 @@ func NewControllers(
 	//provablyFairController ProvablyFairController,
 	boxController BoxController,
 	steamAuthController SteamAuthController,
+	projectStatisticController ProjectStatisticController,
 ) Controllers {
 	return Controllers{
 		CaseBattleController: caseBattleController,
 		UserController:       userController,
 		ReferralController:   referralController,
 		//ProvablyFairController: provablyFairController,
-		BoxController:       boxController,
-		SteamAuthController: steamAuthController,
+		BoxController:              boxController,
+		SteamAuthController:        steamAuthController,
+		ProjectStatisticController: projectStatisticController,
 	}
 }

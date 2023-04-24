@@ -5,19 +5,19 @@ import (
 	"go-rust-drop/internal/api/controllers"
 )
 
-func Routes(router *gin.RouterGroup) {
-	get(router)
-	post(router)
+func Routes(router *gin.RouterGroup, controllersInstance controllers.Controllers) {
+	get(router, controllersInstance)
+	post(router, controllersInstance)
 }
 
-func get(router *gin.RouterGroup) {
+func get(router *gin.RouterGroup, controllersInstance controllers.Controllers) {
 	boxes := router.Group("/boxes")
 	{
-		boxes.GET("/", controllers.BoxController{}.Index)
-		boxes.GET("/:uuid", controllers.BoxController{}.Show)
+		boxes.GET("/", controllersInstance.BoxController.Index)
+		boxes.GET("/:uuid", controllersInstance.BoxController.Show)
 	}
-  
-	router.GET("/project-statistics", controllers.ProjectStatisticController{}.GetProjectStatistic)
+
+	router.GET("/project-statistics", controllersInstance.ProjectStatisticController.GetProjectStatistic)
 	router.GET("/provably-fair", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Hello",
@@ -25,6 +25,6 @@ func get(router *gin.RouterGroup) {
 	})
 }
 
-func post(router *gin.RouterGroup) {
+func post(router *gin.RouterGroup, controllersInstance controllers.Controllers) {
 
 }
