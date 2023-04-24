@@ -20,17 +20,20 @@ type CaseBattleManager struct {
 	caseBattleRepository      repositories.CaseBattleRepository
 	caseBattleRoundRepository repositories.CaseBattleRoundRepository
 	boxRepository             repositories.BoxRepository
+	MysqlDB                   *gorm.DB
 }
 
 func NewCaseBattleManager(
 	caseBattleRepo repositories.CaseBattleRepository,
 	caseBattleRoundRepo repositories.CaseBattleRoundRepository,
 	boxRepo repositories.BoxRepository,
+	mysql *gorm.DB,
 ) CaseBattleManager {
 	return CaseBattleManager{
 		caseBattleRepository:      caseBattleRepo,
 		caseBattleRoundRepository: caseBattleRoundRepo,
 		boxRepository:             boxRepo,
+		MysqlDB:                   mysql,
 	}
 }
 
@@ -47,7 +50,7 @@ func (cbm *CaseBattleManager) Create(caseBattleRequest requests.CaseBattleStoreR
 		now             time.Time
 	)
 
-	tx = MysqlDB.Begin()
+	tx = cbm.MysqlDB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
