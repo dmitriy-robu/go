@@ -21,42 +21,34 @@ func (cbc CaseBattleController) Create(c *gin.Context) {
 		user              models.User
 		caseBattleRequest requests.CaseBattleStoreRequest
 		boxUUID           string
-		errorHandler      utils.Errors
+		errorHandler      *utils.Errors
 	)
 
 	if err = c.ShouldBindJSON(&caseBattleRequest); err != nil {
-		errorHandler = utils.Errors{
-			Code:    http.StatusBadRequest,
-			Message: "Bad request",
-			Err:     err,
-		}
+		errorHandler = utils.NewErrors(http.StatusBadRequest, "Bad request", err)
 		errorHandler.HandleError(c)
 		return
 	}
 
 	if err = validator.New().Struct(caseBattleRequest); err != nil {
-		errorHandler = utils.Errors{
-			Code:    http.StatusBadRequest,
-			Message: "Bad request",
-			Err:     err,
-		}
+		errorHandler = utils.NewErrors(http.StatusBadRequest, "Bad request", err)
 		errorHandler.HandleError(c)
 		return
 	}
 
 	user, errorHandler = cbc.userManager.AuthUser(c)
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		errorHandler.HandleError(c)
 		return
 	}
 
 	boxUUID, errorHandler = cbc.caseBattleManager.Create(caseBattleRequest, user)
-	if errorHandler.Err != nil {
+	if errorHandler != nil {
 		errorHandler.HandleError(c)
 		return
 	}
 
-	c.JSON(200, gin.H{"box_uuid": boxUUID})
+	c.JSON(http.StatusOK, gin.H{"box_uuid": boxUUID})
 }
 
 func (cbc CaseBattleController) Join(c *gin.Context) {

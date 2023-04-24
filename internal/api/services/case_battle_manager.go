@@ -17,12 +17,20 @@ import (
 )
 
 type CaseBattleManager struct {
-	caseBattleRepository      repositories.CaseBattleRepository
-	caseBattleRoundRepository repositories.CaseBattleRoundRepository
-	boxRepository             repositories.BoxRepository
+	caseBattleRepository      *repositories.CaseBattleRepository
+	caseBattleRoundRepository *repositories.CaseBattleRoundRepository
+	boxRepository             *repositories.BoxRepository
 }
 
-func (cbm CaseBattleManager) Create(caseBattleRequest requests.CaseBattleStoreRequest, user models.User) (string, utils.Errors) {
+func NewCaseBattleManager(cbr *repositories.CaseBattleRepository, cbrR *repositories.CaseBattleRoundRepository, br *repositories.BoxRepository) *CaseBattleManager {
+	return &CaseBattleManager{
+		caseBattleRepository:      cbr,
+		caseBattleRoundRepository: cbrR,
+		boxRepository:             br,
+	}
+}
+
+func (cbm *CaseBattleManager) Create(caseBattleRequest requests.CaseBattleStoreRequest, user models.User) (string, *utils.Errors) {
 	var (
 		err             error
 		caseBattle      models.CaseBattle
@@ -31,7 +39,7 @@ func (cbm CaseBattleManager) Create(caseBattleRequest requests.CaseBattleStoreRe
 		caseBattleID    primitive.ObjectID
 		totalCost       uint
 		getBox          models.Box
-		errorHandler    utils.Errors
+		errorHandler    *utils.Errors
 		now             time.Time
 	)
 
@@ -45,7 +53,7 @@ func (cbm CaseBattleManager) Create(caseBattleRequest requests.CaseBattleStoreRe
 		}
 	}()
 
-	err = cbm.WithTransaction(func(ctx mongo.SessionContext) error {
+	err = cbm.withTransaction(func(ctx mongo.SessionContext) error {
 		caseBattleID = primitive.NewObjectID()
 
 		now = utils.GetTimeNow()
@@ -54,7 +62,7 @@ func (cbm CaseBattleManager) Create(caseBattleRequest requests.CaseBattleStoreRe
 		for _, box := range caseBattleRequest.Boxes {
 			getBox, err = cbm.boxRepository.FindByUUID(box.UUID)
 			if err != nil {
-				return errors.Wrap(err, "Error finding box")
+				return errors.New("Error finding box")
 			}
 			totalCost += getBox.Price * box.Quantity
 
@@ -67,7 +75,7 @@ func (cbm CaseBattleManager) Create(caseBattleRequest requests.CaseBattleStoreRe
 			}
 
 			if err = cbm.caseBattleRoundRepository.CreateCaseBattleRound(ctx, caseBattleRound); err != nil {
-				return errors.Wrap(err, "Error creating case battle round")
+				return errors.New("Error creating case battle round")
 			}
 		}
 
@@ -83,7 +91,7 @@ func (cbm CaseBattleManager) Create(caseBattleRequest requests.CaseBattleStoreRe
 		}
 
 		if err = cbm.caseBattleRepository.CreateCaseBattle(ctx, caseBattle); err != nil {
-			return errors.Wrap(err, "Error creating case battle")
+			return errors.New("Error creating case battle")
 		}
 
 		return nil
@@ -91,43 +99,33 @@ func (cbm CaseBattleManager) Create(caseBattleRequest requests.CaseBattleStoreRe
 
 	if err != nil {
 		tx.Rollback()
-		return "", utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error creating case battle",
-			Err:     err,
-		}
+		return "", utils.NewErrors(http.StatusInternalServerError, "Error creating case battle", err)
 	}
 
-	userBalanceManager := UserBalanceManager{
-		user:                  user,
-		userBalanceRepository: repositories.UserBalanceRepository{MysqlDB: tx},
-	}
+	userBalanceManager := NewUserBalanceManager(user, &repositories.UserBalanceRepository{MysqlDB: tx})
 
-	if errorHandler = userBalanceManager.SubtractBalance(totalCost); errorHandler.Err != nil {
+	if errorHandler = userBalanceManager.SubtractBalance(totalCost); errorHandler != nil {
 		tx.Rollback()
 		return "", errorHandler
 	}
 
 	if err = tx.Commit().Error; err != nil {
-		return "", utils.Errors{
-			Code:    http.StatusInternalServerError,
-			Message: "Error committing transaction",
-			Err:     err,
-		}
+		return "", utils.NewErrors(http.StatusInternalServerError, "Error committing transaction", err)
 	}
 
-	return caseBattleID.String(), utils.Errors{}
+	return caseBattleID.String(), nil
+
 }
 
-func (cbm *CaseBattleManager) WithTransaction(fn func(ctx mongo.SessionContext) error) error {
+func (cbm *CaseBattleManager) withTransaction(fn func(ctx mongo.SessionContext) error) error {
 	mongoClient, err := mongodb.GetMongoDBConnection()
 	if err != nil {
-		return errors.Wrap(err, "Error getting MongoDB connection")
+		return errors.New("Error getting MongoDB connection")
 	}
 
 	session, err := mongoClient.Client.StartSession()
 	if err != nil {
-		return errors.Wrap(err, "Error starting MongoDB session")
+		return errors.New("Error starting MongoDB session")
 	}
 	defer session.EndSession(context.Background())
 
