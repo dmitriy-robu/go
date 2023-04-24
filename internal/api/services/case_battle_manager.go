@@ -47,8 +47,6 @@ func (cbm *CaseBattleManager) Create(caseBattleRequest requests.CaseBattleStoreR
 		now             time.Time
 	)
 
-	cbm.boxRepository.MysqlDB = MysqlDB
-
 	tx = MysqlDB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -133,7 +131,7 @@ func (cbm *CaseBattleManager) withTransaction(fn func(ctx mongo.SessionContext) 
 	defer session.EndSession(context.Background())
 
 	callback := func(sessCtx mongo.SessionContext) (interface{}, error) {
-		err := fn(sessCtx)
+		err = fn(sessCtx)
 		if err != nil {
 			return nil, err
 		}

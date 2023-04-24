@@ -24,8 +24,6 @@ func (b BoxManager) FindAllWithItems() models.Boxes {
 		boxes models.Boxes
 	)
 
-	boxes = b.BoxRepository.FindAllWithItems()
-
 	return boxes
 }
 
@@ -34,8 +32,6 @@ func (b BoxManager) FindByUUIDWithItems(uuid string) (models.Box, *utils.Errors)
 		err error
 		box models.Box
 	)
-
-	b.BoxRepository.MysqlDB = MysqlDB
 
 	box, err = b.BoxRepository.FindByUUIDWithItems(uuid)
 	if err != nil {
@@ -50,8 +46,6 @@ func (b BoxManager) Open(uuid string) (models.Box, *utils.Errors) {
 		err error
 		box models.Box
 	)
-
-	b.BoxRepository.MysqlDB = MysqlDB
 
 	box, err = b.BoxRepository.FindByUUIDWithItems(uuid)
 	if err != nil {

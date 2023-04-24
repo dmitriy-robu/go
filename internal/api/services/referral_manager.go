@@ -30,8 +30,6 @@ func (rs ReferralManager) StoreReferralCode(user models.User, store requests.Sto
 		return models.User{}, utils.NewErrors(http.StatusBadRequest, "User already has a referral code", errors.New("User already has a referral code"))
 	}
 
-	rs.referralRepository.MysqlDB = MysqlDB
-
 	user, err = rs.referralRepository.StoreReferralCodeToUser(user, store)
 	if err != nil {
 		return models.User{}, utils.NewErrors(http.StatusInternalServerError, "Error storing referral code to user", err)
@@ -50,8 +48,6 @@ func (rs ReferralManager) GetReferralDetails(user models.User) (models.ReferralD
 		referralDetails       models.ReferralDetails
 		currentTierCommission float64
 	)
-
-	rs.referralRepository.MysqlDB = MysqlDB
 
 	referralTiers, err = rs.referralRepository.GetReferralTiers()
 	if err != nil {
@@ -103,8 +99,6 @@ func (rs ReferralManager) getReferredUsers(userID uint, referralID uint) ([]mode
 		sum           uint
 		user          models.User
 	)
-
-	rs.referralRepository.MysqlDB = MysqlDB
 
 	users, err = rs.referralRepository.GetReferredUserByUserId(userID)
 	if err != nil {

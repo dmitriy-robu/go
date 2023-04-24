@@ -21,8 +21,6 @@ func (ls LevelManager) GetLevelForByExperience(experience uint64) models.Level {
 		level models.Level
 	)
 
-	ls.levelRepository.MysqlDB = MysqlDB
-
 	level, err = ls.levelRepository.GetLevelByExperience(experience)
 	if err != nil {
 		level.EndsAt = 1

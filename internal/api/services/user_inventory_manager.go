@@ -32,8 +32,6 @@ func (uis UserInventoryManager) GetInventoryForUser(userUUID string) (models.Inv
 		errorHandler *utils.Errors
 	)
 
-	uis.userRepository.MysqlDB = MysqlDB
-
 	userAuth, err = uis.userRepository.GetUserAuthByUserUUID(userUUID)
 	if err != nil {
 		return inventory, utils.NewErrors(http.StatusNotFound, "User not found", err)
