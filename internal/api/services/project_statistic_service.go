@@ -11,6 +11,10 @@ import (
 type ProjectStatisticsManager struct {
 }
 
+func NewProjectStatisticsManager() ProjectStatisticsManager {
+	return ProjectStatisticsManager{}
+}
+
 const (
 	DividerForOpenedCaseTime  = 10000
 	DividerForOnlineUsersTime = 10000000

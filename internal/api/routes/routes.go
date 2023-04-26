@@ -28,7 +28,7 @@ func RouteHandle(router *gin.Engine, controllersInstance controllers.Controllers
 	}
 
 	publicGroup := router.Group("/api/v1")
-	public.Routes(publicGroup)
+	public.Routes(publicGroup, controllersInstance)
 
 	authGroup := router.Group("/api/v1")
 	Middleware := middlewares.Middleware{}

@@ -1,0 +1,53 @@
+version: '3.7'
+
+services:
+  mongo1:
+    build: .
+    hostname: mongo1
+    ports:
+      - 27017:27017
+    entrypoint: ["bash", "-c", " /scripts/init-replica-set.sh"]
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=rust_drop
+      - MONGO_INITDB_ROOT_PASSWORD=<H;wFO&:L:ym;9
+    volumes:
+      - ./keyfile:/etc/mongo/keyfile
+      - ./mongo1-data:/data/db
+      - ./init-replica-set.sh:/scripts/init-replica-set.sh
+    networks:
+      mongo-replicate:
+        aliases:
+          - mongodb
+
+  mongo2:
+    build: .
+    hostname: mongo2
+    command: --replSet rs0 --keyFile /data/keyfile/mongodb-keyfile --bind_ip_all
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=rust_drop
+      - MONGO_INITDB_ROOT_PASSWORD=<H;wFO&:L:ym;9
+    volumes:
+      - ./mongo2-data:/data/db
+    networks:
+      mongo-replicate:
+
+  mongo3:
+    build: .
+    hostname: mongo3
+    command: --replSet rs0 --keyFile /data/keyfile/mongodb-keyfile --bind_ip_all
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=rust_drop
+      - MONGO_INITDB_ROOT_PASSWORD=<H;wFO&:L:ym;9
+    volumes:
+      - ./mongo3-data:/data/db
+    networks:
+      mongo-replicate:
+
+networks:
+  mongo-replicate:
+    driver: bridge
+
+volumes:
+  mongo1-data:
+  mongo2-data:
+  mongo3-data:

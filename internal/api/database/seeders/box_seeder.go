@@ -30,9 +30,9 @@ func (b BoxSeeder) Seed() {
 		r1 := rand.New(s1)
 
 		if (r1.Intn(100) % 2) == 0 {
-			model.Active = 1
+			model.Active = true
 		} else {
-			model.Active = 0
+			model.Active = false
 		}
 
 		model.ID = 0

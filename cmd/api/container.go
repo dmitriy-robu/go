@@ -18,6 +18,7 @@ func NewContainer() *dig.Container {
 	container.Provide(repositories.NewLevelRepository)
 	container.Provide(repositories.NewReferralRepository)
 	container.Provide(repositories.NewSteamRepository)
+
 	container.Provide(services.NewCaseBattleManager)
 	container.Provide(services.NewUserBalanceManager)
 	container.Provide(services.NewLevelManager)
@@ -26,6 +27,8 @@ func NewContainer() *dig.Container {
 	container.Provide(services.NewBoxManager)
 	container.Provide(services.NewSteamAuthManager)
 	container.Provide(services.NewUserManager)
+	container.Provide(services.NewProjectStatisticsManager)
+
 	container.Provide(controllers.NewCaseBattleController)
 	container.Provide(controllers.NewReferralController)
 	container.Provide(controllers.NewUserController)
