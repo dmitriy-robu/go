@@ -2,7 +2,7 @@
 set -e
 
 # Start mongod in the background
-mongod --replSet rs0 --keyFile /data/keyfile/mongodb-keyfile --bind_ip_all &
+mongod --replSet rs0 --keyFile /etc/mongo/keyfile --bind_ip_all &
 
 echo "Waiting for MongoDB to start..."
 until mongosh --host mongo1 --eval "db.adminCommand('ping')" >/dev/null 2>&1; do

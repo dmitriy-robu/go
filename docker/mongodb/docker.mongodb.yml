@@ -11,7 +11,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=rust_drop
       - MONGO_INITDB_ROOT_PASSWORD=<H;wFO&:L:ym;9
     volumes:
-      - ./keyfile:/etc/mongo/keyfile
+      - ./mongodb-keyfile:/etc/mongo/keyfile
       - ./mongo1-data:/data/db
       - ./init-replica-set.sh:/scripts/init-replica-set.sh
     networks:
@@ -22,7 +22,7 @@ services:
   mongo2:
     build: .
     hostname: mongo2
-    command: --replSet rs0 --keyFile /data/keyfile/mongodb-keyfile --bind_ip_all
+    command: --replSet rs0 --keyFile /etc/mongo/keyfile --bind_ip_all
     environment:
       - MONGO_INITDB_ROOT_USERNAME=rust_drop
       - MONGO_INITDB_ROOT_PASSWORD=<H;wFO&:L:ym;9
@@ -34,7 +34,7 @@ services:
   mongo3:
     build: .
     hostname: mongo3
-    command: --replSet rs0 --keyFile /data/keyfile/mongodb-keyfile --bind_ip_all
+    command: --replSet rs0 --keyFile /etc/mongo/keyfile --bind_ip_all
     environment:
       - MONGO_INITDB_ROOT_USERNAME=rust_drop
       - MONGO_INITDB_ROOT_PASSWORD=<H;wFO&:L:ym;9
