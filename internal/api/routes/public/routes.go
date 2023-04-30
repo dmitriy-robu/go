@@ -26,5 +26,8 @@ func get(router *gin.RouterGroup, controllersInstance controllers.Controllers) {
 }
 
 func post(router *gin.RouterGroup, controllersInstance controllers.Controllers) {
-
+	openBox := router.Group("/boxes")
+	{
+		openBox.POST("/:uuid/open", controllersInstance.OpenBoxController.Open)
+	}
 }

@@ -9,6 +9,7 @@ func Routes(router *gin.RouterGroup, controllersInstance controllers.Controllers
 	get(router, controllersInstance)
 	post(router, controllersInstance)
 	put(router, controllersInstance)
+
 }
 
 func get(router *gin.RouterGroup, controllersInstance controllers.Controllers) {
@@ -18,13 +19,13 @@ func get(router *gin.RouterGroup, controllersInstance controllers.Controllers) {
 		user.GET("/inventory", controllersInstance.UserController.UserInventory)
 		user.GET("/updatable-fields", controllersInstance.UserController.GetUpdatableFields)
 	}
+
 	router.GET("/referrals/details", controllersInstance.ReferralController.Details)
 }
 
 func post(router *gin.RouterGroup, controllersInstance controllers.Controllers) {
 	router.POST("/users/set-trade-url", controllersInstance.UserController.StoreSteamTradeURL)
 	router.POST("/referrals/store-code", controllersInstance.ReferralController.StoreCode)
-	router.POST("/boxes/open/:uuid", controllersInstance.BoxController.Open)
 
 	caseBattle := router.Group("/case-battles")
 	{

@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"go-rust-drop/internal/api/enum"
 	"log"
 	"os"
 	"strconv"
@@ -13,6 +14,11 @@ type Errors struct {
 	Code    int
 	Message string
 	Err     error
+}
+
+type RarityProbability struct {
+	Rarity      enum.BoxItemRarity
+	Probability float64
 }
 
 func NewErrors(code int, msg string, err error) *Errors {

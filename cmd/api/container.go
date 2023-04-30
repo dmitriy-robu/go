@@ -18,6 +18,8 @@ func NewContainer() *dig.Container {
 	container.Provide(repositories.NewLevelRepository)
 	container.Provide(repositories.NewReferralRepository)
 	container.Provide(repositories.NewSteamRepository)
+	container.Provide(repositories.NewOpenBoxRepository)
+	container.Provide(repositories.NewProvablyFairRepository)
 
 	container.Provide(services.NewCaseBattleManager)
 	container.Provide(services.NewUserBalanceManager)
@@ -28,6 +30,8 @@ func NewContainer() *dig.Container {
 	container.Provide(services.NewSteamAuthManager)
 	container.Provide(services.NewUserManager)
 	container.Provide(services.NewProjectStatisticsManager)
+	container.Provide(services.NewOpenBoxManager)
+	container.Provide(services.NewProvablyFairManager)
 
 	container.Provide(controllers.NewCaseBattleController)
 	container.Provide(controllers.NewReferralController)
@@ -36,6 +40,7 @@ func NewContainer() *dig.Container {
 	container.Provide(controllers.NewSteamAuthController)
 	container.Provide(controllers.NewSteamAuthController)
 	container.Provide(controllers.NewProjectStatisticController)
+	container.Provide(controllers.NewOpenBoxController)
 	container.Provide(controllers.NewControllers)
 
 	return container

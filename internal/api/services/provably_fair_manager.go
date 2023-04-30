@@ -6,42 +6,55 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"go-rust-drop/internal/api/models"
+	"go-rust-drop/internal/api/repositories"
 	"strconv"
 )
 
 type ProvablyFairManager struct {
+	provableFairRepository repositories.ProvablyFairRepository
 }
 
-func (pfs *ProvablyFairManager) GetProvablyFair(provablyFair *models.ProvablyFair) {
+func NewProvablyFairManager() ProvablyFairManager {
+	return ProvablyFairManager{
+		provableFairRepository: repositories.NewProvablyFairRepository(),
+	}
+}
+
+func (pfm ProvablyFairManager) GenerateServerSeed() string {
+	serverSeed, _ := generateRandomSeed(64)
+
+	return serverSeed
+}
+
+func (pfs *ProvablyFairManager) GetWinPercent(
+	clientSeed string,
+	serverSeed string,
+) float64 {
 	var (
 		message      string
 		hash         []byte
 		partOfHash   string
 		decimal      uint64
 		randomNumber float64
+		nonce        int
 	)
 
-	provablyFair.ServerSeed, _ = generateRandomSeed(64)
+	nonce++
 
-	provablyFair.Nonce++
-	provablyFair.MinChance = 0.00
+	MinChance := 0.00
+	MaxChance := 100.00
 
-	if provablyFair.ClientSeed == "" {
-		provablyFair.ClientSeed, _ = generateRandomSeed(64)
-	}
-
-	message = fmt.Sprintf("%s-%d", provablyFair.ClientSeed, provablyFair.Nonce)
-	hash = createHmac(provablyFair.ServerSeed, message)
+	message = fmt.Sprintf("%s-%d", clientSeed, nonce)
+	hash = createHmac(serverSeed, message)
 
 	partOfHash = hex.EncodeToString(hash)[:5]
 	decimal, _ = strconv.ParseUint(partOfHash, 16, 64)
 
 	const maxHexValue float64 = 1048575
 	randomNumber = float64(decimal) / maxHexValue
-	randomNumber = provablyFair.MinChance + (provablyFair.MaxChance-provablyFair.MinChance)*randomNumber
+	randomNumber = MinChance + (MaxChance-MinChance)*randomNumber
 
-	provablyFair.RandomNumber = randomNumber
+	return randomNumber
 }
 
 func generateRandomSeed(length int) (string, error) {

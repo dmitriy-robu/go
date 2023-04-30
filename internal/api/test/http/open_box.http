@@ -1,0 +1,26 @@
+### Get list of boxes
+GET {{api}}/boxes
+
+> {%
+    client.global.set("box_uuid", response.body[0]["uuid"]);
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+### Show box
+GET {{api}}/boxes/{{box_uuid}}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+### Open box
+POST {{api}}/boxes/{{box_uuid}}/open
+Content-Type: application/json
+
+{
+    "client_seed": "1234567890"
+}

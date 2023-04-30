@@ -8,6 +8,7 @@ type Controllers struct {
 	BoxController              BoxController
 	SteamAuthController        SteamAuthController
 	ProjectStatisticController ProjectStatisticController
+	OpenBoxController          OpenBoxController
 }
 
 func NewControllers(
@@ -18,6 +19,7 @@ func NewControllers(
 	boxController BoxController,
 	steamAuthController SteamAuthController,
 	projectStatisticController ProjectStatisticController,
+	openBoxController OpenBoxController,
 ) Controllers {
 	return Controllers{
 		CaseBattleController: caseBattleController,
@@ -27,5 +29,6 @@ func NewControllers(
 		BoxController:              boxController,
 		SteamAuthController:        steamAuthController,
 		ProjectStatisticController: projectStatisticController,
+		OpenBoxController:          openBoxController,
 	}
 }

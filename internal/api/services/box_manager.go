@@ -24,6 +24,8 @@ func (b BoxManager) FindAllWithItems() models.Boxes {
 		boxes models.Boxes
 	)
 
+	boxes = b.BoxRepository.FindAllWithItems()
+
 	return boxes
 }
 
