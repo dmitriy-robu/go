@@ -37,11 +37,10 @@ func GetMongoDBConnection() (*Client, error) {
 	mongodbConfig = db.SetMongoDBConfig()
 
 	onceDBMongoDB.Do(func() {
-		uri = fmt.Sprintf("mongodb://%s:%s@%s:%s/%s?authMechanism=%s&authSource=%s&replicaSet=%s",
+		uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?authMechanism=%s&authSource=%s&replicaSet=%s",
 			mongodbConfig.User,
 			url.QueryEscape(mongodbConfig.Password),
-			mongodbConfig.Host,
-			mongodbConfig.Port,
+			mongodbConfig.ReplicaHost,
 			mongodbConfig.DBName,
 			mongodbConfig.AuthMechanism,
 			mongodbConfig.AuthDatabase,

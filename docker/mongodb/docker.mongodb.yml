@@ -5,23 +5,22 @@ services:
     build: .
     hostname: mongo1
     ports:
-      - 27017:27017
+      - "27017:27017"
     entrypoint: ["bash", "-c", " /scripts/init-replica-set.sh"]
     environment:
       - MONGO_INITDB_ROOT_USERNAME=rust_drop
       - MONGO_INITDB_ROOT_PASSWORD=<H;wFO&:L:ym;9
     volumes:
-      - ./mongodb-keyfile:/etc/mongo/keyfile
       - ./mongo1-data:/data/db
       - ./init-replica-set.sh:/scripts/init-replica-set.sh
     networks:
-      mongo-replicate:
-        aliases:
-          - mongodb
+      - go-rust-drop-network
 
   mongo2:
     build: .
     hostname: mongo2
+    ports:
+      - "27018:27018"
     command: --replSet rs0 --keyFile /etc/mongo/keyfile --bind_ip_all
     environment:
       - MONGO_INITDB_ROOT_USERNAME=rust_drop
@@ -29,11 +28,13 @@ services:
     volumes:
       - ./mongo2-data:/data/db
     networks:
-      mongo-replicate:
+      - go-rust-drop-network
 
   mongo3:
     build: .
     hostname: mongo3
+    ports:
+      - "27019:27019"
     command: --replSet rs0 --keyFile /etc/mongo/keyfile --bind_ip_all
     environment:
       - MONGO_INITDB_ROOT_USERNAME=rust_drop
@@ -41,11 +42,11 @@ services:
     volumes:
       - ./mongo3-data:/data/db
     networks:
-      mongo-replicate:
+      - go-rust-drop-network
 
 networks:
-  mongo-replicate:
-    driver: bridge
+  go-rust-drop-network:
+    external: true
 
 volumes:
   mongo1-data:
