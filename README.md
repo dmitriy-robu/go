@@ -3,17 +3,17 @@
 ## To set up .env file with connections to db's:
 ##### MongoDB Connection
 ``` env
-MONGODB_HOST=go-rust-drop-mdb
+MONGODB_HOST=go-mdb
 MONGODB_PORT=27017
 MONGODB_DBNAME=api
-MONGODB_USER=rust-drop
+MONGODB_USER=admin
 MONGODB_PASSWORD="<H;wFO&:L:ym;9"
 MONGODB_AUTH_MECHANISM=SCRAM-SHA-1
 MONGODB_AUTH_DATABASE=admin
 ```
 ##### MySQL Connection 
 ``` env
-MYSQL_HOST=go-rust-drop-mysql
+MYSQL_HOST=go-mysql
 MYSQL_PORT=3306
 MYSQL_DBNAME=api
 MYSQL_USER=root
