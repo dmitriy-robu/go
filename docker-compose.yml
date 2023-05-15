@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   backend:
-    container_name: go-rust-drop-api
+    container_name: go-api
     build:
       context: .
       dockerfile: Dockerfile
@@ -16,31 +16,31 @@ services:
     volumes:
       - ./:/app
     networks:
-      - go-rust-drop-network
+      - go-network
 
   db:
     image: mysql:latest
-    container_name: go-rust-drop-mysql
+    container_name: go-mysql
     restart: unless-stopped
     tty: true
     environment:
-      MYSQL_DATABASE: rust_drop
+      MYSQL_DATABASE: rp
       MYSQL_ROOT_PASSWORD: 6i6Eo0v812
     ports:
       - '32522:3306'
     volumes:
       - ./storage/db/mysql:/var/lib/mysql
     networks:
-      - go-rust-drop-network
+      - go-network
 
   memcached:
-    container_name: go-rust-drop-mcd
+    container_name: go-mcd
     image: memcached
     ports:
       - "32523:11211"
     networks:
-      - go-rust-drop-network
+      - go-network
 
 networks:
-  go-rust-drop-network:
+  go-network:
     external: true
