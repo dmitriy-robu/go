@@ -25,13 +25,13 @@ func SetSteamSettings() SteamSettings {
 	env := utils.Environment{}
 	return SteamSettings{
 		SteamAPIs: SteamAPIs{
-			Url:                env.GetEnvOrDefault("STEAM_APIS_URL", "https://api.steamapis.com/steam/inventory").(string),
-			APIKey:             env.GetEnvOrDefault("STEAM_APIS_API_KEY", "k-ENKG-syMEX_NuE2i0gKnzJff4").(string),
-			SteamAccountAPIKey: env.GetEnvOrDefault("STEAM_ACCOUNT_API_KEY", "3_FCxv4dfoq2gdEreuJTQdIyUIM").(string),
+			Url:                env.GetEnvOrDefault("STEAM_APIS_URL", "").(string),
+			APIKey:             env.GetEnvOrDefault("STEAM_APIS_API_KEY", "").(string),
+			SteamAccountAPIKey: env.GetEnvOrDefault("STEAM_ACCOUNT_API_KEY", "").(string),
 		},
 		GameInventory: GameInventory{
-			SteamID:   env.GetEnvOrDefault("GAME_INVENTORY_STEAM_ID", "76561199222590363").(string),
-			AppID:     env.GetEnvOrDefault("GAME_INVENTORY_APP_ID", "252490").(string),
+			SteamID:   env.GetEnvOrDefault("GAME_INVENTORY_STEAM_ID", "").(string),
+			AppID:     env.GetEnvOrDefault("GAME_INVENTORY_APP_ID", "").(string),
 			ContextID: 2,
 		},
 	}
